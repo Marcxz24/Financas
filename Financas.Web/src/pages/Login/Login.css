@@ -189,3 +189,22 @@ form {
 .btn-mostrar-senha:hover {
   color: #3b82f6;
 }
+
+/* Container que envelopa o botão do Google */
+.google-login-container {
+  width: 100%;
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* Força o iframe interno do Google Identity Services a ocupar 100% da largura do card */
+.google-login-container > div {
+  width: 100% !important;
+}
+
+.google-login-container iframe {
+  width: 100% !important;
+  border-radius: 6px; /* Mantém o arredondamento idêntico ao seu input (6px) */
+}

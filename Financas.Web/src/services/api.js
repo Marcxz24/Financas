@@ -15,8 +15,8 @@ const api = axios.create({
 // ele verifica se existe um token no navegador e o injeta no cabeçalho.
 api.interceptors.request.use(
     (config) => {
-        // Recupera o token JWT armazenado no login
-        const token = localStorage.getItem("token");
+        // Recupera o token JWT armazenado no login (Corrigido para a chave real do sistema)
+        const token = localStorage.getItem("@Financas:token");
         
         if (token) {
             // Adiciona o cabeçalho de autorização padrão para APIs REST

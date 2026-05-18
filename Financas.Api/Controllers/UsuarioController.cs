@@ -192,5 +192,37 @@ namespace Financas.Api.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        /// <summary>
+        /// Endpoint para autenticação de usuários via provedor de identidade externo (Google OAuth 2.0).
+        /// </summary>
+        /// <param name="dto">Objeto contendo o Identity Token gerado pelo Google.</param>
+        /// <returns>Retorna o token JWT de acesso nativo do sistema em caso de sucesso.</returns>
+        /// <response code="200">Retorna o token gerado com sucesso.</response>
+        /// <response code="401">Caso o token do Google seja inválido, malformado ou expirado.</response>
+        [HttpPost("google")]
+        public async Task<IActionResult> LoginComGoogle([FromBody] GoogleLoginDTO dto)
+        {
+            try
+            {
+                // Valida se o token foi enviado na requisição
+                if (string.IsNullOrEmpty(dto.Token))
+                {
+                    return BadRequest("O token do Google é obrigatório.");
+                }
+
+                // Chama o método de serviço estruturado anteriormente
+                // (Substitua '_usuarioService' pela instância correta do seu serviço de autenticação)
+                string tokenSistema = await _authService.LoginComGoogle(dto.Token);
+
+                // Retorna o JWT nativo com status HTTP 200 OK
+                return Ok(tokenSistema);
+            }
+            catch (Exception ex)
+            {
+                // Retorna o erro de autenticação com status HTTP 401 Unauthorized de forma limpa
+                return Unauthorized(new { mensagem = ex.Message });
+            }
+        }
     }
 }
