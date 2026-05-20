@@ -224,5 +224,40 @@ namespace Financas.Api.Controllers
                 return Unauthorized(new { mensagem = ex.Message });
             }
         }
+
+        // O método VisualizarPerfil é responsável por lidar com as requisições GET para visualizar o perfil do usuário autenticado. Ele extrai o ID do usuário das Claims do Token JWT, chama o serviço de usuário para obter os dados do perfil e retorna a resposta adequada para o cliente.
+        [HttpGet("visualizar-perfil")]
+        [Authorize] // Bloqueia o acesso de usuários não autenticados, exigindo um Token JWT válido.
+        public async Task<ActionResult<UsuarioResponseDTO>> VisualizarPerfil()
+        {
+            try
+            {
+                // 1. Extração Segura de Identidade: O método FindFirstValue busca nas Claims do Token JWT o identificador único do usuário logado (ClaimTypes.NameIdentifier). Isso garante que o perfil retornado seja sempre do usuário autenticado, evitando qualquer possibilidade de acesso a perfis alheios.
+                var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                // 2. Validação de Autenticação: Se o claim do ID do usuário estiver ausente ou vazio, isso indica que o token é inválido ou que o usuário não está autenticado. Nesse caso, o método retorna uma resposta HTTP 401 Unauthorized, informando que o acesso é negado.
+                if (string.IsNullOrEmpty(userIdClaim))
+                    return Unauthorized(new { mensagem = "Usuário não autenticado." });
+
+                // 3. Processamento: Converte o ID do usuário para inteiro e chama o serviço de usuário para obter os dados do perfil. O serviço é responsável por acessar o banco de dados, recuperar as informações do usuário e mapear para um DTO de resposta.
+                var usuarioId = int.Parse(userIdClaim);
+
+                // 4. Resposta Positiva: Se o perfil for recuperado com sucesso, o método retorna uma resposta HTTP 200 OK contendo os dados do perfil do usuário.
+                var perfil = await _usuarioService.VisualizarPerfil(usuarioId);
+
+                // 5. Tratamento de Erros: Se ocorrer uma exceção de acesso não autorizado (por exemplo, se o token for inválido ou expirado), o método captura a exceção e retorna uma resposta HTTP 401 Unauthorized com a mensagem de erro. Para quaisquer outras exceções, ele retorna uma resposta HTTP 400 Bad Request com a mensagem de erro.
+                return Ok(perfil);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                // 5. Tratamento de Erros: Se ocorrer uma exceção de acesso não autorizado (por exemplo, se o token for inválido ou expirado), o método captura a exceção e retorna uma resposta HTTP 401 Unauthorized com a mensagem de erro. Para quaisquer outras exceções, ele retorna uma resposta HTTP 400 Bad Request com a mensagem de erro.
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                // 5. Tratamento de Erros: Se ocorrer uma exceção de acesso não autorizado (por exemplo, se o token for inválido ou expirado), o método captura a exceção e retorna uma resposta HTTP 401 Unauthorized com a mensagem de erro. Para quaisquer outras exceções, ele retorna uma resposta HTTP 400 Bad Request com a mensagem de erro.
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

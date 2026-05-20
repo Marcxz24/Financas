@@ -269,5 +269,30 @@ namespace Financas.Api.Services
             // 6. Persistência: Grava as alterações permanentemente no banco de dados MySQL.
             await _financasDbContext.SaveChangesAsync();
         }
+
+        /// <summary>
+        /// Método para visualizar o perfil do usuário, retornando as informações básicas como ID, username e e-mail.
+        /// <param name="id">ID do usuário a ser visualizado.</param>
+        /// </summary>
+        public async Task<UsuarioResponseDTO> VisualizarPerfil(int id)
+        {
+            // 1. Localização: Busca o usuário no banco de dados através do ID fornecido.
+            var usuario = await _financasDbContext.Usuarios
+                .FirstOrDefaultAsync(u => u.Id == id);
+
+            // 2. Validação de Existência: Garante que o usuário solicitado realmente exista antes de retornar os dados.
+            if (usuario == null)
+                throw new InvalidOperationException("Usuário não encontrado.");
+
+            // 3. Resposta: Mapeia os dados do usuário para um DTO de resposta, expondo apenas as informações essenciais.
+            return new UsuarioResponseDTO
+            {
+                Id = usuario.Id,
+                Username = usuario.Username,
+                Email = usuario.Email,
+                EmailConfirmado = usuario.EmailConfirmado,
+                DataCadastro = usuario.DataCadastro
+            };
+        }
     }
 }

@@ -15,6 +15,8 @@ import Lancamento from "./pages/Lancamentos/Lancamento";
 
 import Categoria from "./pages/Categoria/Categoria";
 
+import Perfil from "./pages/Perfil/Perfil";
+
 import PrivateRoute from "./routes/PrivateRoute";
 
 function App() {
@@ -67,6 +69,12 @@ function App() {
             path="categoria/:id"
             element={<Categoria />}
             />
+
+          {/* Perfil */}
+          <Route
+            path="perfil"
+            element={<Perfil />}
+          />
 
         </Route>
 

@@ -37,6 +37,10 @@ function Dashboard() {
             Relatórios
           </Link>
 
+          <Link to="/dashboard/perfil">
+            Perfil
+          </Link>
+
           <button
             className="btn-logout"
             onClick={handleLogout}

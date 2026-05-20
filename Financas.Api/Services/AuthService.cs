@@ -106,7 +106,8 @@ namespace Financas.Api.Services
                         // Isso anula vetores de ataque por força bruta ou dicionário no fluxo de autenticação tradicional por senha.
                         Password = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString()),
                         // O e-mail é implicitamente considerado verificado dado que a autenticação ocorreu através de um Identity Provider (IdP) confiável.
-                        EmailConfirmado = true
+                        EmailConfirmado = true,
+                        DataCadastro = DateTime.UtcNow
                     };
 
                     _FinancasDbContext.Usuarios.Add(usuario);
@@ -125,10 +126,10 @@ namespace Financas.Api.Services
                 // Constrói a identidade baseada em Claims (Alegações) de segurança para o contexto de segurança local (User Context).
                 var claims = new[]
                 {
-            new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
-            new Claim(ClaimTypes.Email, usuario.Email),
-            new Claim(ClaimTypes.Name, usuario.Username)
-        };
+                    new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+                    new Claim(ClaimTypes.Email, usuario.Email),
+                    new Claim(ClaimTypes.Name, usuario.Username)
+                };
 
                 // Instancia a chave simétrica a partir do segredo armazenado na configuração da aplicação.
                 var key = new SymmetricSecurityKey(

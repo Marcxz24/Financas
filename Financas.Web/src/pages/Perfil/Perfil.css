@@ -1,0 +1,168 @@
+/* Container principal que envolve toda a página de perfil para centralizar o card na tela */
+.perfil-page-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  /* Ocupa a altura total da tela descontando os 80px estimados do cabeçalho/navbar */
+  min-height: calc(100vh - 80px);
+}
+
+/* Card central escuro que agrupa todas as informações do perfil do usuário */
+.perfil-main-card {
+  background-color: #1e1e1e;
+  border: 1px solid #2d2d2d;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 550px;
+  padding: 2.5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Cabeçalho do card, posicionando o avatar, nome e badge de status verticalmente */
+.perfil-card-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 2.5rem;
+  border-bottom: 1px solid #2d2d2d;
+  padding-bottom: 1.5rem;
+}
+
+/* Estilização do ícone de usuário do Bootstrap Icons utilizado como avatar padrão */
+.perfil-avatar-placeholder i {
+  font-size: 4.5rem;
+  color: #007bff;
+}
+
+/* Nome do usuário exibido em destaque no topo do card */
+.perfil-card-header h2 {
+  color: #ffffff;
+  margin: 0.8rem 0 0.4rem 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+/* Estrutura base do badge arredondado para indicar o status da conta */
+.status-badge {
+  font-size: 0.85rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+/* Variação visual do badge em tom verde sutil para quando a conta estiver verificada */
+.status-badge.ativo {
+  background-color: rgba(40, 167, 69, 0.15);
+  color: #28a745;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+/* Variação visual do badge em tom vermelho sutil para quando a conta estiver pendente */
+.status-badge.pendente {
+  background-color: rgba(220, 53, 69, 0.15);
+  color: #dc3545;
+  border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+/* Layout em coluna para empilhar os campos de dados do usuário (Username, Email, etc) */
+.perfil-details-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Agrupamento vertical que junta o label (título) ao campo de dados correspondente */
+.perfil-info-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Rótulo descritivo do campo, configurado para alinhar o ícone interno com o texto */
+.perfil-info-group label {
+  color: #aaaaaa;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Caixa estilizada em modo somente-leitura para exibição dos dados vindos da API */
+.perfil-data-field {
+  background-color: #252526;
+  border: 1px solid #333333;
+  color: #ffffff;
+  padding: 0.8rem 1rem;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+/* Alerta visual vermelho para exibição de mensagens de erro de requisição */
+.perfil-erro-alerta {
+  background-color: rgba(220, 53, 69, 0.1);
+  border: 1px solid #dc3545;
+  color: #dc3545;
+  padding: 0.8rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* Rodapé do card utilizado para posicionar e alinhar o botão de ação à direita */
+.perfil-card-footer {
+  margin-top: 2.5rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Botão principal azul para solicitar ou abrir a edição de dados */
+.btn-solicitar-edicao {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s ease; /* Transição suave na mudança de cor ao passar o mouse */
+}
+
+/* Feedback visual escurecendo o botão quando o usuário passa o ponteiro sobre ele */
+.btn-solicitar-edicao:hover {
+  background-color: #0056b3;
+}
+
+/* Container de Loading - Centraliza o Spinner e o texto na tela enquanto busca os dados da API */
+.perfil-loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 80px);
+  color: #aaaaaa;
+  gap: 1rem;
+}
+
+/* Círculo animado de carregamento com efeito de borda desvanecida e destaque azul */
+.perfil-spinner {
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border-left-color: #007bff;
+  animation: spin 1s linear infinite; /* Executa a animação 'spin' continuamente a cada 1 segundo */
+}
+
+/* Regra de animação que faz o spinner rotacionar continuamente de 0 a 360 graus */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
