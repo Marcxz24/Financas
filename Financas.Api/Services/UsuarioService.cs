@@ -205,6 +205,36 @@ namespace Financas.Api.Services
         }
 
         /// <summary>
+        /// Altera o nome de usuário (username) do cliente, validando a duplicidade no banco de dados.
+        /// </summary>
+        public async Task AlterarUsername(AtualizarUsernameDTO dto, int usuarioId)
+        {
+            // 1. Busca: Localiza o usuário no banco de dados através do ID autenticado.
+            var usuario = await _financasDbContext.Usuarios
+                .FirstOrDefaultAsync(u => u.Id == usuarioId);
+
+            if (usuario == null)
+                throw new InvalidOperationException("Usuário não encontrado.");
+
+            // 2. Otimização: Se o nome digitado for exatamente igual ao atual, não há necessidade de processar.
+            if (usuario.Username == dto.Username)
+                return;
+
+            // 3. Verificação de Duplicidade: Garante que o novo username já não pertença a outro usuário.
+            var usernameExistente = await _financasDbContext.Usuarios
+                .AnyAsync(u => u.Username == dto.Username);
+
+            if (usernameExistente)
+                throw new InvalidOperationException("Este nome de usuário já está sendo utilizado por outra conta.");
+
+            // 4. Aplica a alteração: Atualiza o campo com o valor validado do DTO.
+            usuario.Username = dto.Username;
+
+            // 5. Persistência: Salva a alteração de forma assíncrona no MySQL.
+            await _financasDbContext.SaveChangesAsync();
+        }
+
+        /// <summary>
         /// Inicia o fluxo de recuperação de senha, gerando um token temporário e enviando o link de redefinição por e-mail.
         /// </summary>
         public async Task SolicitarRedefinicaoSenha(EsqueciSenhaDTO dto)

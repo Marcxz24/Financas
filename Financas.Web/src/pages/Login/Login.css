@@ -208,3 +208,66 @@ form {
   width: 100% !important;
   border-radius: 6px; /* Mantém o arredondamento idêntico ao seu input (6px) */
 }
+
+/* Container que cobre a tela toda com fundo semi-transparente escuro */
+.login-overlay-carregamento {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.75); /* Fundo preto com 75% de opacidade */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* Garante que fique na frente de todos os outros elementos */
+  color: #ffffff;
+  font-family: inherit;
+}
+
+/* Container de sobreposição (Overlay): Utiliza posicionamento fixo para cobrir toda a viewport (100vw/100vh) */
+/* O z-index elevado garante que o elemento se sobreponha a todo o conteúdo da aplicação, bloqueando interações */
+.login-overlay-carregamento {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.75); /* Fundo com opacidade controlada para foco no conteúdo central */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  color: #ffffff;
+  font-family: inherit;
+}
+
+/* Spinner de carregamento: Componente visual indicativo de processamento assíncrono */
+.login-spinner {
+  border: 5px solid rgba(255, 255, 255, 0.2); /* Borda secundária (track) com transparência */
+  border-top: 5px solid #ffffff;             /* Borda ativa (indicador de progresso) em destaque */
+  border-radius: 50%;                        /* Transformação do box em círculo via border-radius */
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;        /* Atribuição da keyframe de animação linear */
+  margin-bottom: 20px;
+}
+
+/* Tipografia do status de carregamento: Estilização para legibilidade sobre fundo escuro */
+.login-overlay-carregamento p {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Definição da keyframe 'spin': Realiza a rotação completa (360 graus) do elemento */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

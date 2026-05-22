@@ -9,7 +9,7 @@ import { Link, useNavigate } from "react-router-dom";
 import GoogleAuthButton from "../../components/GoogleAuthButton";
 
 function Login() {
-  //
+  // Define o estado para armazenar mensagens de erro relacionadas ao login
   const [erro, setErro] = useState("");
 
   // Define o estado para armazenar o valor do campo de e-mail
@@ -21,6 +21,9 @@ function Login() {
   // Define o estado para armazenar o valor do campo de senha
   const [password, setPassword] = useState("");
 
+  // Estado booleano para controle de display do Overlay de carregamento (Loading State)
+  const [carregando, setCarregando] = useState(false);
+
   const navigate = useNavigate();
 
   // Define a função assíncrona que processa a submissão do formulário
@@ -28,6 +31,8 @@ function Login() {
     e.preventDefault();
 
     setErro("");
+    // Ativa o estado de carregamento para bloquear a interface via Overlay
+    setCarregando(true); 
 
     try {
       const response = await api.post("/usuarios/login", {
@@ -42,80 +47,92 @@ function Login() {
       console.error(error);
 
       setErro(error.response?.data || "Erro ao realizar login.");
+    } finally {
+      // O bloco finally garante o reset do estado de carregamento independentemente do resultado da Promise
+      setCarregando(false);
     }
   };
 
   return (
-    // Container principal da página de login
-    <div className="login-page">
-      {/* Container do cartão central de login */}
-      <div className="login-card">
-        {/* Cabeçalho contendo o título e a descrição */}
-        <header className="login-header">
-          <h1>Finanças</h1>
+    <>
+      {/* Overlay de Carregamento: Renderização condicional de bloqueio de UI para feedback de latência de rede */}
+      {carregando && (
+        <div className="login-overlay-carregamento">
+          <div className="login-spinner"></div>
+          <p>Autenticando, por favor aguarde...</p>
+        </div>
+      )}
 
-          <p className="descricao-login">
-            Faça login para acessar sua conta e gerenciar suas finanças de forma
-            fácil e segura.
-          </p>
-        </header>
+      {/* Container principal da página de login */}
+      <div className="login-page">
+        {/* Container do cartão central de login */}
+        <div className="login-card">
+          {/* Cabeçalho contendo o título e a descrição */}
+          <header className="login-header">
+            <h1>Finanças</h1>
 
-        {/* Formulário que dispara a função handleLogin ao ser submetido */}
-        <form onSubmit={handleLogin}>
-          {/* Campo de entrada para o e-mail */}
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-            required
-          />
+            <p className="descricao-login">
+              Faça login para acessar sua conta e gerenciar suas finanças de forma
+              fácil e segura.
+            </p>
+          </header>
 
-          {/* Wrapper relativo para segurar o botão dentro do input */}
-          <div className="input-icone-wrapper">
+          {/* Formulário que dispara a função handleLogin ao ser submetido */}
+          <form onSubmit={handleLogin}>
+            {/* Campo de entrada para o e-mail */}
             <input
-              type={mostrarSenha ? "text" : "password"}
-              className="input-senha-custom"
-              placeholder="Senha"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
               required
             />
 
-            {/* Botão posicionado de forma absoluta para flutuar dentro do campo */}
-            <button
-              type="button"
-              className="btn-mostrar-senha"
-              onClick={() => setMostrarSenha(!mostrarSenha)}
-              title={mostrarSenha ? "Esconder senha" : "Mostrar senha"}
-            >
-              <i className={mostrarSenha ? "bi bi-eye-slash" : "bi bi-eye"}></i>
-            </button>
-          </div>
+            {/* Wrapper relativo para segurar o botão dentro do input */}
+            <div className="input-icone-wrapper">
+              <input
+                type={mostrarSenha ? "text" : "password"}
+                className="input-senha-custom"
+                placeholder="Senha"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                required
+              />
 
-          {/* Botão de envio do formulário */}
-          <button type="submit">Entrar</button>
+              {/* Botão posicionado de forma absoluta para flutuar dentro do campo */}
+              <button
+                type="button"
+                className="btn-mostrar-senha"
+                onClick={() => setMostrarSenha(!mostrarSenha)}
+                title={mostrarSenha ? "Esconder senha" : "Mostrar senha"}
+              >
+                <i className={mostrarSenha ? "bi bi-eye-slash" : "bi bi-eye"}></i>
+              </button>
+            </div>
 
-          <div className="google-login-container">
-            <GoogleAuthButton navigate={navigate} />
-          </div>
+            {/* O botão volta ao normal, sem mudar de texto */}
+            <button type="submit">Entrar</button>
 
-          {/* Mensagem de erro */}
-          {erro && <p className="mensagem-erro">{erro}</p>}
-        </form>
+            <div className="google-login-container">
+              <GoogleAuthButton navigate={navigate} />
+            </div>
 
-        {/* Seção inferior para redirecionamento à página de cadastro */}
-        <header className="criar-conta">
-          <p>
-            Não tem uma conta? <Link to="/criar-conta">Crie uma aqui</Link>
-          </p>
-        </header>
+            {/* Mensagem de erro */}
+            {erro && <p className="mensagem-erro">{erro}</p>}
+          </form>
+
+          {/* Seção inferior para redirecionamento à página de cadastro */}
+          <header className="criar-conta">
+            <p>
+              Não tem uma conta? <Link to="/criar-conta">Crie uma aqui</Link>
+            </p>
+          </header>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
-// Exporta o componente Login para ser utilizado em outras partes da aplicação
 export default Login;

@@ -116,10 +116,15 @@
 .perfil-card-footer {
   margin-top: 2.5rem;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
 }
 
-/* Botão principal azul para solicitar ou abrir a edição de dados */
+.perfil-card-footer.modo-edicao {
+  justify-content: center; /* Centraliza o botão de salvar quando estiver em modo de edição */
+}
+
+/* Botão principal de ação do Perfil (Base para Editar e Salvar) */
 .btn-solicitar-edicao {
   background-color: #007bff;
   color: white;
@@ -131,13 +136,51 @@
   font-weight: 500;
   display: flex;
   align-items: center;
+  justify-content: center; /* Centraliza o texto e ícone internamente */
   gap: 0.5rem;
-  transition: background-color 0.2s ease; /* Transição suave na mudança de cor ao passar o mouse */
+  transition: background-color 0.2s ease;
+  
+  /* FIXADOR DE TAMANHO: Garante que o botão tenha exatamente o mesmo tamanho nos dois estados */
+  width: 210px; 
 }
 
-/* Feedback visual escurecendo o botão quando o usuário passa o ponteiro sobre ele */
+/* Feedback visual do botão de Editar (Azul) ao passar o mouse */
 .btn-solicitar-edicao:hover {
   background-color: #0056b3;
+}
+
+/* Customização estrita para o botão de Salvar (Mantém o tamanho, muda apenas a cor para Verde) */
+.btn-solicitar-edicao.btn-salvar {
+  background-color: #28a745;
+}
+
+/* Feedback visual do botão de Salvar (Verde) ao passar o mouse */
+.btn-solicitar-edicao.btn-salvar:hover {
+  background-color: #218838;
+}
+
+/* Botão de Excluir Perfil (Vermelho sutil para o tema dark) */
+.btn-excluir-perfil {
+  background-color: rgba(220, 53, 69, 0.1); /* Fundo vermelho bem transparente */
+  color: #dc3545; /* Texto e ícone vermelhos */
+  border: 1px solid rgba(220, 53, 69, 0.4);
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  width: 170px; /* Largura fixa ideal para o texto de exclusão */
+}
+
+/* Feedback visual ao passar o mouse sobre o botão de exclusão */
+.btn-excluir-perfil:hover {
+  background-color: #dc3545; /* Inverte a cor preenchendo o fundo de vermelho */
+  color: white; /* Texto passa a ser branco para dar contraste */
 }
 
 /* Container de Loading - Centraliza o Spinner e o texto na tela enquanto busca os dados da API */
@@ -159,6 +202,13 @@
   border-radius: 50%;
   border-left-color: #007bff;
   animation: spin 1s linear infinite; /* Executa a animação 'spin' continuamente a cada 1 segundo */
+}
+
+/* Remove outlines padrão quando o input estiver focado para digitação */
+.perfil-input-editando:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
 /* Regra de animação que faz o spinner rotacionar continuamente de 0 a 360 graus */

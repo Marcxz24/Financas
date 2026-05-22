@@ -5,8 +5,13 @@ import api from "../../services/api";
 // Importação do arquivo de estilização específico deste componente
 import "./Perfil.css";
 
+/**
+ * Componente Perfil
+ * Responsável por exibir e atualizar os dados cadastrais do usuário autenticado.
+ * Implementa validação de formulário com suporte ao ModelState do backend (.NET) e feedback visual dinâmico.
+ */
 function Perfil() {
-  // Estado estruturado para gerenciar os dados cadastrais do usuário com base no UsuarioResponseDTO
+  // Estado principal (Fonte da Verdade): armazena os dados consolidados e persistidos no banco
   const [usuario, setUsuario] = useState({
     username: "",
     email: "",
@@ -14,46 +19,60 @@ function Perfil() {
     emailConfirmado: false,
   });
 
-  // Estados de controle de fluxo: gerenciamento do feedback visual de carregamento e mensagens de erro
+  // Estados de controle de UI (Interface de Usuário)
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
+  const [editando, setEditando] = useState(false);
 
-  // Hook useEffect utilizado para buscar os dados de forma assíncrona assim que o componente é montado
+  // Estado de rascunho: gerencia o two-way data binding dos inputs durante o modo de edição
+  const [formulario, setFormulario] = useState({
+    username: "",
+    email: "",
+  });
+
+  /**
+   * Efeito colateral executado na fase de montagem (Mount) do componente.
+   * Realiza a requisição HTTP GET para buscar os dados primários do usuário.
+   */
   useEffect(() => {
     const buscarPerfil = async () => {
       try {
-        // Inicializa o estado resetando erros e ativando o indicador visual de carregamento
         setCarregando(true);
         setErro("");
 
-        // Chamada limpa: a API descobre o usuário olhando direto o Token enviado no Header HTTP
+        // A autenticação da requisição ocorre de forma implícita via token JWT injetado no interceptor do Axios
         const response = await api.get("/usuarios/visualizar-perfil");
 
-        // Atualiza o estado da aplicação injetando os dados estritamente tipados mapeados do DTO C#
+        // Sincroniza o estado principal com o DTO retornado pela API
         setUsuario({
           username: response.data.username,
           email: response.data.email,
           dataCadastro: response.data.dataCadastro,
           emailConfirmado: response.data.emailConfirmado,
         });
+
+        // Preenche o estado de rascunho para que o formulário de edição inicialize com os dados corretos
+        setFormulario({
+          username: response.data.username,
+          email: response.data.email,
+        });
       } catch (err) {
-        // Tratamento de exceções: exibe o erro no console e alimenta o estado visual com o retorno da API ou fallback
-        console.error("Erro ao carregar perfil:", err);
+        console.error("Erro na busca de dados do perfil:", err);
         setErro(
           err.response?.data?.mensagem ||
-            "Não foi possível carregar os dados do perfil.",
+            "Não foi possível carregar os dados do perfil."
         );
       } finally {
-        // Garante a desativação do spinner tanto em caso de sucesso quanto em caso de erro na requisição
+        // Assegura a liberação da thread de carregamento da UI independentemente do sucesso ou falha na rede
         setCarregando(false);
       }
     };
 
-    // Dispara a execução da função assíncrona de busca
     buscarPerfil();
-  }, []); // Array de dependências vazio garante que o efeito rode apenas uma vez na inicialização da página
+  }, []);
 
-  // Renderização condicional de barreira: bloqueia o layout do card exibindo a tela de carregamento caso a API não tenha respondido
+  // Early Return: Exibe o fallback de carregamento e impede a renderização da estrutura do card
+  // caso a Promise de busca dos dados iniciais ainda esteja pendente
   if (carregando) {
     return (
       <div className="perfil-loading-container">
@@ -63,19 +82,107 @@ function Perfil() {
     );
   }
 
-  // Renderização principal do componente após a conclusão da busca dos dados
+  /**
+   * Habilita o modo de edição do card.
+   * Sobrescreve o rascunho com os dados oficiais mais recentes para prevenir inconsistências de estado.
+   */
+  const handleEntrarModoEdicao = () => {
+    setFormulario({
+      username: usuario.username,
+      email: usuario.email,
+    });
+    setEditando(true);
+  };
+
+  /**
+   * Manipulador genérico para atualização de inputs controlados no React.
+   * Utiliza desestruturação para inferir a chave do estado dinamicamente através do atributo 'name'.
+   */
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormulario((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  /**
+   * Processa a submissão das alterações do perfil.
+   * Realiza validação otimista e gerencia o parser de erros HTTP mapeando os DataAnnotations do C#.
+   */
+  const handleSalvarInformacoes = async () => {
+    try {
+      setErro("");
+
+      // Validação otimista: previne o disparo de chamadas HTTP desnecessárias caso o payload não tenha sofrido mutação
+      if (formulario.username === usuario.username) {
+        setEditando(false);
+        return;
+      }
+
+      setCarregando(true);
+
+      // Disparo da mutação de dados via método PATCH (atualização parcial)
+      await api.patch("/usuarios/alterar-username", {
+        username: formulario.username,
+      });
+
+      // Atualiza a fonte da verdade localmente para refletir o sucesso da operação na base de dados
+      setUsuario((prev) => ({
+        ...prev,
+        username: formulario.username,
+      }));
+
+      setEditando(false);
+    } catch (err) {
+      console.error("Falha na requisição PATCH (alterar-username):", err);
+
+      // 1. Interceptação de validações de pipeline (.NET ModelState / DataAnnotations)
+      const errosValidacao = err.response?.data?.errors;
+
+      if (errosValidacao) {
+        // Extrai a primeira mensagem de erro associada ao campo Username
+        const mensagensDeErro =
+          errosValidacao.Username || Object.values(errosValidacao)[0];
+
+        if (mensagensDeErro && mensagensDeErro.length > 0) {
+          setErro(mensagensDeErro[0]);
+          return;
+        }
+      }
+
+      // 2. Interceptação de exceções mapeadas de regra de negócio (ex: InvalidOperationException)
+      if (err.response?.data?.mensagem) {
+        setErro(err.response.data.mensagem);
+        return;
+      }
+
+      // 3. Fallback genérico para instabilidade de conexão ou HTTP 500 (Internal Server Error)
+      setErro(
+        "Não foi possível atualizar o nome de usuário. Tente novamente mais tarde."
+      );
+    } finally {
+      setCarregando(false);
+    }
+  };
+
   return (
     <div className="perfil-page-container">
       <div className="perfil-main-card">
-        {/* Seção de Cabeçalho: Exibe o avatar padrão, o nome do usuário e o badge dinâmico de status */}
+        {/* Cabeçalho: Apresenta a identidade básica e indicador visual (badge) referente à integridade da conta */}
         <header className="perfil-card-header">
           <div className="perfil-avatar-placeholder">
             <i className="bi bi-person-circle"></i>
           </div>
           <h2>{usuario.username}</h2>
-          {/* Força a comparação estrita aceitando tanto o booleano true quanto a string "True" ou o número 1 para controle das classes CSS */}
           <span
-            className={`status-badge ${usuario.emailConfirmado === true || usuario.emailConfirmado === "True" || usuario.emailConfirmado === 1 ? "ativo" : "pendente"}`}
+            className={`status-badge ${
+              usuario.emailConfirmado === true ||
+              usuario.emailConfirmado === "True" ||
+              usuario.emailConfirmado === 1
+                ? "ativo"
+                : "pendente"
+            }`}
           >
             {usuario.emailConfirmado === true ||
             usuario.emailConfirmado === "True" ||
@@ -85,20 +192,29 @@ function Perfil() {
           </span>
         </header>
 
-        {/* Renderização condicional do alerta: renderiza na tela apenas se houver alguma mensagem de erro capturada no estado */}
+        {/* Bloco de Notificação: Renderização condicional para exibição de validações ou falhas processadas no state */}
         {erro && <p className="perfil-erro-alerta">{erro}</p>}
 
-        {/* Grade de exibição de dados: renderização estática e segura das propriedades do usuário */}
         <div className="perfil-details-grid">
-          {/* Campo de Exibição: Username */}
+          {/* Sessão Username: Implementa renderização condicional alternando entre visualização nativa e input editável */}
           <div className="perfil-info-group">
             <label>
               <i className="bi bi-person"></i> Nome de Usuário
             </label>
-            <div className="perfil-data-field">{usuario.username}</div>
+            {editando ? (
+              <input
+                type="text"
+                name="username"
+                className="perfil-data-field perfil-input-editando"
+                value={formulario.username}
+                onChange={handleInputChange}
+              />
+            ) : (
+              <div className="perfil-data-field">{usuario.username}</div>
+            )}
           </div>
 
-          {/* Campo de Exibição: Email */}
+          {/* Sessão E-mail: Renderizado estritamente como texto fluido (Read-only) por conformidade com regras de segurança */}
           <div className="perfil-info-group">
             <label>
               <i className="bi bi-envelope"></i> E-mail Cadastrado
@@ -106,7 +222,7 @@ function Perfil() {
             <div className="perfil-data-field">{usuario.email}</div>
           </div>
 
-          {/* Renderização condicional da data: só exibe o campo se dataCadastro for válida, aplicando a formatação local brasileira */}
+          {/* Sessão Data de Cadastro: Protegida por avaliação de curto-circuito (Short-circuit evaluation) para evitar parse de strings vazias */}
           {usuario.dataCadastro && (
             <div className="perfil-info-group">
               <label>
@@ -119,11 +235,37 @@ function Perfil() {
           )}
         </div>
 
-        {/* Rodapé do card: abriga o botão de ação para abertura posterior do fluxo de edição cadastral */}
-        <footer className="perfil-card-footer">
-          <button type="button" className="btn-solicitar-edicao">
-            <i className="bi bi-pencil-square"></i> Editar Informações
-          </button>
+        {/* Rodapé de Ações: Transição CSS e alternância de controles dependentes do estado booleano 'editando' */}
+        <footer
+          className={`perfil-card-footer ${editando ? "modo-edicao" : ""}`}
+        >
+          {!editando && (
+            <button
+              type="button"
+              className="btn-excluir-perfil"
+              onClick={() => alert("Fluxo de exclusão de conta disparado.")}
+            >
+              <i className="bi bi-trash3"></i> Excluir Perfil
+            </button>
+          )}
+
+          {editando ? (
+            <button
+              type="button"
+              className="btn-solicitar-edicao btn-salvar"
+              onClick={handleSalvarInformacoes}
+            >
+              <i className="bi bi-check-circle"></i> Salvar Informações
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn-solicitar-edicao"
+              onClick={handleEntrarModoEdicao}
+            >
+              <i className="bi bi-pencil-square"></i> Editar Informações
+            </button>
+          )}
         </footer>
       </div>
     </div>

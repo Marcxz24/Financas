@@ -157,6 +157,37 @@ namespace Financas.Api.Controllers
             }
         }
 
+        [HttpPatch("alterar-username")]
+        [Authorize]
+        public async Task<IActionResult> AlterarUsername([FromBody] AtualizarUsernameDTO dto)
+        {
+            try
+            {
+                // Recupera o ID do usuário logado direto das Claims do Token JWT
+                // (Altere "ClaimTypes.NameIdentifier" para a Claim exata que você usa no método de Email)
+                var usuarioIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(usuarioIdClaim) || !int.TryParse(usuarioIdClaim, out int usuarioId))
+                {
+                    return Unauthorized(new { mensagem = "Usuário não autenticado ou token inválido." });
+                }
+
+                // Executa o método do Service que acabamos de criar
+                await _usuarioService.AlterarUsername(dto, usuarioId);
+
+                return Ok(new { mensagem = "Nome de usuário atualizado com sucesso!" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Captura as exceções de negócio lançadas pelo Service (ex: username em uso)
+                return BadRequest(new { mensagem = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { mensagem = "Ocorreu um erro interno ao processar a alteração do nome de usuário." });
+            }
+        }
+
         [HttpPost("esqueci-senha")] // Define o verbo POST para iniciar o processo de recuperação (criação de recurso temporário de token).
         public async Task<ActionResult> SolicitarRedefinicaoSenha([FromBody] EsqueciSenhaDTO dto)
         {
