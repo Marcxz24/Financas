@@ -1,0 +1,347 @@
+/* Reset global para normalizar o box-model e remover margens padrão */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* Previne quebras de layout por soma de padding/border */
+}
+
+/* Container principal: centraliza o conteúdo e garante altura mínima de tela menos o header */
+.contas-container {
+  width: 100%;
+  min-height: calc(100vh - 72px); /* Desconta o header global para evitar scroll vertical desnecessário */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #0f1115;
+  overflow: hidden;
+  padding-top: 40px;
+  padding-bottom: 30px;
+}
+
+/* Cabeçalho da seção com largura contida */
+.contas-header {
+  text-align: center;
+  margin-bottom: 30px;
+  width: 100%;
+  max-width: 750px;
+}
+
+.contas-header h1 {
+  color: #ffffff;
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.contas-header p {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+/* Card principal do formulário: estilização com bordas laterais para destaque */
+.form-card {
+  box-sizing: border-box;
+  width: 100%;        
+  max-width: 750px;
+  height: auto;
+  margin: 0 auto;
+
+  /* Bordas laterais simulando colunas isoladas do design */
+  border-radius: 16px;
+  border-left: 1px solid #252a35;
+  border-right: 1px solid #252a35;
+  border-top: none;
+  border-bottom: none;
+
+  background: #1a1f29;
+  transition: all 0.3s ease; /* Suaviza a animação de hover */
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px;
+}
+
+/* Microinteração de elevação ao passar o mouse */
+.form-card:hover {
+  transform: translateY(-5px) scale(1.01);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8);
+  border-color: #3b82f6;
+}
+
+/* Alinhamento bicolunar para inputs; quebra automático em telas menores que 300px via Grid */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.input-group label {
+  font-size: 14px;
+  color: #9ca3af;
+  margin-bottom: 10px;
+  display: block;
+}
+
+/* Padronização de inputs e selects para tema dark */
+.input-group input,
+.input-group select {
+  width: 100%;
+  height: 52px;
+  padding: 0 16px;
+  background: #12161f;
+  border: 1px solid #242833;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+/* Efeito visual de foco (glow) */
+.input-group input:focus,
+.input-group select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); /* Efeito glow padrão da UI */
+}
+
+/* Evita que o elemento option nativo herde fundo claro do SO em modo dark */
+.input-group select option {
+  background-color: #1a1f29;
+  color: #fff;
+}
+
+/* Estilização para campos desabilitados */
+.input-group input:disabled {
+  background: #1a1f29;
+  color: #6b7280;
+  cursor: not-allowed;
+  border-color: #242833;
+}
+
+.input-group small {
+  display: block;
+  color: #9ca3af;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+/* Área de botões com alinhamento vertical */
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+/* Botão de ação principal (Salvar) */
+.btn-salvar {
+  width: 100%;
+  height: 52px;
+  border: none;
+  border-radius: 10px;
+  background: #3b82f6;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.btn-salvar:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+}
+
+/* Botão de ação secundária (Cancelar) */
+.btn-cancelar {
+  width: 100%;
+  height: 48px;
+  background-color: transparent;
+  border: 1px solid #4b5563;
+  border-radius: 10px;
+  color: #9ca3af;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancelar:hover {
+  background-color: #374151;
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+/* Blocos de Alerta para feedback de sistema */
+.alerta {
+  width: 100%;
+  max-width: 750px;
+  padding: 14px;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.alerta-erro {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.alerta-sucesso {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+/* Seção de listagem de contas */
+.contas-grid {
+  width: 100%;
+  max-width: 750px;
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.conta-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #12161f;
+  border: 1px solid #242833;
+  border-radius: 10px;
+  padding: 16px 20px;
+  transition: border-color 0.2s;
+}
+
+.conta-card:hover {
+  border-color: #3b82f6;
+}
+
+.conta-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.conta-info h3 {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Badge do Tipo de Conta com estilização técnica */
+.conta-info span {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.conta-saldo {
+  color: #10b981;
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* Ações dos itens da lista (Editar/Excluir) */
+.conta-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.conta-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.conta-actions button:hover {
+  opacity: 0.7;
+  transform: scale(1.1);
+}
+
+.conta-actions button[title="Editar"] {
+  color: #3b82f6;
+}
+
+.conta-actions button[title="Excluir"] {
+  color: #ef4444;
+}
+
+/* Overlay Global para estados de carregamento */
+.loading-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #0f1115;
+}
+
+.global-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 17, 21, 0.85);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.global-overlay p {
+  color: #3b82f6;
+  margin-top: 15px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Animação do Spinner */
+.spinner {
+  width: 45px;
+  height: 45px;
+  border: 4px solid #242833;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Media Queries para responsividade em telas menores */
+@media (max-width: 1020px) {
+  .contas-container {
+    padding: 20px 15px;
+  }
+
+  .form-card {
+    padding: 30px 20px;
+    max-width: 100%;
+  }
+
+  .contas-header, .contas-grid, .alerta {
+    max-width: 100%;
+  }
+
+  .form-grid {
+    gap: 15px;
+  }
+}

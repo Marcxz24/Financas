@@ -148,24 +148,33 @@ namespace Financas.Api.Services
         /// <exception cref="UnauthorizedAccessException">Lançada quando a conta pertence a outro usuário.</exception>
         public async Task DeletarContaBancaria(int contaBancariaId, int userId)
         {
-            // 1. Localização do Recurso:
-            // Tenta encontrar a conta específica no banco de dados.
+            // 1. Localização da Conta:
             var contaBancaria = await _financasDbContext.ContasBancarias
                 .FirstOrDefaultAsync(c => c.Id == contaBancariaId);
 
-            // 2. Validação de Existência:
-            // Se a conta não for encontrada, lança uma exceção de "Não Encontrado".
             if (contaBancaria == null)
                 throw new KeyNotFoundException("Conta bancária não encontrada");
 
-            // 3. Validação de Propriedade (Segurança Crítica):
-            // Impede que um usuário apague contas de outras pessoas via manipulação de ID na URL/Request.
+            // 2. Validação de Propriedade:
             if (contaBancaria.UsuarioId != userId)
-                throw new UnauthorizedAccessException("A Conta Bancaria não pertence ao usuário");
+                throw new UnauthorizedAccessException("A Conta Bancária não pertence ao usuário");
 
-            // 4. Remoção e Persistência:
-            // Marca a entidade para remoção no rastreador do EF Core e confirma a exclusão no MySQL.
+            // 3. REMOÇÃO EM CASCATA (Nova lógica):
+            // Busca todos os lançamentos vinculados a esta conta
+            var lancamentosVinculados = await _financasDbContext.Lancamentos
+                .Where(l => l.ContaBancariaId == contaBancariaId)
+                .ToListAsync();
+
+            // Remove todos os lançamentos encontrados
+            if (lancamentosVinculados.Any())
+            {
+                _financasDbContext.Lancamentos.RemoveRange(lancamentosVinculados);
+            }
+
+            // 4. Remoção da Conta:
             _financasDbContext.ContasBancarias.Remove(contaBancaria);
+
+            // 5. Persistência (Executa o DELETE dos lançamentos e da conta em uma única transação)
             await _financasDbContext.SaveChangesAsync();
         }
     }

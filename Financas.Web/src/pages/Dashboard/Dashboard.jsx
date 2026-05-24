@@ -33,6 +33,10 @@ function Dashboard() {
             Categorias
           </Link>
 
+          <Link to="/dashboard/contas-bancarias">
+            Contas Bancárias
+          </Link>
+
           <Link to="#">
             Relatórios
           </Link>
