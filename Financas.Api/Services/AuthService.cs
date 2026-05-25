@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 
 namespace Financas.Api.Services
 {
@@ -71,59 +72,101 @@ namespace Financas.Api.Services
         /// </summary>
         /// <param name="googleToken">O token JWT enviado pelo front-end, gerado após a autenticação bem-sucedida no Google Identity Services.</param>
         /// <returns>Uma string representando o token JWT nativo da aplicação para autorização de requisições subsequentes.</returns>
-        /// <exception cref="Exception">Lançada caso o token do Google seja corrompido, expirado, possua assinatura inválida ou falte correspondência de Audience.</exception>
+        /// <exception cref="UnauthorizedAccessException">
+        /// Lançada caso o token do Google seja inválido, expirado ou incompatível com a aplicação.
+        /// </exception>
         public async Task<string> LoginComGoogle(string googleToken)
         {
             try
             {
-                // 1. Instancia as configurações de validação criptográfica do token do Google.
-                // Restringe a validação ao Client ID da aplicação (Audience) para mitigar ataques de personificação (Token Substitution).
-                var settings = new Google.Apis.Auth.GoogleJsonWebSignature.ValidationSettings()
+                // Validação defensiva: Verifica se o token recebido do frontend não é nulo ou vazio
+                if (string.IsNullOrWhiteSpace(googleToken))
+                    throw new UnauthorizedAccessException("Token Google não informado.");
+
+                // Instancia o HttpClient para consultar o endpoint oficial do Google
+                using var httpClient = new HttpClient();
+
+                // Realiza a validação oficial do token junto ao Google: O Google responde se o token é legítimo
+                var response = await httpClient.GetAsync(
+                    $"https://oauth2.googleapis.com/tokeninfo?id_token={googleToken}"
+                );
+
+                // Token inválido ou expirado: Se a resposta não for 200 OK, encerra o processo
+                if (!response.IsSuccessStatusCode)
+                    throw new UnauthorizedAccessException("Token Google inválido ou expirado.");
+
+                // Lê o payload (os dados do usuário) retornado pelo Google em formato JSON
+                var json = await response.Content.ReadAsStringAsync();
+
+                using var document = JsonDocument.Parse(json);
+
+                var root = document.RootElement;
+
+                // Extrai os campos identificadores do usuário enviados pelo Google
+                string? audience = root.GetProperty("aud").GetString();
+                string? issuer = root.GetProperty("iss").GetString();
+                string? email = root.GetProperty("email").GetString();
+                string? nome = root.GetProperty("name").GetString();
+
+                // Validação de integridade mínima: Garante que os dados necessários não vieram vazios
+                if (
+                    string.IsNullOrWhiteSpace(audience) ||
+                    string.IsNullOrWhiteSpace(issuer) ||
+                    string.IsNullOrWhiteSpace(email) ||
+                    string.IsNullOrWhiteSpace(nome)
+                )
                 {
-                    Audience = new List<string> { _configuration["Google:ClientId"]! }
-                };
+                    throw new UnauthorizedAccessException("Payload Google inválido.");
+                }
 
-                // 2. Executa a validação assíncrona do JWT (verifica assinatura, expiração (exp) e emissor legítimo do Google).
-                // Em caso de sucesso, deserializa e extrai o Payload com as informações de perfil do usuário.
-                Google.Apis.Auth.GoogleJsonWebSignature.Payload payload = await Google.Apis.Auth.GoogleJsonWebSignature.ValidateAsync(googleToken, settings);
+                // Valida se o token pertence à aplicação correta: Compara o ID do cliente configurado no sistema com o 'aud' do token
+                if (audience != _configuration["Google:ClientId"])
+                    throw new UnauthorizedAccessException("ClientId inválido.");
 
-                string email = payload.Email;
-                string nome = payload.Name;
+                // Valida emissor oficial do Google: Garante que o token realmente veio dos servidores do Google
+                if (
+                    issuer != "https://accounts.google.com" &&
+                    issuer != "accounts.google.com"
+                )
+                {
+                    throw new UnauthorizedAccessException("Issuer Google inválido.");
+                }
 
-                // 3. Consulta a persistência buscando a existência do usuário pelo identificador único alternativo (E-mail).
+                // Consulta a persistência buscando a existência do usuário pelo identificador único alternativo (E-mail).
                 var usuario = await _FinancasDbContext.Usuarios
                     .FirstOrDefaultAsync(u => u.Email == email);
 
-                // 4. Fluxo de Provisionamento Automático (Just-In-Time Provisioning):
-                // Caso o usuário não possua registro local, uma nova conta é instanciada e persistida de forma transparente.
+                // Fluxo de Provisionamento Automático (Just-In-Time Provisioning): Se o usuário é novo, cria o registro automaticamente
                 if (usuario == null)
                 {
                     usuario = new Usuario
                     {
                         Username = nome,
                         Email = email,
-                        // Define uma credencial randômica forte (GUID criptográfico) antes de aplicar o algoritmo de derivação de chave (KDF).
-                        // Isso anula vetores de ataque por força bruta ou dicionário no fluxo de autenticação tradicional por senha.
+
+                        // Define uma credencial randômica forte para inutilizar login tradicional por senha (força o uso do Google)
                         Password = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString()),
-                        // O e-mail é implicitamente considerado verificado dado que a autenticação ocorreu através de um Identity Provider (IdP) confiável.
+
+                        // Usuário autenticado pelo Google já é considerado validado (e-mail verificado pela fonte de origem)
                         EmailConfirmado = true,
+
                         DataCadastro = DateTime.UtcNow
                     };
 
                     _FinancasDbContext.Usuarios.Add(usuario);
+
                     await _FinancasDbContext.SaveChangesAsync();
                 }
 
-                // 5. Garantia de Consistência Cadastral:
-                // Caso o usuário exista localmente, mas com status de validação pendente, o IdP externo atua como autoridade de validação.
+                // Garante consistência caso o usuário já exista localmente, mas ainda não tivesse marcado o e-mail como confirmado
                 if (!usuario.EmailConfirmado)
                 {
                     usuario.EmailConfirmado = true;
+
                     await _FinancasDbContext.SaveChangesAsync();
                 }
 
-                // 6. Geração do Token de Acesso Nativo da Aplicação (App JWT):
-                // Constrói a identidade baseada em Claims (Alegações) de segurança para o contexto de segurança local (User Context).
+                // Claims do JWT interno da aplicação: Define os dados que estarão gravados dentro do seu token (ID, Email, Nome)
                 var claims = new[]
                 {
                     new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
@@ -131,15 +174,18 @@ namespace Financas.Api.Services
                     new Claim(ClaimTypes.Name, usuario.Username)
                 };
 
-                // Instancia a chave simétrica a partir do segredo armazenado na configuração da aplicação.
+                // Chave simétrica do JWT: Busca o segredo configurado no appsettings para assinar o token
                 var key = new SymmetricSecurityKey(
                     Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!)
                 );
 
-                // Define as credenciais de assinatura utilizando criptografia de chave simétrica com o algoritmo HMAC SHA-256.
-                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                // Credenciais de assinatura: Define o algoritmo de segurança (HmacSha256)
+                var creds = new SigningCredentials(
+                    key,
+                    SecurityAlgorithms.HmacSha256
+                );
 
-                // Configura as propriedades do envelope JWT (Tempo de vida estrito de 2 horas, Emissor e Escopo).
+                // Criação do JWT da aplicação: Configura emissor, audiência, duração (2 horas) e as claims do usuário
                 var token = new JwtSecurityToken(
                     issuer: _configuration["Jwt:Issuer"],
                     audience: _configuration["Jwt:Audience"],
@@ -148,13 +194,18 @@ namespace Financas.Api.Services
                     signingCredentials: creds
                 );
 
-                // 7. Serializa o objeto JwtSecurityToken em sua representação compacta de string (Header.Payload.Signature).
+                // Serializa o objeto JWT para uma string legível que será enviada ao Frontend
                 return new JwtSecurityTokenHandler().WriteToken(token);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Repassa falhas controladas de autenticação sem expor detalhes internos
+                throw;
             }
             catch (Exception ex)
             {
-                // Captura falhas de validação de assinatura, tokens expirados ou estruturalmente malformados do Google.
-                throw new Exception("Token do Google inválido ou expirado.", ex);
+                // Retorna mensagem segura para a camada superior
+                throw new Exception("Falha interna ao processar autenticação Google.", ex);
             }
         }
     }

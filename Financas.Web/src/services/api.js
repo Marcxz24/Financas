@@ -2,8 +2,9 @@ import axios from "axios";
 
 // Criação da instância personalizada do Axios
 const api = axios.create({
-    // Lê a URL do seu back-end C# definida no arquivo .env
-    baseURL: import.meta.env.VITE_API_URL,
+    // Define a URL base da API já contendo o prefixo padrão "/api"
+    baseURL: `${import.meta.env.VITE_API_URL}/api`,
+
     headers: {
         "Content-Type": "application/json"
     },

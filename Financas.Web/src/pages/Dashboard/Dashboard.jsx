@@ -1,15 +1,21 @@
-import "./Dashboard.css";
-import { Link, useNavigate, Outlet } from "react-router-dom";
+import "./Dashboard.css"; // Importa o arquivo de estilos CSS para aplicar o layout visual da página
+import { Link, useNavigate, Outlet } from "react-router-dom"; // Importa hooks e componentes do React Router para navegação
 
 function Dashboard() {
 
+  // O hook 'useNavigate' é usado para redirecionar o usuário programaticamente (via código)
   const navigate = useNavigate();
 
+  // Função disparada ao clicar no botão de sair
   const handleLogout = () => {
+    // Remove o token de autenticação armazenado no navegador (localStorage)
+    // Isso encerra a sessão do usuário localmente
     localStorage.removeItem("token");
+    
+    // Redireciona o usuário de volta para a rota raiz ("/"), geralmente a tela de login
     navigate("/");
   };
-
+  
   return (
     <div className="dashboard-page">
 

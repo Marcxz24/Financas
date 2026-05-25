@@ -17,7 +17,7 @@ function GoogleAuthButton({ navigate }) {
 
           // Envia o token do Google para a Web API em C# validar e registrar/logar o usuário
           const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/usuarios/google`,
+            `${import.meta.env.VITE_API_URL}/api/usuarios/google`,
             {
               method: "POST",
               headers: {
@@ -32,9 +32,8 @@ function GoogleAuthButton({ navigate }) {
 
           // Se o backend C# retornar qualquer status fora da faixa 200-299 (ex: 400, 404, 500)
           if (!response.ok) {
-            throw new Error("Falha na autenticação com a API.");
+            throw new Error("Falha na autenticação com Google.");
           }
-
           // Lê o JWT customizado gerado pela nossa API C# (retornado como texto puro)
           const tokenSistema = await response.text();
 

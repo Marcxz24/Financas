@@ -1,11 +1,8 @@
 ﻿using Financas.Api.DTOs.Usuario;
-using Financas.Api.Entities;
 using Financas.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
 using System.Security.Claims;
-using System.Transactions;
 
 namespace Financas.Api.Controllers
 {
@@ -232,6 +229,7 @@ namespace Financas.Api.Controllers
         /// <response code="200">Retorna o token gerado com sucesso.</response>
         /// <response code="401">Caso o token do Google seja inválido, malformado ou expirado.</response>
         [HttpPost("google")]
+        [AllowAnonymous]
         public async Task<IActionResult> LoginComGoogle([FromBody] GoogleLoginDTO dto)
         {
             try

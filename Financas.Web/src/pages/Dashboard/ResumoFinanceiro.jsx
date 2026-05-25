@@ -23,8 +23,8 @@ function ResumoFinanceiro() {
   const carregarDados = useCallback(async () => {
     try {
       const url = contaFiltroId > 0
-      ? `/Dashboard/resumo-mensal?contaId=${contaFiltroId}`
-      : "/Dashboard/resumo-mensal";
+      ? `/dashboard/resumo-mensal?contaId=${contaFiltroId}`
+      : "/dashboard/resumo-mensal";
 
       const response = await api.get(url);
       const dados = response.data;
@@ -43,7 +43,7 @@ function ResumoFinanceiro() {
   useEffect(() => {
     const carregarContasDoUsuario = async () => {
       try {
-        const response = await api.get("/contas-bancarias/listar-conta-bancaria");
+        const response = await api.get("/api/contas-bancarias/listar-conta-bancaria");
         setContasBancarias(response.data || []);
       } catch (error) {
         console.error("Erro ao carregar contas para o filtro:", error);
