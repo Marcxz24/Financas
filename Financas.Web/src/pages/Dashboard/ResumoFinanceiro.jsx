@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
-import "./dashboard.css";
+import "./Dashboard.css";
 
 function ResumoFinanceiro() {
   const navigate = useNavigate();
