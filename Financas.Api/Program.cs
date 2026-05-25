@@ -30,7 +30,8 @@ builder.Services.AddCors(options =>
             .WithOrigins(
                 "http://localhost:5173",
                 "http://127.0.0.1:5173",
-                "http://[::1]:5173"
+                "http://[::1]:5173",
+                "https://financas-navy.vercel.app"
             )
             .AllowAnyHeader()
             .AllowAnyMethod();
@@ -108,18 +109,18 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI();
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-}
+app.UseHttpsRedirection();
 
 app.UseCors("Frontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.MapGet("/healthz", () => Results.Ok("Healthy"));
 
