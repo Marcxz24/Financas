@@ -1,4 +1,4 @@
-import "./dashboard.css";
+import "./Dashboard.css";
 import { Link, useNavigate, Outlet } from "react-router-dom";
 
 function Dashboard() {

@@ -2,7 +2,7 @@ import { useState } from "react";
 // Importa a instância configurada do cliente HTTP (Axios)
 import api from "../../services/api";
 // Importa o arquivo de estilos CSS específico deste componente
-import "./login.css";
+import "./Login.css";
 // Importa o componente Link para navegação entre rotas
 import { Link, useNavigate } from "react-router-dom";
 

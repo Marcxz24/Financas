@@ -3,7 +3,7 @@ import { useState } from 'react';
 // Importa o componente Link para navegação interna sem recarregar a página
 import { Link } from 'react-router-dom'; 
 // Importa o arquivo de estilos CSS específico para a página de registro
-import './register.css';
+import './Register.css';
 
 const Register = () => {
   // Inicializa um objeto de estado para armazenar todos os campos do formulário
