@@ -5,12 +5,16 @@ import { GoogleLogin } from "@react-oauth/google";
  * Componente de Botão de Autenticação do Google.
  * Encapsula a lógica de login social, validação com o backend C# e gerenciamento de sessão.
  * * @param {Function} navigate - Função de navegação do react-router-dom repassada pelo componente pai.
+ * @param {Function} setCarregando - Função para controlar o estado de carregamento.
  */
-function GoogleAuthButton({ navigate }) {
+function GoogleAuthButton({ navigate, setCarregando }) {
   return (
     <GoogleLogin
       // Disparado quando o usuário faz login com sucesso na janela popup do Google
       onSuccess={async (credentialResponse) => {
+
+        setCarregando(true);
+
         try {
           // Extrai o ID Token (JWT) retornado pelos servidores do Google
           const googleToken = credentialResponse.credential;
@@ -45,6 +49,9 @@ function GoogleAuthButton({ navigate }) {
         } catch (error) {
           // Captura e exibe erros de rede ou falhas na validação do backend C#
           console.error("Erro ao integrar com a API:", error);
+        } finally {
+          // Garante que o estado de carregamento seja desativado após a tentativa de login
+          setCarregando(false);
         }
       }}
       // Disparado quando o fluxo de login falha no lado do próprio Google (ex: popup fechada pelo usuário)

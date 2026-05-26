@@ -116,7 +116,9 @@ function Login() {
             <button type="submit">Entrar</button>
 
             <div className="google-login-container">
-              <GoogleAuthButton navigate={navigate} />
+              <GoogleAuthButton navigate={navigate}
+              setCarregando={setCarregando} 
+              />
             </div>
 
             {/* Mensagem de erro */}
