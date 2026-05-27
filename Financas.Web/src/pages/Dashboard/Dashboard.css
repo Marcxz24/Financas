@@ -79,12 +79,15 @@ body {
 }
 
 .dashboard-content {
-  flex: 1;
-  width: 100%;
-  max-width: 1400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* Centraliza melhor o conteúdo */
+  padding: 25px;
+
+  /* Evita largura exagerada em monitores grandes */
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 20px;
-  box-sizing: border-box;
 }
 
 /* Layout em grade para os cards */
@@ -269,4 +272,30 @@ body {
   margin-bottom: 0;
   font-size: 1.8rem; /* Ajuste para manter o destaque do seu valor */
   font-weight: bold;
+}
+
+@media (max-width: 600px) {
+  .dashboard-header {
+    flex-direction: column; /* Coloca Logo no topo, menu embaixo */
+    padding: 15px;
+  }
+
+  .menu-top {
+    flex-direction: row; /* Mantém os itens um ao lado do outro */
+    flex-wrap: wrap;     /* Se não couber, joga o item para a linha de baixo */
+    justify-content: center;
+    gap: 15px;           /* Espaçamento entre os links */
+    margin-top: 15px;
+    width: 100%;
+  }
+
+  .menu-top a {
+    font-size: 13px;     /* Reduz um pouco o tamanho para caber tudo */
+  }
+
+  .btn-logout {
+    margin-left: 0;      /* Remove o espaço lateral do botão */
+    width: 100%;         /* Botão ocupa a largura total abaixo do menu */
+    margin-top: 10px;
+  }
 }

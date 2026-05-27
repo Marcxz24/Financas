@@ -2,30 +2,39 @@
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  box-sizing: border-box; /* Garante que o padding não aumente o tamanho dos elementos */
 }
 
 .lancamento-page {
   width: 100%;
-  min-height: calc(100vh - 72px); 
+  min-height: calc(100vh - 72px);
+
   display: flex;
   justify-content: center;
   align-items: flex-start;
+
   background: #0f1115;
+
   overflow: hidden;
+
   box-sizing: border-box;
-  padding-top: 0px; 
+
+  padding-top: 0px;
   padding-bottom: 30px;
 }
 
 .lancamento-card {
   box-sizing: border-box;
-  width: 100%;        
-  max-width: 750px;
+
+  width: 750px;
+  max-width: 100%;
+
   height: auto;
+
   margin: 0 auto;
 
-  border-radius: 16px; 
+  border-radius: 16px;
+
   border-left: 1px solid #252a35;
   border-right: 1px solid #252a35;
   border-top: none;
@@ -35,15 +44,16 @@
 
   display: flex;
   flex-direction: column;
-  justify-content: center; 
+  justify-content: center;
+
   padding: 40px;
 
   overflow-y: auto;
 }
 
-/* Efeito de crescer e sombra profunda */
+/* Efeito de interação: cresce e aplica sombra ao passar o mouse */
 .lancamento-card:hover {
-  transform: translateY(-5px) scale(1.01); /* Levanta e cresce sutilmente */
+  transform: translateY(-5px) scale(1.01); 
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8);
   border-color: #3b82f6;
 }
@@ -69,13 +79,7 @@
 .lancamentos-box {
   display: flex;
   flex-direction: column;
-  gap: 25px;
-}
-
-.grid-form {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
+  gap: 25px; /* Espaçamento entre os grupos de campos */
 }
 
 .detalhes-wrapper label {
@@ -100,7 +104,7 @@
 }
 
 .item-lancamento:focus {
-  border-color: #3b82f6;
+  border-color: #3b82f6; /* Destaque azul ao selecionar o campo */
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
@@ -183,10 +187,6 @@
     max-width: 95%;
   }
 
-  .grid-form{
-    gap: 15px;
-  }
-
   .lancamento-header {
     margin-bottom: 20px;
   }
@@ -195,7 +195,90 @@
 
 /* No seu CSS de formulário */
 .input-form[type="datetime-local"] {
-  /* Garante que o ícone do calendário e relógio fiquem visíveis */
   padding-right: 10px;
   font-family: inherit;
+}
+
+/* Ajustes específicos para telas menores, como celulares */
+@media (max-width: 768px) {
+
+  .lancamento-page {
+    display: block !important;
+
+    height: 100vh;
+    height: 100dvh;
+
+    overflow-y: auto !important;
+    overflow-x: hidden;
+
+    -webkit-overflow-scrolling: touch;
+
+    padding: 20px 14px 120px;
+  }
+
+  .lancamento-card {
+    width: 100% !important;
+
+    max-width: 100%;
+
+    padding: 28px 20px;
+
+    margin-bottom: 120px;
+
+    border-radius: 18px;
+
+    overflow-x: hidden;
+  }
+
+  /* Organiza os campos em coluna no mobile */
+  .grid-form {
+    display: flex;
+    flex-direction: column;
+
+    gap: 18px;
+
+    width: 100%;
+  }
+
+  /* Mantém os campos proporcionais à largura do card */
+  .detalhes-wrapper,
+  .lancamentos-box,
+  .item-lancamento,
+  .btn-salvar,
+  .btn-deletar {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  /* Inputs mais confortáveis para toque */
+  .item-lancamento {
+    height: 54px;
+
+    font-size: 15px;
+
+    padding: 0 18px;
+  }
+
+  /* Botões com visual mais equilibrado no mobile */
+  .btn-salvar,
+  .btn-deletar {
+    height: 54px;
+
+    font-size: 15px;
+  }
+
+  /* Ajusta respiro do cabeçalho */
+  .lancamento-header {
+    margin-bottom: 25px;
+  }
+
+  .lancamento-header h1 {
+    font-size: 24px;
+  }
+
+  .descricao-header {
+    font-size: 14px;
+    line-height: 1.5;
+  }
 }

@@ -43,7 +43,7 @@ function ResumoFinanceiro() {
   useEffect(() => {
     const carregarContasDoUsuario = async () => {
       try {
-        const response = await api.get("/api/contas-bancarias/listar-conta-bancaria");
+        const response = await api.get("/contas-bancarias/listar-conta-bancaria");
         setContasBancarias(response.data || []);
       } catch (error) {
         console.error("Erro ao carregar contas para o filtro:", error);

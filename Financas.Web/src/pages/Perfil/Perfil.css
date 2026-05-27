@@ -1,11 +1,19 @@
-/* Container principal que envolve toda a página de perfil para centralizar o card na tela */
+/* Configura o comportamento da página de perfil no mobile */
 .perfil-page-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2rem;
-  /* Ocupa a altura total da tela descontando os 80px estimados do cabeçalho/navbar */
-  min-height: calc(100vh - 80px);
+  /* Mantém o layout simples para evitar conflitos de scroll */
+  display: block !important;
+  /* Altura padrão da viewport */
+  height: 100vh;
+  /* Corrige problemas da barra do navegador em celulares modernos */
+  height: 100dvh;
+  /* Mantém a rolagem vertical ativa */
+  overflow-y: auto !important;
+  /* Remove rolagem lateral */
+  overflow-x: hidden;
+  /* Suaviza a rolagem no iOS */
+  -webkit-overflow-scrolling: touch;
+  /* Espaço inferior para evitar corte dos botões */
+  padding-bottom: 120px !important;
 }
 
 /* Card central escuro que agrupa todas as informações do perfil do usuário */
@@ -215,4 +223,42 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Ajustes para dispositivos móveis */
+@media (max-width: 768px) {
+  /* Permite que o container acompanhe o crescimento do conteúdo */
+  .perfil-page-container {
+    display: block !important;
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    padding: 20px 10px 120px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Reduz o espaçamento interno para melhor aproveitamento no mobile */
+  .perfil-main-card {
+    width: 100%;
+    max-width: 100%;
+    padding: 25px 15px;
+    overflow-x: hidden;
+    margin-bottom: 80px;
+  }
+
+  /* Mantém os botões empilhados em telas menores */
+  .perfil-card-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  /* Evita quebra visual dos botões laterais */
+  .btn-solicitar-edicao,
+  .btn-excluir-perfil {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
 }

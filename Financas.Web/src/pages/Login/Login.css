@@ -271,3 +271,19 @@ form {
     transform: rotate(360deg);
   }
 }
+
+/* --- Responsividade --- */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 30px 20px 40px 20px; /* Reduz o padding lateral de 40px para 20px */
+    width: 90%; /* Garante uma margem de respiro fora do card */
+  }
+
+  .login-header h1 {
+    font-size: 28px; /* Título um pouco menor para não quebrar a palavra */
+  }
+
+  .login-header {
+    gap: 15px; /* Aproxima um pouco mais os elementos do cabeçalho */
+  }
+}
