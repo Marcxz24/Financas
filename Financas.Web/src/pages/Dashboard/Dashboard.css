@@ -6,17 +6,13 @@ body {
   font-family: 'Inter', Arial, Helvetica, sans-serif;
 }
 
-html,
-body {
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
 /* Estrutura principal da página com fundo em gradiente */
 .dashboard-page {
   min-height: 100vh;
   background: linear-gradient(180deg, #0f1115 0%, #151922 100%);
   color: #ffffff;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Cabeçalho fixo com efeito de desfoque (Glassmorphism) */
@@ -84,10 +80,16 @@ body {
 
 .dashboard-content {
   width: 100%;
-  overflow-x: hidden;
-  padding: 25px;
   max-width: 1600px;
+
   margin: 0 auto;
+
+  padding: 25px;
+
+  overflow-x: hidden;
+  overflow-y: visible;
+
+  flex: 1;
 }
 
 /* Layout em grade para os cards */
