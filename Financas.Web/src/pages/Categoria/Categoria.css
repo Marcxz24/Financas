@@ -1,405 +1,394 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box; /* Previne quebras de layout por soma de padding/border */
+/* =========================================
+   1. VARIÁVEIS DO TEMA (ESCOPO LOCAL)
+   ========================================= */
+.categoria-page {
+  --bg-page: transparent;
+  --bg-card: #1a1f29;
+  --bg-input: #12161f;
+  --text-main: #ffffff;
+  --text-muted: #9ca3af;
+  --border-color: #242833;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --danger-text: #ef4444;
+  --danger-bg: rgba(239, 68, 68, 0.1);
+  --danger-border: rgba(239, 68, 68, 0.2);
+  --success-text: #10b981;
+  --success-bg: rgba(16, 185, 129, 0.1);
+  --success-border: rgba(16, 185, 129, 0.2);
+  --radius-card: 16px;
+  --radius-input: 10px;
 }
 
+/* =========================================
+   2. ESTRUTURA BASE (MOBILE-FIRST)
+   ========================================= */
 .categoria-page {
   width: 100%;
-  min-height: calc(100vh - 72px);
-
+  background-color: var(--bg-page);
+  padding: 20px 15px 120px;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-
-  background: #0f1115;
-
-  overflow-x: hidden;
-
-  padding: 40px 20px 30px;
+  font-family: inherit;
+  box-sizing: border-box;
 }
 
 .categoria-card {
-  box-sizing: border-box;
-
   width: 100%;
   max-width: 750px;
-
   margin: 0 auto;
-
-  border-radius: 16px;
-
-  border-left: 1px solid #252a35;
-  border-right: 1px solid #252a35;
-  border-top: none;
-  border-bottom: none;
-
-  background: #1a1f29;
-
-  transition: all 0.3s ease;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-
-  padding: 40px;
-
-  overflow: visible;
-}
-
-/* Microinteração de elevação para manter consistência com o card de lançamentos */
-.categoria-card:hover {
-  transform: translateY(-5px) scale(1.01);
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8);
-  border-color: #3b82f6;
-}
-
-.categoria-header {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.categoria-header h1 {
-  color: #ffffff;
-  font-size: 26px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.descricao-header {
-  color: #9ca3af;
-  font-size: 14px;
-}
-
-.categorias-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  padding: 24px 20px;
   display: flex;
   flex-direction: column;
   gap: 25px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
-
-/* Alinhamento bicolunar para inputs; quebra automático em telas menores que 300px */
-.grid-form {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
-}
-
-.detalhes-wrapper label {
-  font-size: 14px;
-  color: #9ca3af;
-  margin-bottom: 10px;
-  display: block;
-}
-
-.item-categoria {
-  width: 100%;
-  height: 52px;
-  padding: 0 16px;
-  background: #12161f; 
-  border: 1px solid #242833;
-  border-radius: 10px;
-  color: #ffffff;
-  font-size: 14px;
-  outline: none;
-  transition: all 0.2s ease;
-}
-
-.item-categoria:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); /* Efeito glow padrão da UI */
-}
-
-.acoes-form-container {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  margin-top: 10px;
-}
-
-.btn-salvar {
-  width: 100%;
-  height: 52px;
-  border: none;
-  border-radius: 10px;
-  background: #3b82f6;
-  color: white;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.2s, background 0.2s;
-}
-
-.btn-salvar:hover {
-  background: #2563eb;
-  transform: translateY(-2px);
-}
-
-.btn-deletar {
-  width: 100%;
-  height: 48px;
-  background-color: #451a1a; /* Tom destrutivo opaco para evitar poluição visual */
-  border: 1px solid #7f1d1d;
-  border-radius: 10px;
-  color: #f87171;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-deletar:hover {
-  background-color: #7f1d1d;
-  color: #ffffff;
-  transform: translateY(-2px);
-}
-
-.link-voltar {
-  text-align: center;
-  color: #9ca3af;
-  text-decoration: none;
-  font-size: 14px;
-  display: block;
-  margin-top: 10px;
-  transition: color 0.2s;
-}
-
-.link-voltar:hover {
-  color: #ffffff;
-}
-
-.mensagem-erro {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-  padding: 12px;
-  border-radius: 8px;
-  text-align: center;
-  margin-top: 15px;
-}
-
-/* --- Seção de Listagem (Grid Inferior) --- */
-.listagem-categorias-section {
-  margin-top: 40px;
-  border-top: 1px solid #242833;
-  padding-top: 25px;
-}
-
-.listagem-categorias-section h2 {
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 20px;
-}
-
-.categorias-grid-lista {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-height: 280px; /* Limita o crescimento vertical da listagem */
-  overflow-y: auto;   /* Força scroll interno se ultrapassar o max-height */
-  padding-right: 6px;
-}
-
-/* Customização da scrollbar interna (Webkit) */
-.categorias-grid-lista::-webkit-scrollbar {
-  width: 6px;
-}
-.categorias-grid-lista::-webkit-scrollbar-thumb {
-  background-color: #242833;
-  border-radius: 4px;
-}
-
-.categoria-item-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #12161f;
-  border: 1px solid #242833;
-  border-radius: 10px;
-  padding: 14px 20px;
-  transition: border-color 0.2s;
-}
-
-.categoria-item-card:hover {
-  border-color: #3b82f6;
-}
-
-.categoria-item-info {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  color: #ffffff;
-  font-size: 14px;
-}
-
-.icone-cat {
-  color: #3b82f6;
-  font-size: 18px;
-}
-
-.badge-tipo-cat {
-  font-size: 11px;
-  font-weight: 700;
-  padding: 6px 12px;
-  border-radius: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.cat-receita {
-  background-color: rgba(16, 185, 129, 0.1);
-  color: #10b981;
-  border: 1px solid rgba(16, 185, 129, 0.2);
-}
-
-.cat-despesa {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.2);
-}
-
-.txt-vazio {
-  color: #9ca3af;
-  font-size: 14px;
-}
-
-/* --- Media Queries / Responsividade --- */
-@media (max-width: 1020px) {
-  .categoria-page {
-    padding: 20px 10px;
-  }
-
-  .categoria-card {
-    padding: 30px 40px;
-    max-width: 95%;
-  }
-
-  .grid-form {
-    gap: 15px;
-  }
-
+  
+  /* =========================================
+     3. CABEÇALHO
+     ========================================= */
   .categoria-header {
-    margin-bottom: 20px;
+    text-align: center;
   }
-}
-
-/* Evita que o elemento option nativo herde fundo claro do SO em modo dark */
-.item-categoria option, 
-.item-categoria optgroup {
-  background-color: #1a1f29;
-  color: #fff;
-}
-
-/* Posicionamento do wrapper para simular o ícone injetado dentro do select */
-.input-icone-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-/* Força o ícone a flutuar sobre o input sem bloquear eventos de clique do select */
-.icone-preview {
-  position: absolute;
-  left: 16px;
-  color: #3b82f6;
-  font-size: 18px;
-  pointer-events: none;
-}
-
-/* Recuo do texto para alinhar com o ícone absoluto inserido à esquerda */
-.select-com-icone {
-  padding-left: 48px;
-}
-
-.btn-editar-lista {
-  background: none;
-  border: none;
-  color: #3b82f6;
-  cursor: pointer;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  padding: 0;
-  transition: opacity 0.2s;
-}
-
-.btn-editar-lista:hover {
-  opacity: 0.7;
-}
-
-.acoes-lista-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-/* Ajustes específicos para celulares */
-@media (max-width: 768px) {
-
-  .categoria-page {
-    display: block !important;
-
-    height: 100vh;
-    height: 100dvh;
-
-    overflow-y: auto !important;
-    overflow-x: hidden;
-
-    -webkit-overflow-scrolling: touch;
-
-    padding: 20px 12px 120px;
+  
+  .categoria-header h1 {
+    color: var(--text-main);
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
   }
-
-  .categoria-card {
-    width: 100%;
-    max-width: 100%;
-
-    padding: 25px 18px;
-
-    overflow-x: hidden;
-
-    margin-bottom: 140px;
+  
+  .descricao-header {
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.4;
   }
-
-  .grid-form {
+  
+  /* =========================================
+     4. FORMULÁRIO E INPUTS
+     ========================================= */
+  .categorias-box {
     display: flex;
     flex-direction: column;
-
-    width: 100%;
-
-    gap: 15px;
+    gap: 20px;
   }
-
-  .item-categoria,
-  .btn-salvar,
-  .btn-deletar,
-  .detalhes-wrapper,
-  .categorias-box {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
+  
+  .detalhes-wrapper label {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    display: block;
   }
-
-  .categoria-item-card {
+  
+  /* Campos de texto e selects */
+  .item-categoria {
+    width: 100%;
+    height: 50px;
+    padding: 0 16px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-input);
+    color: var(--text-main);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .item-categoria:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  }
+  
+  .item-categoria option, 
+  .item-categoria optgroup {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+  }
+  
+  /* Grid do Form (Mobile = Empilhado 1 coluna) */
+  .grid-form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  /* Hack visual para o Ícone dentro do Select */
+  .input-icone-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .icone-preview {
+    position: absolute;
+    left: 16px;
+    color: var(--primary);
+    font-size: 18px;
+    pointer-events: none;
+  }
+  
+  .select-com-icone {
+    padding-left: 48px;
+  }
+  
+  /* =========================================
+     5. BOTÕES E AÇÕES
+     ========================================= */
+  .acoes-form-container {
+    display: flex;
     flex-direction: column;
-    align-items: flex-start;
-
-    gap: 15px;
+    gap: 12px;
+    margin-top: 10px;
   }
-
-  .categoria-item-info {
+  
+  .btn-salvar, .btn-deletar {
     width: 100%;
+    height: 50px;
+    border-radius: var(--radius-input);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .btn-salvar {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+  }
+  
+  .btn-salvar:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+  }
+  
+  .btn-deletar {
+    background: transparent;
+    border: 1px solid var(--danger-border);
+    color: var(--danger-text);
+  }
+  
+  .btn-deletar:hover {
+    background: var(--danger-bg);
+    border-color: var(--danger-text);
+    transform: translateY(-2px);
+  }
+  
+  .link-voltar {
+    text-align: center;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 14px;
+    padding: 8px;
+    transition: color 0.2s ease;
+  }
+  
+  .link-voltar:hover {
+    color: var(--text-main);
+  }
+  
+  .mensagem-erro {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    padding: 12px;
+    border-radius: var(--radius-input);
+    text-align: center;
+    font-size: 14px;
+  }
+  
+  /* =========================================
+     6. LISTAGEM DE CATEGORIAS
+     ========================================= */
+  .listagem-categorias-section {
+    border-top: 1px solid var(--border-color);
+    padding-top: 25px;
+  }
+  
+  .listagem-categorias-section h2 {
+    color: var(--text-main);
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     flex-wrap: wrap;
   }
 
-  .acoes-lista-wrapper {
-    width: 100%;
-    justify-content: flex-end;
+  .listagem-contador {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    padding: 4px 12px;
+    white-space: nowrap;
   }
-
+  
   .categorias-grid-lista {
-    max-height: none;
-
-    overflow: visible;
-
-    padding-right: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
-}
+  
+  .categoria-item-card {
+    display: flex;
+    flex-direction: column; /* Mobile: Itens empilhados no card */
+    gap: 15px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-input);
+    padding: 16px;
+    transition: border-color 0.2s ease;
+  }
+  
+  .categoria-item-card:hover {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .categoria-item-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: var(--text-main);
+    font-size: 15px;
+    font-weight: 500;
+  }
+  
+  .icone-cat {
+    color: var(--primary);
+    font-size: 20px;
+  }
+  
+  .acoes-lista-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Afasta o botão editar do badge */
+    width: 100%;
+  }
+  
+  .badge-tipo-cat {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .cat-receita {
+    background: var(--success-bg);
+    color: var(--success-text);
+    border: 1px solid var(--success-border);
+  }
+  
+  .cat-despesa {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border: 1px solid var(--danger-border);
+  }
+  
+  .btn-editar-lista {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 18px;
+    transition: color 0.2s ease;
+  }
+  
+  .btn-editar-lista:hover {
+    color: var(--text-main);
+  }
+  
+  .txt-vazio {
+    color: var(--text-muted);
+    font-size: 14px;
+    text-align: center;
+    padding: 20px 0;
+  }
+  
+  /* =========================================
+     7. RESPONSIVIDADE (TABLET E DESKTOP)
+     ========================================= */
+  @media (max-width: 600px) {
+    .categoria-page {
+      padding: 16px 8px 140px;
+    }
+
+    .categoria-header h1 {
+      font-size: 22px;
+    }
+
+    .categoria-item-card {
+      padding: 14px;
+    }
+
+    .acoes-lista-wrapper {
+      gap: 12px;
+    }
+  }
+
+  @media (min-width: 600px) {
+    
+    .categoria-page {
+      padding: 32px 20px 80px;
+    }
+  
+    .categoria-card {
+      padding: 35px 40px; /* Expande o card interno */
+    }
+  
+    .categoria-header h1 {
+      font-size: 26px;
+    }
+  
+    /* Coloca o Tipo e Ícone lado a lado */
+    .grid-form {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  
+    /* Organiza os botões do formulário */
+    .acoes-form-container {
+      flex-direction: row;
+      align-items: center;
+      flex-wrap: wrap; /* Evita quebra de layout */
+    }
+  
+    .btn-salvar {
+      flex: 1; /* Ocupa o espaço máximo possível */
+    }
+  
+    .btn-deletar {
+      width: auto;
+      padding: 0 24px;
+    }
+  
+    .link-voltar {
+      width: 100%;
+      margin-top: 5px;
+    }
+  
+    /* O card da lista fica em linha (Horizontal) */
+    .categoria-item-card {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+  
+    .acoes-lista-wrapper {
+      width: auto;
+      gap: 20px;
+      justify-content: flex-end;
+    }
+  }

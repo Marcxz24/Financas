@@ -1,284 +1,258 @@
-/* Reset e Configuração da Área Principal */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box; /* Garante que o padding não aumente o tamanho dos elementos */
+/* =========================================
+   1. VARIÁVEIS DO TEMA (ESCOPO LOCAL)
+   ========================================= */
+.lancamento-page {
+  --bg-page: transparent;
+  --bg-card: #1a1f29;
+  --bg-input: #12161f;
+  --text-main: #ffffff;
+  --text-muted: #9ca3af;
+  --border-color: #242833;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --danger-text: #ef4444;
+  --danger-bg: rgba(239, 68, 68, 0.1);
+  --danger-border: rgba(239, 68, 68, 0.2);
+  --radius-card: 16px;
+  --radius-input: 10px;
 }
 
+/* =========================================
+   2. ESTRUTURA BASE (MOBILE-FIRST)
+   ========================================= */
 .lancamento-page {
   width: 100%;
-  min-height: calc(100vh - 72px);
-
+  background-color: var(--bg-page);
+  padding: 20px 15px 120px;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-
-  background: #0f1115;
-
-  overflow: hidden;
-
+  font-family: inherit;
   box-sizing: border-box;
-
-  padding-top: 0px;
-  padding-bottom: 30px;
 }
 
 .lancamento-card {
-  box-sizing: border-box;
-
-  width: 750px;
-  max-width: 100%;
-
-  height: auto;
-
+  width: 100%;
+  max-width: 750px;
   margin: 0 auto;
-
-  border-radius: 16px;
-
-  border-left: 1px solid #252a35;
-  border-right: 1px solid #252a35;
-  border-top: none;
-  border-bottom: none;
-
-  background: #1a1f29;
-
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  padding: 24px 20px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-
-  padding: 40px;
-
-  overflow-y: auto;
+  gap: 25px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Efeito de interação: cresce e aplica sombra ao passar o mouse */
 .lancamento-card:hover {
-  transform: translateY(-5px) scale(1.01); 
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8);
-  border-color: #3b82f6;
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
 }
 
+/* =========================================
+   3. CABEÇALHO
+   ========================================= */
 .lancamento-header {
   text-align: center;
-  margin-bottom: 30px;
 }
 
 .lancamento-header h1 {
-  color: #ffffff;
-  font-size: 26px;
+  color: var(--text-main);
+  font-size: 24px;
   font-weight: 700;
   margin-bottom: 8px;
 }
 
 .descricao-header {
-  color: #9ca3af;
+  color: var(--text-muted);
   font-size: 14px;
+  line-height: 1.4;
 }
 
-/* --- FORMULÁRIO E GRUPOS --- */
+/* =========================================
+   4. FORMULÁRIO E INPUTS
+   ========================================= */
 .lancamentos-box {
   display: flex;
   flex-direction: column;
-  gap: 25px; /* Espaçamento entre os grupos de campos */
+  gap: 20px;
 }
 
 .detalhes-wrapper label {
   font-size: 14px;
-  color: #9ca3af;
-  margin-bottom: 10px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
   display: block;
 }
 
-/* Inputs e Selects */
 .item-lancamento {
   width: 100%;
-  height: 52px;
+  height: 50px;
   padding: 0 16px;
-  background: #12161f; 
-  border: 1px solid #242833;
-  border-radius: 10px;
-  color: #ffffff;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-input);
+  color: var(--text-main);
   font-size: 14px;
   outline: none;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .item-lancamento:focus {
-  border-color: #3b82f6; /* Destaque azul ao selecionar o campo */
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
-/* --- BOTÕES --- */
-.acoes-form-container {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  margin-top: 10px;
+.item-lancamento option,
+.item-lancamento optgroup {
+  background-color: var(--bg-card);
+  color: var(--text-main);
 }
 
-.btn-salvar {
-  width: 100%;
-  height: 52px;
-  border: none;
-  border-radius: 10px;
-  background: #3b82f6;
-  color: white;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.2s, background 0.2s;
-}
-
-.btn-salvar:hover {
-  background: #2563eb;
-  transform: translateY(-2px);
-}
-
-.btn-deletar {
-  width: 100%;
-  height: 48px;
-  background-color: #451a1a; 
-  border: 1px solid #7f1d1d;
-  border-radius: 10px;
-  color: #f87171;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-deletar:hover {
-  background-color: #7f1d1d;
-  color: #ffffff;
-  transform: translateY(-2px);
-}
-
-/* --- LINKS E AVISOS --- */
-.link-voltar {
-  text-align: center;
-  color: #9ca3af;
-  text-decoration: none;
-  font-size: 14px;
-  display: block;
-  margin-top: 10px;
-  transition: color 0.2s;
-}
-
-.link-voltar:hover {
-  color: #ffffff;
-}
-
-.mensagem-erro {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-  padding: 12px;
-  border-radius: 8px;
-  text-align: center;
-  margin-top: 15px;
-}
-
-/* Para monitores menores e notebooks */
-@media (max-width: 1020px) {
-  .lancamento-page{
-    padding: 20px 10px;
-  }
-
-  .lancamento-card {
-    padding: 30px 40px;
-    max-width: 95%;
-  }
-
-  .lancamento-header {
-    margin-bottom: 20px;
-  }
-  
-}
-
-/* No seu CSS de formulário */
 .input-form[type="datetime-local"] {
   padding-right: 10px;
   font-family: inherit;
 }
 
-/* Ajustes específicos para telas menores, como celulares */
-@media (max-width: 768px) {
+.grid-form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
 
+/* =========================================
+   5. BOTÕES E AÇÕES
+   ========================================= */
+.acoes-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.btn-salvar,
+.btn-deletar {
+  width: 100%;
+  height: 50px;
+  border-radius: var(--radius-input);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-salvar {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+}
+
+.btn-salvar:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+}
+
+.btn-deletar {
+  background: transparent;
+  border: 1px solid var(--danger-border);
+  color: var(--danger-text);
+}
+
+.btn-deletar:hover {
+  background: var(--danger-bg);
+  border-color: var(--danger-text);
+  transform: translateY(-2px);
+}
+
+.link-voltar {
+  text-align: center;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 14px;
+  padding: 8px;
+  transition: color 0.2s ease;
+}
+
+.link-voltar:hover {
+  color: var(--text-main);
+}
+
+.mensagem-erro {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  padding: 12px;
+  border-radius: var(--radius-input);
+  text-align: center;
+  font-size: 14px;
+}
+
+/* =========================================
+   6. RESPONSIVIDADE (TABLET E DESKTOP)
+   ========================================= */
+@media (max-width: 600px) {
   .lancamento-page {
-    display: block !important;
-
-    height: 100vh;
-    height: 100dvh;
-
-    overflow-y: auto !important;
-    overflow-x: hidden;
-
-    -webkit-overflow-scrolling: touch;
-
-    padding: 20px 14px 120px;
-  }
-
-  .lancamento-card {
-    width: 100% !important;
-
-    max-width: 100%;
-
-    padding: 28px 20px;
-
-    margin-bottom: 120px;
-
-    border-radius: 18px;
-
-    overflow-x: hidden;
-  }
-
-  /* Organiza os campos em coluna no mobile */
-  .grid-form {
-    display: flex;
-    flex-direction: column;
-
-    gap: 18px;
-
-    width: 100%;
-  }
-
-  /* Mantém os campos proporcionais à largura do card */
-  .detalhes-wrapper,
-  .lancamentos-box,
-  .item-lancamento,
-  .btn-salvar,
-  .btn-deletar {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-  }
-
-  /* Inputs mais confortáveis para toque */
-  .item-lancamento {
-    height: 54px;
-
-    font-size: 15px;
-
-    padding: 0 18px;
-  }
-
-  /* Botões com visual mais equilibrado no mobile */
-  .btn-salvar,
-  .btn-deletar {
-    height: 54px;
-
-    font-size: 15px;
-  }
-
-  /* Ajusta respiro do cabeçalho */
-  .lancamento-header {
-    margin-bottom: 25px;
+    padding: 16px 8px 140px;
   }
 
   .lancamento-header h1 {
-    font-size: 24px;
+    font-size: 22px;
   }
 
-  .descricao-header {
-    font-size: 14px;
-    line-height: 1.5;
+  .lancamento-card {
+    padding: 20px 16px;
+  }
+
+  .item-lancamento {
+    height: 54px;
+    font-size: 15px;
+  }
+
+  .btn-salvar,
+  .btn-deletar {
+    height: 54px;
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 600px) {
+  .lancamento-page {
+    padding: 32px 20px 80px;
+  }
+
+  .lancamento-card {
+    padding: 35px 40px;
+  }
+
+  .lancamento-header h1 {
+    font-size: 26px;
+  }
+
+  .grid-form {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .acoes-form-container {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-salvar {
+    flex: 1;
+  }
+
+  .btn-deletar {
+    width: auto;
+    padding: 0 24px;
+  }
+
+  .link-voltar {
+    width: 100%;
+    margin-top: 5px;
   }
 }

@@ -138,7 +138,6 @@ function Categoria() {
 
   return (
     <div className="categoria-page">
-      <div className="dashboard-content">
         <div className="categoria-card">
           <header className="categoria-header">
             {/* Alternância de títulos baseada no estado de edição */}
@@ -243,7 +242,12 @@ function Categoria() {
           {/* O bloco de listagem inferior fica oculto durante a edição para focar a atenção do usuário no formulário */}
           {modo === "criar" && (
             <div className="listagem-categorias-section">
-              <h2>Categorias Ativas</h2>
+              <h2>
+                Categorias Ativas
+                <span className="listagem-contador">
+                  {categorias.length} {categorias.length === 1 ? "categoria" : "categorias"}
+                </span>
+              </h2>
               <div className="categorias-grid-lista">
                 {categorias.length === 0 ? (
                   <p className="txt-vazio">Nenhuma categoria encontrada no banco de dados.</p>
@@ -291,7 +295,6 @@ function Categoria() {
             </div>
           )}
         </div>
-      </div>
     </div>
   );
 }

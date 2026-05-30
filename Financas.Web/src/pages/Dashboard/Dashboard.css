@@ -8,11 +8,13 @@ body {
 
 /* Estrutura principal da página com fundo em gradiente */
 .dashboard-page {
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
   background: linear-gradient(180deg, #0f1115 0%, #151922 100%);
   color: #ffffff;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 /* Cabeçalho fixo com efeito de desfoque (Glassmorphism) */
@@ -24,8 +26,7 @@ body {
   border-bottom: 1px solid #242833;
   background-color: rgba(20, 22, 28, 0.95);
   backdrop-filter: blur(8px);
-  position: sticky;
-  top: 0;
+  flex-shrink: 0;
   z-index: 100;
 }
 
@@ -79,17 +80,16 @@ body {
 }
 
 .dashboard-content {
+  flex: 1;
+  min-height: 0;
   width: 100%;
   max-width: 1600px;
-
   margin: 0 auto;
-
   padding: 25px;
-
+  overflow-y: auto;
   overflow-x: hidden;
-  overflow-y: visible;
-
-  flex: 1;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
 }
 
 /* Layout em grade para os cards */
@@ -162,8 +162,6 @@ body {
   border-color: #3b82f644;
 }
 
-/* --- ESTILO DOS BOTÕES (IGUAL À IMAGEM) --- */
-
 .acoes-valor-wrapper {
   display: flex;
   align-items: center;
@@ -189,7 +187,6 @@ body {
   color: white;
 }
 
-/* Botão Editar (Azul/Cinza escuro conforme a imagem) */
 .btn-acao-tabela.editar {
   background-color: #374151; /* Cor de fundo sóbria */
   border: 1px solid #4b5563;
@@ -225,12 +222,38 @@ body {
 .info-item small { width: 55px; color: #888; font-weight: 500; }
 .origem-txt { color: #ffffff; margin-left: 5px; font-size: 13px; }
 
+.desc-txt {
+  color: #ffffff;
+  font-size: 15px;
+}
+
+.empty-msg {
+  color: #9ca3af;
+  font-size: 14px;
+  text-align: center;
+  padding: 24px 0;
+}
+
 /* Responsividade */
 @media (max-width: 1024px) { .resumo-cards { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 768px) {
-  .resumo-cards { grid-template-columns: 1fr; }
-  .item-transacao { flex-direction: column; gap: 15px; align-items: flex-start; }
+  .resumo-cards { grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; }
+  .card { padding: 18px; }
+  .card p { font-size: 1.5rem; }
+  .ultimas-transacoes { padding: 20px 16px; }
+  .item-transacao { flex-direction: column; gap: 15px; align-items: flex-start; padding: 16px; }
+  .info-esquerda { flex-direction: column; align-items: flex-start; width: 100%; gap: 12px; }
+  .data-wrapper {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    border-right: none;
+    padding-right: 0;
+    margin-right: 0;
+    min-width: 0;
+  }
   .acoes-valor-wrapper { width: 100%; justify-content: space-between; }
+  .dashboard-content { padding: 16px 12px 120px; }
 }
 
 /* Ajuste específico para o card que contém o filtro */
@@ -278,26 +301,74 @@ body {
 
 @media (max-width: 600px) {
   .dashboard-header {
-    flex-direction: column; /* Coloca Logo no topo, menu embaixo */
-    padding: 15px;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px 12px 10px;
+    gap: 10px;
+  }
+
+  .logo-area {
+    text-align: center;
+  }
+
+  .logo-area h1 {
+    font-size: 22px;
   }
 
   .menu-top {
-    flex-direction: row; /* Mantém os itens um ao lado do outro */
-    flex-wrap: wrap;     /* Se não couber, joga o item para a linha de baixo */
-    justify-content: center;
-    gap: 15px;           /* Espaçamento entre os links */
-    margin-top: 15px;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-top: 0;
     width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+
+  .menu-top::-webkit-scrollbar {
+    display: none;
   }
 
   .menu-top a {
-    font-size: 13px;     /* Reduz um pouco o tamanho para caber tudo */
+    font-size: 13px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid #242833;
   }
 
   .btn-logout {
-    margin-left: 0;      /* Remove o espaço lateral do botão */
-    width: 100%;         /* Botão ocupa a largura total abaixo do menu */
+    margin-left: 0;
+    width: auto;
+    flex-shrink: 0;
+    margin-top: 0;
+    padding: 6px 14px;
+    font-size: 13px;
+  }
+
+  .select-filtro-conta {
+    max-width: 100%;
+    width: 100%;
     margin-top: 10px;
+  }
+
+  .card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .card h3 {
+    width: 100%;
+  }
+
+  .btn-acao-tabela {
+    padding: 8px 14px;
+    font-size: 13px;
   }
 }

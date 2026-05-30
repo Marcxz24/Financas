@@ -1,240 +1,256 @@
-/* Reset global para normalizar o box-model e remover margens padrão */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box; /* Previne quebras de layout por soma de padding/border */
+/* =========================================
+   1. VARIÁVEIS DO TEMA (ESCOPO LOCAL)
+   ========================================= */
+.contas-container {
+  --bg-page: transparent;
+  --bg-card: #1a1f29;
+  --bg-input: #12161f;
+  --text-main: #ffffff;
+  --text-muted: #9ca3af;
+  --border-color: #242833;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --danger-text: #ef4444;
+  --danger-bg: rgba(239, 68, 68, 0.1);
+  --danger-border: rgba(239, 68, 68, 0.2);
+  --success-text: #10b981;
+  --success-bg: rgba(16, 185, 129, 0.1);
+  --success-border: rgba(16, 185, 129, 0.2);
+  --radius-card: 16px;
+  --radius-input: 10px;
 }
 
-html,
-body {
-  overflow-x: hidden;
-}
-
-/* Container principal: centraliza o conteúdo e garante altura mínima de tela menos o header */
+/* =========================================
+   2. ESTRUTURA BASE (MOBILE-FIRST)
+   ========================================= */
 .contas-container {
   width: 100%;
-  min-height: calc(100vh - 72px);
-
+  background-color: var(--bg-page);
+  padding: 20px 15px 120px;
   display: flex;
   flex-direction: column;
   align-items: center;
-
-  background: #0f1115;
-
-  overflow-x: hidden;
-
-  padding: 40px 20px 30px;
+  font-family: inherit;
+  box-sizing: border-box;
 }
 
-/* Cabeçalho da seção com largura contida */
 .contas-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 24px;
   width: 100%;
-  max-width: 1100px;
+  max-width: 750px;
 }
 
 .contas-header h1 {
-  color: #ffffff;
-  font-size: 26px;
+  color: var(--text-main);
+  font-size: 24px;
   font-weight: 700;
   margin-bottom: 8px;
 }
 
 .contas-header p {
-  color: #9ca3af;
+  color: var(--text-muted);
   font-size: 14px;
+  line-height: 1.4;
 }
 
-/* Card principal do formulário: estilização com bordas laterais para destaque */
 .form-card {
-  box-sizing: border-box;
-
   width: 100%;
-  max-width: 1100px;
-
-  margin: 0 auto;
-
-  border-radius: 16px;
-
-  border-left: 1px solid #252a35;
-  border-right: 1px solid #252a35;
-  border-top: none;
-  border-bottom: none;
-
-  background: #1a1f29;
-
-  transition: all 0.3s ease;
-
+  max-width: 750px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  padding: 24px 20px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-
-  padding: 40px;
-
-  overflow: visible;
+  gap: 25px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Microinteração de elevação ao passar o mouse */
 .form-card:hover {
-  transform: translateY(-5px) scale(1.01);
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8);
-  border-color: #3b82f6;
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
 }
 
-/* Alinhamento bicolunar para inputs; quebra automático em telas menores que 300px via Grid */
+/* =========================================
+   3. FORMULÁRIO E INPUTS
+   ========================================= */
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
+  grid-template-columns: 1fr;
+  gap: 20px;
 }
 
 .input-group label {
   font-size: 14px;
-  color: #9ca3af;
-  margin-bottom: 10px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
   display: block;
 }
 
-/* Padronização de inputs e selects para tema dark */
 .input-group input,
 .input-group select {
   width: 100%;
-  height: 52px;
+  height: 50px;
   padding: 0 16px;
-  background: #12161f;
-  border: 1px solid #242833;
-  border-radius: 10px;
-  color: #ffffff;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-input);
+  color: var(--text-main);
   font-size: 14px;
   outline: none;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Efeito visual de foco (glow) */
 .input-group input:focus,
 .input-group select:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); /* Efeito glow padrão da UI */
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
-/* Evita que o elemento option nativo herde fundo claro do SO em modo dark */
 .input-group select option {
-  background-color: #1a1f29;
-  color: #fff;
+  background-color: var(--bg-card);
+  color: var(--text-main);
 }
 
-/* Estilização para campos desabilitados */
 .input-group input:disabled {
-  background: #1a1f29;
+  background: var(--bg-card);
   color: #6b7280;
   cursor: not-allowed;
-  border-color: #242833;
+  border-color: var(--border-color);
 }
 
 .input-group small {
   display: block;
-  color: #9ca3af;
+  color: var(--text-muted);
   font-size: 12px;
   margin-top: 6px;
 }
 
-/* Área de botões com alinhamento vertical */
+/* =========================================
+   4. BOTÕES E AÇÕES
+   ========================================= */
 .form-actions {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  margin-top: 30px;
+  gap: 12px;
+  margin-top: 10px;
 }
 
-/* Botão de ação principal (Salvar) */
-.btn-salvar {
+.btn-salvar,
+.btn-cancelar {
   width: 100%;
-  height: 52px;
-  border: none;
-  border-radius: 10px;
-  background: #3b82f6;
-  color: white;
-  font-size: 16px;
+  height: 50px;
+  border-radius: var(--radius-input);
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s, background 0.2s;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-salvar {
+  background: var(--primary);
+  color: #fff;
+  border: none;
 }
 
 .btn-salvar:hover {
-  background: #2563eb;
+  background: var(--primary-hover);
   transform: translateY(-2px);
 }
 
-/* Botão de ação secundária (Cancelar) */
 .btn-cancelar {
-  width: 100%;
-  height: 48px;
-  background-color: transparent;
+  background: transparent;
   border: 1px solid #4b5563;
-  border-radius: 10px;
-  color: #9ca3af;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+  color: var(--text-muted);
 }
 
 .btn-cancelar:hover {
-  background-color: #374151;
-  color: #ffffff;
+  background: #374151;
+  color: var(--text-main);
   transform: translateY(-2px);
 }
 
-/* Blocos de Alerta para feedback de sistema */
 .alerta {
   width: 100%;
   max-width: 750px;
-  padding: 14px;
-  border-radius: 8px;
+  padding: 12px;
+  border-radius: var(--radius-input);
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   font-weight: 600;
   font-size: 14px;
 }
 
 .alerta-erro {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  border: 1px solid var(--danger-border);
 }
 
 .alerta-sucesso {
-  background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  background: var(--success-bg);
+  color: var(--success-text);
+  border: 1px solid var(--success-border);
 }
 
-/* Seção de listagem de contas */
-.contas-grid {
+/* =========================================
+   5. LISTAGEM DE CONTAS
+   ========================================= */
+.contas-listagem-section {
   width: 100%;
-  max-width: 1100px;
+  max-width: 750px;
+  margin-top: 25px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 25px;
+}
 
-  margin-top: 40px;
+.contas-listagem-section h2 {
+  color: var(--text-main);
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
 
+.listagem-contador {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  padding: 4px 12px;
+  white-space: nowrap;
+}
+
+.contas-grid {
   display: flex;
   flex-direction: column;
-
   gap: 12px;
 }
 
 .conta-card {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #12161f;
-  border: 1px solid #242833;
-  border-radius: 10px;
-  padding: 16px 20px;
-  transition: border-color 0.2s;
+  flex-direction: column;
+  gap: 15px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-input);
+  padding: 16px;
+  transition: border-color 0.2s ease;
 }
 
 .conta-card:hover {
-  border-color: #3b82f6;
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .conta-info {
@@ -245,35 +261,35 @@ body {
 }
 
 .conta-info h3 {
-  color: #ffffff;
-  font-size: 16px;
+  color: var(--text-main);
+  font-size: 15px;
   font-weight: 600;
 }
 
-/* Badge do Tipo de Conta com estilização técnica */
 .conta-info span {
   font-size: 11px;
   font-weight: 700;
-  padding: 4px 10px;
+  padding: 6px 12px;
   border-radius: 6px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  background-color: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--primary);
   border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 .conta-saldo {
-  color: #10b981;
+  color: var(--success-text);
   font-size: 16px;
   font-weight: 700;
   margin-top: 4px;
 }
 
-/* Ações dos itens da lista (Editar/Excluir) */
 .conta-actions {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
   gap: 15px;
 }
 
@@ -282,29 +298,42 @@ body {
   border: none;
   cursor: pointer;
   font-size: 18px;
-  transition: opacity 0.2s, transform 0.2s;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .conta-actions button:hover {
-  opacity: 0.7;
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .conta-actions button[title="Editar"] {
-  color: #3b82f6;
+  color: var(--text-muted);
+}
+
+.conta-actions button[title="Editar"]:hover {
+  color: var(--text-main);
 }
 
 .conta-actions button[title="Excluir"] {
-  color: #ef4444;
+  color: var(--danger-text);
 }
 
-/* Overlay Global para estados de carregamento */
+.txt-vazio {
+  color: var(--text-muted);
+  font-size: 14px;
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* =========================================
+   6. ESTADOS DE CARREGAMENTO
+   ========================================= */
 .loading-center {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  background: #0f1115;
+  width: 100%;
+  min-height: 240px;
+  background: transparent;
 }
 
 .global-overlay {
@@ -322,18 +351,17 @@ body {
 }
 
 .global-overlay p {
-  color: #3b82f6;
+  color: var(--primary);
   margin-top: 15px;
   font-weight: 600;
   font-size: 14px;
 }
 
-/* Animação do Spinner */
 .spinner {
   width: 45px;
   height: 45px;
-  border: 4px solid #242833;
-  border-top-color: #3b82f6;
+  border: 4px solid var(--border-color);
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -342,42 +370,67 @@ body {
   to { transform: rotate(360deg); }
 }
 
-/* Media Queries para responsividade em telas menores */
-@media (max-width: 768px) {
-
+/* =========================================
+   7. RESPONSIVIDADE (TABLET E DESKTOP)
+   ========================================= */
+@media (max-width: 600px) {
   .contas-container {
-    display: block !important;
+    padding: 16px 8px 140px;
+  }
 
-    height: 100vh;
-    height: 100dvh;
-
-    overflow-y: auto !important;
-    overflow-x: hidden;
-
-    -webkit-overflow-scrolling: touch;
-
-    padding: 20px 10px 120px;
+  .contas-header h1 {
+    font-size: 22px;
   }
 
   .form-card {
-    width: 100%;
-    max-width: 100%;
-
-    padding: 25px 15px;
-
-    overflow-x: hidden;
-
-    margin-bottom: 30px;
+    padding: 20px 16px;
   }
 
-  .contas-grid {
-    width: 100%;
-    max-width: 100%;
+  .conta-card {
+    padding: 14px;
+  }
+}
 
-    margin-top: 25px;
+@media (min-width: 600px) {
+  .contas-container {
+    padding: 32px 20px 80px;
+  }
 
-    gap: 15px;
+  .form-card {
+    padding: 35px 40px;
+  }
 
-    padding-bottom: 120px;
+  .contas-header h1 {
+    font-size: 26px;
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .form-actions {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-salvar {
+    flex: 1;
+  }
+
+  .btn-cancelar {
+    width: auto;
+    padding: 0 24px;
+  }
+
+  .conta-card {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .conta-actions {
+    width: auto;
+    justify-content: flex-end;
   }
 }

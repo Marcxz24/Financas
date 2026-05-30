@@ -130,7 +130,7 @@ function ContaBancaria() {
     });
 
     setModoEdicao(true);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    document.querySelector(".dashboard-content")?.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const resetarFormulario = () => {
@@ -200,22 +200,34 @@ function ContaBancaria() {
       </section>
 
       {/* Listagem das contas cadastradas */}
-      <section className="contas-grid">
-        {contas.map((conta) => (
-          <div key={conta.id} className="conta-card">
-            <div className="conta-info">
-              <h3>{conta.nome}</h3>
-              <span>{conta.tipo}</span>
-              <div className="conta-saldo">
-                {Number(conta.saldo).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+      <section className="contas-listagem-section">
+        <h2>
+          Contas Cadastradas
+          <span className="listagem-contador">
+            {contas.length} {contas.length === 1 ? "conta" : "contas"}
+          </span>
+        </h2>
+        <div className="contas-grid">
+          {contas.length === 0 ? (
+            <p className="txt-vazio">Nenhuma conta bancária cadastrada.</p>
+          ) : (
+            contas.map((conta) => (
+              <div key={conta.id} className="conta-card">
+                <div className="conta-info">
+                  <h3>{conta.nome}</h3>
+                  <span>{conta.tipo}</span>
+                  <div className="conta-saldo">
+                    {Number(conta.saldo).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                  </div>
+                </div>
+                <div className="conta-actions">
+                  <button onClick={() => prepararEdicao(conta)} title="Editar"><i className="bi bi-pencil-square"></i></button>
+                  <button onClick={() => handleExcluir(conta.id)} title="Excluir"><i className="bi bi-trash"></i></button>
+                </div>
               </div>
-            </div>
-            <div className="conta-actions">
-              <button onClick={() => prepararEdicao(conta)} title="Editar"><i className="bi bi-pencil"></i></button>
-              <button onClick={() => handleExcluir(conta.id)} title="Excluir"><i className="bi bi-trash"></i></button>
-            </div>
-          </div>
-        ))}
+            ))
+          )}
+        </div>
       </section>
     </div>
   );

@@ -1,30 +1,23 @@
-/* Configura o comportamento da página de perfil no mobile */
+/* Container principal — scroll único via dashboard-content */
 .perfil-page-container {
-  /* Mantém o layout simples para evitar conflitos de scroll */
-  display: block !important;
-  /* Altura padrão da viewport */
-  height: 100vh;
-  /* Corrige problemas da barra do navegador em celulares modernos */
-  height: 100dvh;
-  /* Mantém a rolagem vertical ativa */
-  overflow-y: auto !important;
-  /* Remove rolagem lateral */
-  overflow-x: hidden;
-  /* Suaviza a rolagem no iOS */
-  -webkit-overflow-scrolling: touch;
-  /* Espaço inferior para evitar corte dos botões */
-  padding-bottom: 120px !important;
+  width: 100%;
+  padding: 20px 15px 120px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  box-sizing: border-box;
 }
 
 /* Card central escuro que agrupa todas as informações do perfil do usuário */
 .perfil-main-card {
-  background-color: #1e1e1e;
-  border: 1px solid #2d2d2d;
-  border-radius: 12px;
+  background-color: #1a1f29;
+  border: 1px solid #242833;
+  border-radius: 16px;
   width: 100%;
-  max-width: 550px;
+  max-width: 750px;
+  margin: 0 auto;
   padding: 2.5rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
 }
 
 /* Cabeçalho do card, posicionando o avatar, nome e badge de status verticalmente */
@@ -197,7 +190,8 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 80px);
+  width: 100%;
+  min-height: 240px;
   color: #aaaaaa;
   gap: 1rem;
 }
@@ -227,24 +221,14 @@
 
 /* Ajustes para dispositivos móveis */
 @media (max-width: 768px) {
-  /* Permite que o container acompanhe o crescimento do conteúdo */
   .perfil-page-container {
-    display: block !important;
-    height: 100vh;
-    height: 100dvh;
-    overflow-y: auto !important;
-    overflow-x: hidden;
-    padding: 20px 10px 120px;
-    -webkit-overflow-scrolling: touch;
+    padding: 16px 8px 140px;
   }
 
-  /* Reduz o espaçamento interno para melhor aproveitamento no mobile */
   .perfil-main-card {
     width: 100%;
     max-width: 100%;
     padding: 25px 15px;
-    overflow-x: hidden;
-    margin-bottom: 80px;
   }
 
   /* Mantém os botões empilhados em telas menores */

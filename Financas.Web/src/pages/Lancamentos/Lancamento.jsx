@@ -120,7 +120,6 @@ function Lancamento() {
 
   return (
     <div className="lancamento-page">
-      <div className="dashboard-content">
         <div className="lancamento-card">
           <header className="lancamento-header">
             <h1>{modo === "criar" ? "Novo Lançamento" : "Gerenciar Lançamento"}</h1>
@@ -247,7 +246,6 @@ function Lancamento() {
             {erro && <p className="mensagem-erro">{erro}</p>}
           </form>
         </div>
-      </div>
     </div>
   );
 }
