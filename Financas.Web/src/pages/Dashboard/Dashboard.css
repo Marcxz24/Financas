@@ -6,11 +6,15 @@ body {
   font-family: 'Inter', Arial, Helvetica, sans-serif;
 }
 
+html,
+body {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 /* Estrutura principal da página com fundo em gradiente */
 .dashboard-page {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
   background: linear-gradient(180deg, #0f1115 0%, #151922 100%);
   color: #ffffff;
 }
@@ -79,13 +83,9 @@ body {
 }
 
 .dashboard-content {
-  overflow-y: auto;
+  width: 100%;
   overflow-x: hidden;
-
-  /* Centraliza melhor o conteúdo */
   padding: 25px;
-
-  /* Evita largura exagerada em monitores grandes */
   max-width: 1600px;
   margin: 0 auto;
 }
