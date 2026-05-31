@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import "./Dashboard.css";
@@ -19,26 +19,37 @@ function ResumoFinanceiro() {
   const [contasBancarias, setContasBancarias] = useState([]);
   const [contaFiltroId, setContaFiltroId] = useState(0);
 
+  const [loadingResumo, setLoadingResumo] = useState(false);
+
   // 1. Função estabilizada para carregar dados (pode ser chamada pelo useEffect ou pelos botões)
-  const carregarDados = useCallback(async () => {
-    try {
-      const url =
-        contaFiltroId > 0
-          ? `/dashboard/resumo-mensal?contaId=${contaFiltroId}`
-          : "/dashboard/resumo-mensal";
+  useEffect(() => {
+    const carregar = async () => {
+      setLoadingResumo(true);
 
-      const response = await api.get(url);
-      const dados = response.data;
+      try {
+        const url =
+          contaFiltroId && contaFiltroId > 0
+            ? `/dashboard/resumo-mensal?contaBancariaId=${contaFiltroId}`
+            : "/dashboard/resumo-mensal";
 
-      setTransacoes(dados.ultimosLancamentos || []);
-      setResumo({
-        totalReceitas: dados.totalReceitas || 0,
-        totalDespesas: dados.totalDespesas || 0,
-        saldoBancarioTotal: dados.saldoBancarioTotal || 0,
-      });
-    } catch (error) {
-      console.error("Erro ao carregar dados:", error);
-    }
+        const response = await api.get(url);
+        const dados = response.data;
+
+        setTransacoes(dados.ultimosLancamentos || []);
+
+        setResumo({
+          totalReceitas: dados.totalReceitas || 0,
+          totalDespesas: dados.totalDespesas || 0,
+          saldoBancarioTotal: dados.saldoBancarioTotal || 0,
+        });
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoadingResumo(false);
+      }
+    };
+
+    carregar();
   }, [contaFiltroId]);
 
   useEffect(() => {
@@ -52,25 +63,9 @@ function ResumoFinanceiro() {
         console.error("Erro ao carregar contas para o filtro:", error);
       }
     };
+
     carregarContasDoUsuario();
   }, []);
-
-  // 2. useEffect com Cleanup para evitar erros de renderização em cascata ou vazamento de memória
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchData = async () => {
-      if (isMounted) {
-        await carregarDados();
-      }
-    };
-
-    fetchData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [carregarDados]);
 
   return (
     <>
@@ -85,7 +80,7 @@ function ResumoFinanceiro() {
             className="select-filtro-conta"
           >
             <option value={0} style={{ background: "#1a1f29" }}>
-              Conta Principal(Padrão)
+              Todas as Contas
             </option>
             {contasBancarias.map((conta) => (
               <option
@@ -100,9 +95,15 @@ function ResumoFinanceiro() {
 
           <p>
             R${" "}
-            {resumo.saldoBancarioTotal.toLocaleString("pt-BR", {
-              minimumFractionDigits: 2,
-            })}
+            {loadingResumo ? (
+              <span style={{ opacity: 0.6, fontSize: "0.9rem" }}>
+                Atualizando dados...
+              </span>
+            ) : (
+              resumo.saldoBancarioTotal.toLocaleString("pt-BR", {
+                minimumFractionDigits: 2,
+              })
+            )}
           </p>
         </div>
 

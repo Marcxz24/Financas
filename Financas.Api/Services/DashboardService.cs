@@ -18,17 +18,6 @@ namespace Financas.Api.Services
 
         public async Task<DashboardResumoResponseDto> GetResumoMensalAsync(int mes, int ano, int usuarioId, int? contaBancariaId = null)
         {
-            if (!contaBancariaId.HasValue || contaBancariaId.Value == 0)
-            {
-                var primeiraConta = await _financasDbContext.ContasBancarias
-                    .Where(c => c.UsuarioId == usuarioId)
-                    .OrderBy(c => c.Id)
-                    .FirstOrDefaultAsync();
-
-                if (primeiraConta != null)
-                    contaBancariaId = primeiraConta.Id;
-            }
-
             // Filtra os lançamentos base por usuário e período (mês/ano) para reutilização na lógica abaixo
             var lancamento = _financasDbContext.Lancamentos
                 .Where(l => l.UsuarioId == usuarioId &&
@@ -45,14 +34,25 @@ namespace Financas.Api.Services
                 .Where(l => l.Tipo == TipoLancamento.Despesa)
                 .SumAsync(l => l.Valor);
 
-            decimal saldoBancarioTotal = 0;
-            if (contaBancariaId.HasValue)
+            // Saldo bancário (regra explícita e previsível)
+            decimal saldoBancarioTotal;
+
+            // Se um ID de conta bancária for fornecido, calcula o saldo apenas para essa conta; caso contrário, soma o saldo de todas as contas do usuário
+            if (contaBancariaId.HasValue && contaBancariaId.Value > 0)
             {
-                // Calcula o saldo bancário total para a conta selecionada
+                // Uma única conta
                 saldoBancarioTotal = await _financasDbContext.ContasBancarias
-                    .Where(c => c.Id == contaBancariaId.Value && c.UsuarioId == usuarioId)
+                    .Where(c => c.Id == contaBancariaId.Value &&
+                                c.UsuarioId == usuarioId)
                     .Select(c => c.Saldo)
                     .FirstOrDefaultAsync();
+            }
+            else
+            {
+                // Todas as contas do usuário
+                saldoBancarioTotal = await _financasDbContext.ContasBancarias
+                    .Where(c => c.UsuarioId == usuarioId)
+                    .SumAsync(c => c.Saldo);
             }
 
             // Busca os 5 lançamentos mais recentes, projetando para o DTO de resumo

@@ -25,7 +25,7 @@ namespace Financas.Api.Controllers
         [Authorize]
         // Define que este é um método GET acessível via 'api/dashboard/resumo-mensal'
         [HttpGet("resumo-mensal")]
-        public async Task<IActionResult> GetResumoMensal([FromQuery] int? mes, [FromQuery] int? ano)
+        public async Task<IActionResult> GetResumoMensal([FromQuery] int? mes, [FromQuery] int? ano, [FromQuery] int? contaBancariaId)
         {
             // Extrai o ID do usuário autenticado a partir das Claims do Token JWT
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -42,7 +42,7 @@ namespace Financas.Api.Controllers
             int anoFiltro = ano ?? DateTime.Now.Year;
 
             // Chama o serviço para buscar os dados financeiros consolidados do período e usuário
-            var resumo = await _dashboardService.GetResumoMensalAsync(mesFiltro, anoFiltro, usuarioId);
+            var resumo = await _dashboardService.GetResumoMensalAsync(mesFiltro, anoFiltro, usuarioId, contaBancariaId);
 
             // Retorna o resumo financeiro com status 200 OK
             return Ok(resumo);
