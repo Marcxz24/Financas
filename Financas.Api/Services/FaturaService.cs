@@ -348,8 +348,13 @@ namespace Financas.Api.Services
                     f.Status == FaturaStatus.Aberta &&
                     f.Id != fatura.Id);
 
-                // Atualiza o status da fatura atual para Fechada (bloqueando novos lançamentos nela)
-                fatura.Status = FaturaStatus.Fechada;
+                // Calcula saldo pendente
+                var saldoPendente = fatura.ValorTotal - fatura.ValorPago;
+
+                // Define o status correto
+                fatura.Status = saldoPendente <= 0
+                    ? FaturaStatus.Paga
+                    : FaturaStatus.Fechada;
 
                 // Lógica de projeção para o próximo mês
                 var novoInicio = fatura.DataFechamento.AddDays(1);
