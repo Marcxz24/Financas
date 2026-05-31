@@ -405,6 +405,7 @@ namespace Financas.Api.Services
             // É necessário buscar o objeto completo para que o EF saiba o que remover
             var lancamento = await _financasDbContext.Lancamentos
                 .Include(l => l.ContaBancaria)
+                .Include(l => l.Fatura)
                 .FirstOrDefaultAsync(l => l.Id == lancamentoId);
 
             // 2. Verificação de existência
@@ -418,12 +419,21 @@ namespace Financas.Api.Services
             if (lancamento.UsuarioId != usuarioId)
                 throw new UnauthorizedAccessException("Não é possível excluir um lançamento de outro usuário.");
 
+            // 4. Regra de Negócio Crítica: Não permite excluir um lançamento que esteja vinculado a uma fatura fechada ou paga, pois isso comprometeria a integridade financeira da fatura.
+            // A verificação é feita antes de qualquer alteração para garantir que o lançamento permaneça intacto caso a operação seja proibida.
+            // O carregamento antecipado (Include) da fatura permite acessar o status da fatura diretamente na entidade do lançamento, evitando consultas adicionais ao banco de dados.
+            if (lancamento.Fatura != null && (lancamento.Fatura.Status == FaturaStatus.Fechada || lancamento.Fatura.Status == FaturaStatus.Paga))
+                throw new InvalidOperationException("Não é permitido excluir um lançamento vinculado a uma fatura fechada ou paga.");
+
             using var transaction = await _financasDbContext.Database.BeginTransactionAsync(); // Inicia uma transação para garantir a atomicidade das operações
 
             try
             {
                 if (lancamento.ContaBancaria != null)
                     EstornarValor(lancamento.ContaBancaria, lancamento.Valor, lancamento.Tipo); // Reverte o valor para restaurar o saldo da conta bancária antes de excluir o lançamento
+
+                if (lancamento.Fatura != null)
+                    _faturaService.EstornarValorFatura(lancamento.Fatura, lancamento.Valor); // Reverte o valor para restaurar o total da fatura antes de excluir o lançamento
 
                 // 4. Marcação para remoção:
                 // O método .Remove() avisa ao Entity Framework que este objeto deve ser deletado
