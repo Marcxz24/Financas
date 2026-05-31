@@ -1,0 +1,250 @@
+/* =========================================
+   1. VARIÁVEIS DO TEMA (igual Categoria)
+   ========================================= */
+.cartao-page {
+  --bg-page: transparent;
+  --bg-card: #1a1f29;
+  --bg-input: #12161f;
+  --text-main: #ffffff;
+  --text-muted: #9ca3af;
+  --border-color: #242833;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --danger-text: #ef4444;
+  --danger-bg: rgba(239, 68, 68, 0.1);
+  --danger-border: rgba(239, 68, 68, 0.2);
+  --radius-card: 16px;
+  --radius-input: 10px;
+}
+
+/* =========================================
+   2. ESTRUTURA BASE (MOBILE FIRST)
+   ========================================= */
+.cartao-page {
+  width: 100%;
+  background-color: var(--bg-page);
+  padding: 20px 15px 120px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.cartao-card {
+  width: 100%;
+  max-width: 750px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* =========================================
+   3. HEADER
+   ========================================= */
+.cartao-header {
+  text-align: center;
+}
+
+.cartao-header h1 {
+  color: var(--text-main);
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.descricao-header {
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* =========================================
+   4. FORMULÁRIO
+   ========================================= */
+.cartao-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.campo label {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* Inputs padronizados */
+.campo input,
+.campo select {
+  width: 100%;
+  height: 50px;
+  padding: 0 16px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-input);
+  color: var(--text-main);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.campo input:focus,
+.campo select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* GRID */
+.grid-form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+/* =========================================
+   5. BOTÕES
+   ========================================= */
+.acoes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.btn-salvar,
+.btn-deletar {
+  width: 100%;
+  height: 50px;
+  border-radius: var(--radius-input);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-salvar {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+}
+
+.btn-salvar:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+}
+
+.btn-deletar {
+  background: transparent;
+  border: 1px solid var(--danger-border);
+  color: var(--danger-text);
+}
+
+.btn-deletar:hover {
+  background: var(--danger-bg);
+  border-color: var(--danger-text);
+  transform: translateY(-2px);
+}
+
+/* =========================================
+   6. LISTAGEM
+   ========================================= */
+.lista {
+  border-top: 1px solid var(--border-color);
+  padding-top: 25px;
+}
+
+.lista h2 {
+  color: var(--text-main);
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.card-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-input);
+  padding: 16px;
+  margin-top: 12px;
+  color: var(--text-main);
+  transition: border-color 0.2s ease;
+}
+
+.card-item:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.card-item strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.card-item p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.vazio {
+  color: var(--text-muted);
+  font-size: 14px;
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* =========================================
+   7. RESPONSIVIDADE
+   ========================================= */
+@media (max-width: 600px) {
+  .cartao-page {
+    padding: 16px 8px 140px;
+  }
+
+  .cartao-header h1 {
+    font-size: 22px;
+  }
+
+  .card-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
+
+@media (min-width: 600px) {
+  .cartao-card {
+    padding: 35px 40px;
+  }
+
+  .grid-form {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .acoes {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .btn-salvar {
+    flex: 1;
+  }
+
+  .btn-deletar {
+    width: auto;
+    padding: 0 24px;
+  }
+}

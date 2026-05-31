@@ -13,6 +13,8 @@ import ResumoFinanceiro from "./pages/Dashboard/ResumoFinanceiro";
 import Lancamento from "./pages/Lancamentos/Lancamento";
 import Categoria from "./pages/Categoria/Categoria";
 import ContaBancaria from "./pages/ContaBancaria/ContaBancaria";
+import CartaoCredito from "./pages/CartaoCredito/CartaoCredito";
+import Fatura from "./pages/Faturas/Fatura";
 import Perfil from "./pages/Perfil/Perfil";
 
 // Componente de Middleware para proteção de rotas (Auth check)
@@ -46,10 +48,18 @@ function App() {
           <Route path="lancamento" element={<Lancamento />} />
           <Route path="lancamento/:id" element={<Lancamento />} />
 
+          {/* Rotas de Categoria: Listagem, criação e edição */}
           <Route path="categoria" element={<Categoria />} />
           <Route path="categoria/:id" element={<Categoria />} />
 
+          {/* Rotas de Conta Bancária: Listagem, criação e edição */}
           <Route path="contas-bancarias" element={<ContaBancaria />} />
+          
+          {/* Rotas de Cartão de Crédito: Listagem, criação e edição */}
+          <Route path="cartao-credito" element={<CartaoCredito />} />
+
+          <Route path="fatura" element={<Fatura />} />
+          
           <Route path="perfil" element={<Perfil />} />
         </Route>
 
