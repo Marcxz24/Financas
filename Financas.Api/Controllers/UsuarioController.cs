@@ -221,6 +221,28 @@ namespace Financas.Api.Controllers
             }
         }
 
+        [HttpPost("definir-senha")]
+        public async Task<ActionResult> DefinirSenha([FromBody] DefinirSenhaDTO dto)
+        {
+            try
+            {
+                var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (string.IsNullOrEmpty(userIdClaim))
+                    return Unauthorized(new { mensagem = "Usuário não autenticado." });
+
+                var usuarioId = int.Parse(userIdClaim);
+
+                await _usuarioService.DefinirSenha(dto, usuarioId);
+
+                return Ok("Senha definida");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         /// <summary>
         /// Endpoint para autenticação de usuários via provedor de identidade externo (Google OAuth 2.0).
         /// </summary>

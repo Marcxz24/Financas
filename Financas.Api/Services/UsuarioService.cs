@@ -4,6 +4,7 @@ using Financas.Api.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Org.BouncyCastle.Bcpg.OpenPgp;
 
 namespace Financas.Api.Services
 {
@@ -323,6 +324,29 @@ namespace Financas.Api.Services
                 EmailConfirmado = usuario.EmailConfirmado,
                 DataCadastro = usuario.DataCadastro
             };
+        }
+
+        // Método responsável por definir a senha após o login com o Google.
+        public async Task DefinirSenha(DefinirSenhaDTO dto, int usuarioId)
+        {
+            // Filtra no banco de dados o ID do usuário logado.
+            var usuario = await _financasDbContext.Usuarios
+                .FirstOrDefaultAsync(u => u.Id == usuarioId);
+
+            // Se a nova senha digitada for diferente da confirmação da senha digitada.
+            // Retorna a mensagem de operação inválida.
+            if (dto.NewPassword != dto.ConfirmNewPassword)
+                throw new InvalidOperationException("A confirmação da senha não confere.");
+
+            // Se o retorno do usuário for Nulo, retorna uma operação inválida de usuário não encontrado.
+            if (usuario == null)
+                throw new InvalidOperationException("Usuário não encontrado.");
+
+            // Gera um novo HASH para a senha digitada.
+            usuario.Password = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+
+            // Salva as alterações no Banco de Dados.
+            await _financasDbContext.SaveChangesAsync();
         }
     }
 }

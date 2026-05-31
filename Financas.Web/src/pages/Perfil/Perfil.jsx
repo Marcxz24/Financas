@@ -30,6 +30,19 @@ function Perfil() {
     email: "",
   });
 
+  const [modalSenhaAberto, setModalSenhaAberto] = useState(false);
+
+  const [formSenha, setFormSenha] = useState({
+    novaSenha: "",
+    confirmarSenha: "",
+  });
+
+  const [erroSenha, setErroSenha] = useState("");
+
+  const [salvandoSenha, setSalvandoSenha] = useState(false);
+
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+
   /**
    * Efeito colateral executado na fase de montagem (Mount) do componente.
    * Realiza a requisição HTTP GET para buscar os dados primários do usuário.
@@ -60,7 +73,7 @@ function Perfil() {
         console.error("Erro na busca de dados do perfil:", err);
         setErro(
           err.response?.data?.mensagem ||
-            "Não foi possível carregar os dados do perfil."
+            "Não foi possível carregar os dados do perfil.",
         );
       } finally {
         // Assegura a liberação da thread de carregamento da UI independentemente do sucesso ou falha na rede
@@ -70,6 +83,30 @@ function Perfil() {
 
     buscarPerfil();
   }, []);
+
+  const abrirModalSenha = () => {
+    setErroSenha("");
+
+    setFormSenha({
+      novaSenha: "",
+      confirmarSenha: "",
+    });
+
+    setModalSenhaAberto(true);
+  };
+
+  const fecharModalSenha = () => {
+    setModalSenhaAberto(false);
+  };
+
+  const handleSenhaChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormSenha((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   // Early Return: Exibe o fallback de carregamento e impede a renderização da estrutura do card
   // caso a Promise de busca dos dados iniciais ainda esteja pendente
@@ -104,6 +141,49 @@ function Perfil() {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleAlterarSenha = async () => {
+    try {
+      // Reseta erros anteriores e ativa o estado de loading no botão
+      setErroSenha("");
+      setSalvandoSenha(true);
+
+      // Validação de campo vazio: verifica se ambos os campos foram preenchidos
+      if (!formSenha.novaSenha || !formSenha.confirmarSenha) {
+        setErroSenha("Preencha todos os campos.");
+        return;
+      }
+
+      // Validação de consistência: verifica se a nova senha coincide com a confirmação
+      if (formSenha.novaSenha !== formSenha.confirmarSenha) {
+        setErroSenha("As senhas não conferem.");
+        return;
+      }
+
+      // Requisição à API: envia os dados para o endpoint de definição de senha
+      await api.post("/usuarios/definir-senha", {
+        newPassword: formSenha.novaSenha,
+        confirmNewPassword: formSenha.confirmarSenha,
+      });
+
+      // Sucesso: limpa os campos do formulário após a alteração bem-sucedida
+      setFormSenha({
+        novaSenha: "",
+        confirmarSenha: "",
+      });
+
+      // Fecha o modal de alteração de senha
+      fecharModalSenha();
+    } catch (err) {
+      // Tratamento de erro: exibe a mensagem enviada pela API ou uma mensagem padrão genérica
+      setErroSenha(
+        err.response?.data?.mensagem || "Não foi possível alterar a senha.",
+      );
+    } finally {
+      // Finalização: garante que o estado de loading seja desativado independentemente do resultado
+      setSalvandoSenha(false);
+    }
   };
 
   /**
@@ -159,11 +239,15 @@ function Perfil() {
 
       // 3. Fallback genérico para instabilidade de conexão ou HTTP 500 (Internal Server Error)
       setErro(
-        "Não foi possível atualizar o nome de usuário. Tente novamente mais tarde."
+        "Não foi possível atualizar o nome de usuário. Tente novamente mais tarde.",
       );
     } finally {
       setCarregando(false);
     }
+  };
+
+  const toggleMostrarSenha = () => {
+    setMostrarSenha((prev) => !prev);
   };
 
   return (
@@ -235,6 +319,27 @@ function Perfil() {
           )}
         </div>
 
+        <div className="perfil-security-section">
+          <h3>
+            <i className="bi bi-shield-lock"></i>
+            Segurança da Conta
+          </h3>
+
+          <p>
+            Defina uma senha para acessar sua conta utilizando e-mail e senha,
+            além do login com Google.
+          </p>
+
+          <button
+            type="button"
+            className="btn-definir-senha"
+            onClick={abrirModalSenha}
+          >
+            <i className="bi bi-key"></i>
+            Definir Senha
+          </button>
+        </div>
+
         {/* Rodapé de Ações: Transição CSS e alternância de controles dependentes do estado booleano 'editando' */}
         <footer
           className={`perfil-card-footer ${editando ? "modo-edicao" : ""}`}
@@ -268,6 +373,79 @@ function Perfil() {
           )}
         </footer>
       </div>
+
+      {modalSenhaAberto && (
+        <div className="modal-overlay">
+          <div className="modal-senha">
+            <h3>
+              <i className="bi bi-key"></i>
+              Definir Senha
+            </h3>
+
+            {erroSenha && <p className="perfil-erro-alerta">{erroSenha}</p>}
+
+            {/* NOVA SENHA */}
+            <div className="perfil-info-group">
+              <label>Nova Senha</label>
+
+              <div className="input-password-wrapper">
+                <input
+                  type={mostrarSenha ? "text" : "password"}
+                  name="novaSenha"
+                  value={formSenha.novaSenha}
+                  onChange={handleSenhaChange}
+                />
+
+                <button
+                  type="button"
+                  className="btn-toggle-senha"
+                  onClick={toggleMostrarSenha}
+                >
+                  {mostrarSenha ? "🙈" : "👁️"}
+                </button>
+              </div>
+            </div>
+
+            {/* CONFIRMAR SENHA */}
+            <div className="perfil-info-group">
+              <label>Confirmar Senha</label>
+
+              <div className="input-password-wrapper">
+                <input
+                  type={mostrarSenha ? "text" : "password"}
+                  name="confirmarSenha"
+                  value={formSenha.confirmarSenha}
+                  onChange={handleSenhaChange}
+                />
+
+                <button
+                  type="button"
+                  className="btn-toggle-senha"
+                  onClick={toggleMostrarSenha}
+                >
+                  {mostrarSenha ? "🙈" : "👁️"}
+                </button>
+              </div>
+            </div>
+
+            {/* AÇÕES */}
+            <div className="modal-actions">
+              <button type="button" onClick={fecharModalSenha}>
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                className="btn-salvar"
+                onClick={handleAlterarSenha}
+                disabled={salvandoSenha}
+              >
+                {salvandoSenha ? "Salvando..." : "Salvar Senha"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
