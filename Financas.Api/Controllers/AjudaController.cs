@@ -14,10 +14,13 @@ namespace Financas.Api.Controllers
         // Dependência do serviço que contém a lógica de negócio para manipulação de chamados
         private readonly AjudaService _ajudaService;
 
+        private readonly EmailService _emailService;
+
         // Construtor que realiza a Injeção de Dependência do AjudaService
-        public AjudaController(AjudaService ajudaService)
+        public AjudaController(AjudaService ajudaService, EmailService emailService)
         {
             _ajudaService = ajudaService;
+            _emailService = emailService;
         }
 
         // Endpoint para receber e processar a abertura de um novo chamado de suporte
@@ -47,6 +50,18 @@ namespace Financas.Api.Controllers
                 // Captura qualquer erro inesperado e retorna status 400 (BadRequest) com a mensagem da exceção
                 return BadRequest(new { error = ex.Message });
             }
+        }
+
+        [HttpGet("teste-email")]
+        public async Task<IActionResult> TesteEmail()
+        {
+            await _emailService.EnviarEmailAsync02(
+                "SEU_EMAIL_PARA_TESTE@gmail.com",
+                "Teste SMTP Gmail",
+                "<h1>Funcionou 🎉</h1><p>Email enviado com sucesso.</p>"
+            );
+
+            return Ok("E-mail enviado");
         }
     }
 }

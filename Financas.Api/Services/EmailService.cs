@@ -14,86 +14,79 @@ public class EmailService
 
     public async Task EnviarEmailAsync(string destinatario, string assunto, string corpo)
     {
+        // Instancia o objeto da mensagem utilizando a biblioteca MimeKit.
+        var mensagem = new MimeMessage();
+
+        // Define o remetente com base no endereço configurado no sistema.
+        mensagem.From.Add(MailboxAddress.Parse(_configuration["Email:From"]!));
+
+        // Adiciona o endereço do usuário que receberá a mensagem.
+        mensagem.To.Add(MailboxAddress.Parse(destinatario));
+
+        // Define o título do e-mail.
+        mensagem.Subject = assunto;
+
+        // Define o conteúdo como HTML, permitindo o uso de links e formatação visual.
+        mensagem.Body = new TextPart("html") { Text = corpo };
+
+        // Inicializa o cliente SMTP do MailKit para realizar a conexão.
+        using var smtp = new SmtpClient();
+
+        // Estabelece conexão com o servidor de e-mail usando criptografia TLS (Segurança).
+        await smtp.ConnectAsync(
+            _configuration["Email:Host"]!,
+            int.Parse(_configuration["Email:Port"]!),
+            SecureSocketOptions.StartTls
+        );
+
+        // Realiza a autenticação com as credenciais do servidor de e-mail.
+        await smtp.AuthenticateAsync(
+            _configuration["Email:Username"]!,
+            _configuration["Email:Password"]!
+        );
+
+        // Dispara o envio da mensagem de forma assíncrona.
+        await smtp.SendAsync(mensagem);
+
+        // Encerra a conexão com o servidor de e-mail de forma limpa.
+        await smtp.DisconnectAsync(true);
+    }
+
+    public async Task EnviarEmailAsync02(string destinatario, string assunto, string corpo)
+    {
         try
         {
-            Console.WriteLine("[EMAIL] Iniciando envio.");
-
-            // Instancia o objeto da mensagem utilizando a biblioteca MimeKit.
             var mensagem = new MimeMessage();
 
-            Console.WriteLine("[EMAIL] Montando mensagem.");
-
-            // Define o remetente com base no endereço configurado no sistema.
-            mensagem.From.Add(MailboxAddress.Parse(_configuration["Email:From"]!));
-
-            // Adiciona o endereço do usuário que receberá a mensagem.
+            mensagem.From.Add(MailboxAddress.Parse(_configuration["Email:From"]));
             mensagem.To.Add(MailboxAddress.Parse(destinatario));
-
-            // Define o título do e-mail.
             mensagem.Subject = assunto;
 
-            // Define o conteúdo como HTML.
             mensagem.Body = new TextPart("html")
             {
                 Text = corpo
             };
 
-            Console.WriteLine($"[EMAIL] Destinatário: {destinatario}");
-            Console.WriteLine($"[EMAIL] Host SMTP: {_configuration["Email:Host"]}");
-            Console.WriteLine($"[EMAIL] Porta SMTP: {_configuration["Email:Port"]}");
-            Console.WriteLine($"[EMAIL] Usuário SMTP: {_configuration["Email:Username"]}");
-
-            // Inicializa o cliente SMTP do MailKit.
-            using var smtp = new SmtpClient
-            {
-                Timeout = 30000 // 30 segundos
-            };
-
-            Console.WriteLine("[EMAIL] Antes ConnectAsync...");
+            using var smtp = new SmtpClient();
 
             await smtp.ConnectAsync(
-                _configuration["Email:Host"]!,
-                int.Parse(_configuration["Email:Port"]!),
+                _configuration["Email:Host"],
+                int.Parse(_configuration["Email:Port"]),
                 SecureSocketOptions.StartTls
             );
 
-            Console.WriteLine("[EMAIL] ConnectAsync executado com sucesso.");
-
-            Console.WriteLine("[EMAIL] Antes AuthenticateAsync...");
-
             await smtp.AuthenticateAsync(
-                _configuration["Email:Username"]!,
-                _configuration["Email:Password"]!
+                _configuration["Email:Username"],
+                _configuration["Email:Password"]
             );
-
-            Console.WriteLine("[EMAIL] AuthenticateAsync executado com sucesso.");
-
-            Console.WriteLine("[EMAIL] Antes SendAsync...");
 
             await smtp.SendAsync(mensagem);
 
-            Console.WriteLine("[EMAIL] SendAsync executado com sucesso.");
-
-            Console.WriteLine("[EMAIL] Antes DisconnectAsync...");
-
             await smtp.DisconnectAsync(true);
-
-            Console.WriteLine("[EMAIL] DisconnectAsync executado com sucesso.");
-            Console.WriteLine("[EMAIL] Processo finalizado.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine("[EMAIL] ERRO DURANTE ENVIO");
-            Console.WriteLine($"[EMAIL] Tipo: {ex.GetType().Name}");
-            Console.WriteLine($"[EMAIL] Mensagem: {ex.Message}");
-
-            if (ex.InnerException != null)
-            {
-                Console.WriteLine($"[EMAIL] InnerException: {ex.InnerException.Message}");
-            }
-
-            Console.WriteLine($"[EMAIL] StackTrace: {ex.StackTrace}");
-
+            Console.WriteLine($"Erro ao enviar e-mail: {ex.Message}");
             throw;
         }
     }
