@@ -21,6 +21,7 @@ builder.Services.AddScoped<CartaoCreditoService>();
 builder.Services.AddScoped<FaturaService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<AjudaService>();
 
 builder.Services.AddCors(options =>
 {
