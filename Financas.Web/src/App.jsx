@@ -16,6 +16,7 @@ import ContaBancaria from "./pages/ContaBancaria/ContaBancaria";
 import CartaoCredito from "./pages/CartaoCredito/CartaoCredito";
 import Fatura from "./pages/Faturas/Fatura";
 import Perfil from "./pages/Perfil/Perfil";
+import Ajuda from "./pages/Ajuda/Ajuda";
 
 // Componente de Middleware para proteção de rotas (Auth check)
 import PrivateRoute from "./routes/PrivateRoute";
@@ -61,6 +62,8 @@ function App() {
           <Route path="fatura" element={<Fatura />} />
           
           <Route path="perfil" element={<Perfil />} />
+
+          <Route path="ajuda" element={<Ajuda />} />
         </Route>
 
         {/* Wildcard (*): Fallback p/ rotas inexistentes, redirecionando p/ login */}

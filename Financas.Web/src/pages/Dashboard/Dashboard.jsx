@@ -59,6 +59,10 @@ function Dashboard() {
             Perfil
           </Link>
 
+          <Link to="/dashboard/ajuda">
+            Ajuda
+          </Link>
+
           <button
             className="btn-logout"
             onClick={handleLogout}
