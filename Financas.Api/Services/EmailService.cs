@@ -1,93 +1,79 @@
-﻿using MailKit.Net.Smtp;
-using MailKit.Security;
-using MimeKit;
+﻿using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 
-public class EmailService
+namespace Financas.Api.Services
 {
-    // Interface para acessar as chaves de configuração (Host, Porta, Senha) do appsettings.json.
-    private readonly IConfiguration _configuration;
-
-    public EmailService(IConfiguration configuration)
+    // Serviço responsável por enviar e-mails usando a API do Resend
+    public class EmailService
     {
-        _configuration = configuration;
-    }
+        // IHttpClientFactory: gerencia criação de HttpClient de forma correta (evita leaks e melhora performance)
+        private readonly IHttpClientFactory _httpClientFactory;
 
-    public async Task EnviarEmailAsync(string destinatario, string assunto, string corpo)
-    {
-        // Instancia o objeto da mensagem utilizando a biblioteca MimeKit.
-        var mensagem = new MimeMessage();
+        // IConfiguration: acessa appsettings.json / variáveis de ambiente
+        private readonly IConfiguration _configuration;
 
-        // Define o remetente com base no endereço configurado no sistema.
-        mensagem.From.Add(MailboxAddress.Parse(_configuration["Email:From"]!));
+        // Chave de autenticação da API do Resend
+        private readonly string _apiKey;
 
-        // Adiciona o endereço do usuário que receberá a mensagem.
-        mensagem.To.Add(MailboxAddress.Parse(destinatario));
+        // E-mail remetente configurado no Resend
+        private readonly string _from;
 
-        // Define o título do e-mail.
-        mensagem.Subject = assunto;
-
-        // Define o conteúdo como HTML, permitindo o uso de links e formatação visual.
-        mensagem.Body = new TextPart("html") { Text = corpo };
-
-        // Inicializa o cliente SMTP do MailKit para realizar a conexão.
-        using var smtp = new SmtpClient();
-
-        // Estabelece conexão com o servidor de e-mail usando criptografia TLS (Segurança).
-        await smtp.ConnectAsync(
-            _configuration["Email:Host"]!,
-            int.Parse(_configuration["Email:Port"]!),
-            SecureSocketOptions.StartTls
-        );
-
-        // Realiza a autenticação com as credenciais do servidor de e-mail.
-        await smtp.AuthenticateAsync(
-            _configuration["Email:Username"]!,
-            _configuration["Email:Password"]!
-        );
-
-        // Dispara o envio da mensagem de forma assíncrona.
-        await smtp.SendAsync(mensagem);
-
-        // Encerra a conexão com o servidor de e-mail de forma limpa.
-        await smtp.DisconnectAsync(true);
-    }
-
-    public async Task EnviarEmailAsync02(string destinatario, string assunto, string corpo)
-    {
-        try
+        // Construtor: injeta dependências necessárias pelo ASP.NET Core (DI)
+        public EmailService(IConfiguration configuration, IHttpClientFactory httpClientFactory)
         {
-            var mensagem = new MimeMessage();
+            _configuration = configuration;
+            _httpClientFactory = httpClientFactory;
 
-            mensagem.From.Add(MailboxAddress.Parse(_configuration["Email:From"]));
-            mensagem.To.Add(MailboxAddress.Parse(destinatario));
-            mensagem.Subject = assunto;
+            // Lê a API Key do Resend no appsettings ou variável de ambiente
+            _apiKey = _configuration["Resend:ApiKey"]
+                ?? throw new Exception("Resend API Key não configurada");
 
-            mensagem.Body = new TextPart("html")
+            // Lê o e-mail remetente configurado
+            _from = _configuration["Resend:From"]
+                ?? throw new Exception("From do Resend não configurado.");
+        }
+
+        // Método principal responsável por enviar o e-mail
+        public async Task EnviarEmailAsync(string destinatario, string assunto, string corpo)
+        {
+            // Cria um HttpClient a partir da factory (forma correta no ASP.NET Core)
+            var client = _httpClientFactory.CreateClient();
+
+            // Define a URL base da API do Resend
+            client.BaseAddress = new Uri("https://api.resend.com");
+
+            // Adiciona autenticação Bearer Token (API Key do Resend)
+            client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", _apiKey);
+
+            // Monta o payload (dados do e-mail) no formato esperado pela API
+            var payload = new
             {
-                Text = corpo
+                from = _from,                     // remetente
+                to = new[] { destinatario },      // destinatário (array porque pode enviar múltiplos)
+                subject = assunto,                // assunto do e-mail
+                html = corpo                     // corpo em HTML
             };
 
-            using var smtp = new SmtpClient();
+            // Converte o objeto para JSON
+            var json = JsonSerializer.Serialize(payload);
 
-            await smtp.ConnectAsync(
-                _configuration["Email:Host"],
-                int.Parse(_configuration["Email:Port"]),
-                SecureSocketOptions.StartTls
-            );
+            // Cria o conteúdo da requisição HTTP (JSON + encoding UTF8)
+            using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            await smtp.AuthenticateAsync(
-                _configuration["Email:Username"],
-                _configuration["Email:Password"]
-            );
+            // Faz a requisição POST para o endpoint de envio de e-mail
+            var response = await client.PostAsync("/emails", content);
 
-            await smtp.SendAsync(mensagem);
+            // Se a resposta não for sucesso (200-299), trata como erro
+            if (!response.IsSuccessStatusCode)
+            {
+                // Lê o corpo da resposta de erro da API
+                var body = await response.Content.ReadAsStringAsync();
 
-            await smtp.DisconnectAsync(true);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Erro ao enviar e-mail: {ex.Message}");
-            throw;
+                // Lança exceção com detalhes do erro (ajuda debug em produção)
+                throw new Exception($"Erro ao enviar e-mail via Resend: {response.StatusCode} - {body}");
+            }
         }
     }
 }

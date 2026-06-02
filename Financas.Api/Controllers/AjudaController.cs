@@ -51,17 +51,5 @@ namespace Financas.Api.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
-
-        [HttpGet("teste-email")]
-        public async Task<IActionResult> TesteEmail()
-        {
-            await _emailService.EnviarEmailAsync02(
-                "SEU_EMAIL_PARA_TESTE@gmail.com",
-                "Teste SMTP Gmail",
-                "<h1>Funcionou 🎉</h1><p>Email enviado com sucesso.</p>"
-            );
-
-            return Ok("E-mail enviado");
-        }
     }
 }
