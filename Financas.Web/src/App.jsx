@@ -17,6 +17,7 @@ import CartaoCredito from "./pages/CartaoCredito/CartaoCredito";
 import Fatura from "./pages/Faturas/Fatura";
 import Perfil from "./pages/Perfil/Perfil";
 import Ajuda from "./pages/Ajuda/Ajuda";
+import SessaoExpirada from "./pages/SessaoExpirada/SessaoExpirada";
 
 // Componente de Middleware para proteção de rotas (Auth check)
 import PrivateRoute from "./routes/PrivateRoute";
@@ -29,6 +30,7 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/criar-conta" element={<Register />} />
+        <Route path="/sessao-expirada" element={<SessaoExpirada />} />
 
         {/* Rotas Privadas: Envolvidas por PrivateRoute. 
           O padrão de rota aninhada (Nested Routes) permite que a Dashboard 

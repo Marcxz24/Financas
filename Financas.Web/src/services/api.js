@@ -32,4 +32,19 @@ api.interceptors.request.use(
     }
 );
 
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        // Verifica se a resposta de erro é um 401 (Unauthorized)
+        if (error.response?.status === 401) {
+            // Limpa o token do armazenamento local, efetivamente "deslogando" o usuário
+            localStorage.removeItem("token");
+
+            // Redireciona para a página de sessão expirada
+            window.location.href = "sessao-expirada";
+        }
+        return Promise.reject(error);
+    }
+);
+
 export default api;
