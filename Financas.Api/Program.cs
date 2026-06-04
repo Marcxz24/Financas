@@ -106,6 +106,18 @@ builder.Services.AddAuthentication(options =>
             Encoding.UTF8.GetBytes(jwtKey)
         )
     };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnChallenge = context =>
+        {
+            context.HandleResponse();
+
+            context.Response.StatusCode = 401;
+            context.Response.ContentType = "application/json";
+            return context.Response.WriteAsync("{\"error\": \"Sua sessão expirou. Por favor, faça login novamente.\"}");
+        }
+    };
 });
 
 var app = builder.Build();
