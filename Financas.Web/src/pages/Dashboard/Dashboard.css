@@ -17,6 +17,19 @@ body {
   overflow: hidden;
 }
 
+/* Container para o conteúdo principal, garantindo que o rodapé fique fixo */
+.dashboard-content {
+  flex: 1 0 auto;
+  min-height: 0;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 25px;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+  overflow-y: visible;
+}
+
 /* Cabeçalho fixo com efeito de desfoque (Glassmorphism) */
 .dashboard-header {
   display: flex;
@@ -77,19 +90,6 @@ body {
 .btn-logout:hover {
   background: #b91c1c;
   transform: translateY(-1px);
-}
-
-.dashboard-content {
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 25px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  box-sizing: border-box;
 }
 
 /* Layout em grade para os cards */
@@ -307,6 +307,10 @@ body {
     gap: 10px;
   }
 
+  .dashboard-content { 
+  padding: 16px 12px; /* Removido o 120px de baixo */
+}
+
   .logo-area {
     text-align: center;
   }
@@ -371,4 +375,19 @@ body {
     padding: 8px 14px;
     font-size: 13px;
   }
+}
+
+/* Container para o conteúdo que rola, garantindo que o rodapé fique fixo */
+.dashboard-scroll-container {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Ajuste para garantir que o rodapé fique sempre visível e não seja empurrado para baixo */
+.footer-sistema {
+  flex-shrink: 0;
+  margin-top: 40px;
 }

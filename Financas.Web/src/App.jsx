@@ -18,7 +18,6 @@ import Fatura from "./pages/Faturas/Fatura";
 import Perfil from "./pages/Perfil/Perfil";
 import Ajuda from "./pages/Ajuda/Ajuda";
 import SessaoExpirada from "./pages/SessaoExpirada/SessaoExpirada";
-
 // Componente de Middleware para proteção de rotas (Auth check)
 import PrivateRoute from "./routes/PrivateRoute";
 

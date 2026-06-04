@@ -1,0 +1,62 @@
+/* Configuração do container principal do rodapé */
+.footer-sistema {
+    width: 100%; /* Garante que o rodapé ocupe toda a largura disponível */
+
+    margin-top: 40px; /* Cria um espaço de respiro acima do rodapé */
+    padding: 15px 25px; /* Espaçamento interno entre o conteúdo e as bordas */
+
+    background: #111827; /* Cor de fundo escura */
+    border-top: 1px solid #293445; /* Linha de divisão superior para dar acabamento */
+
+    color: #9ca3af; /* Cor cinza suave para o texto */
+
+    font-size: 0.85rem; /* Tamanho de fonte reduzido para não sobrecarregar o visual */
+}
+
+/* Container interno que limita a largura do conteúdo e organiza os elementos */
+.footer-conteudo {
+    max-width: 1400px; /* Define largura máxima para telas grandes */
+
+    margin: 0 auto; /* Centraliza o conteúdo horizontalmente */
+
+    display: flex; /* Utiliza Flexbox para organizar os itens */
+    justify-content: space-between; /* Espaça os elementos para as extremidades */
+    align-items: center; /* Alinha os itens verticalmente ao centro */
+
+    gap: 20px; /* Define um espaçamento entre os blocos (info e versão) */
+}
+
+/* Área que agrupa informações como Copyright e desenvolvedor */
+.footer-info {
+    display: flex; /* Organiza os itens em linha */
+    align-items: center;
+    gap: 10px; /* Espaçamento entre os textos e separadores */
+
+    flex-wrap: wrap; /* Permite que os textos quebrem linha se o espaço for curto */
+}
+
+/* Estilo visual para o ponto de separação entre informações */
+.footer-separador {
+    color: #4b5563; /* Cor um pouco mais escura para manter a sutileza */
+}
+
+/* Estilo para a exibição da versão do sistema */
+.footer-versao {
+    color: #60a5fa; /* Cor azul para destacar a numeração da versão */
+    font-weight: 600; /* Negrito para melhor legibilidade */
+}
+
+/* Ajustes de responsividade para telas menores (ex: dispositivos móveis) */
+@media (max-width: 768px) {
+
+    /* Alinha o conteúdo em coluna ao invés de linha */
+    .footer-conteudo {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    /* Centraliza as informações do desenvolvedor e copyright */
+    .footer-info {
+        justify-content: center;
+    }
+}
