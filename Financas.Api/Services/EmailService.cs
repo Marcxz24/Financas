@@ -1,78 +1,85 @@
-﻿using System.Net.Http.Headers;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 
 namespace Financas.Api.Services
 {
-    // Serviço responsável por enviar e-mails usando a API do Resend
+    // Serviço responsável por enviar e-mails usando a API REST do Brevo
     public class EmailService
     {
-        // IHttpClientFactory: gerencia criação de HttpClient de forma correta (evita leaks e melhora performance)
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly HttpClient _httpClient;
 
-        // IConfiguration: acessa appsettings.json / variáveis de ambiente
-        private readonly IConfiguration _configuration;
-
-        // Chave de autenticação da API do Resend
+        // Chave de autenticação da API do Brevo
         private readonly string _apiKey;
 
-        // E-mail remetente configurado no Resend
-        private readonly string _from;
+        // E-mail remetente configurado no Brevo
+        private readonly string _fromEmail;
 
         // Construtor: injeta dependências necessárias pelo ASP.NET Core (DI)
-        public EmailService(IConfiguration configuration, IHttpClientFactory httpClientFactory)
+        public EmailService(IConfiguration configuration, HttpClient httpClient)
         {
-            _configuration = configuration;
-            _httpClientFactory = httpClientFactory;
+            _httpClient = httpClient;
 
-            // Lê a API Key do Resend no appsettings ou variável de ambiente
-            _apiKey = _configuration["Resend:ApiKey"]
-                ?? throw new Exception("Resend API Key não configurada");
+            // Lê a API Key do Brevo no appsettings ou variável de ambiente
+            _apiKey = configuration["Brevo:ApiKey"]
+                ?? throw new InvalidOperationException("Brevo API Key não configurada.");
 
             // Lê o e-mail remetente configurado
-            _from = _configuration["Resend:From"]
-                ?? throw new Exception("From do Resend não configurado.");
+            _fromEmail = configuration["Brevo:FromEmail"]
+                ?? throw new InvalidOperationException("Brevo FromEmail não configurado.");
         }
 
         // Método principal responsável por enviar o e-mail
         public async Task EnviarEmailAsync(string destinatario, string assunto, string corpo)
         {
-            // Cria um HttpClient a partir da factory (forma correta no ASP.NET Core)
-            var client = _httpClientFactory.CreateClient();
+            if (string.IsNullOrWhiteSpace(destinatario))
+                throw new ArgumentException("Destinatário não informado.");
 
-            // Define a URL base da API do Resend
-            client.BaseAddress = new Uri("https://api.resend.com");
+            if (string.IsNullOrWhiteSpace(assunto))
+                throw new ArgumentException("Assunto não informado.");
 
-            // Adiciona autenticação Bearer Token (API Key do Resend)
-            client.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", _apiKey);
+            if (string.IsNullOrWhiteSpace(corpo))
+                throw new ArgumentException("Corpo do e-mail não informado.");
 
-            // Monta o payload (dados do e-mail) no formato esperado pela API
             var payload = new
             {
-                from = _from,                     // remetente
-                to = new[] { destinatario },      // destinatário (array porque pode enviar múltiplos)
-                subject = assunto,                // assunto do e-mail
-                html = corpo                     // corpo em HTML
+                sender = new
+                {
+                    name = "Finanças",
+                    email = _fromEmail
+                },
+
+                to = new[]
+                {
+                new
+                {
+                    email = destinatario
+                }
+            },
+
+                subject = assunto,
+
+                htmlContent = corpo
             };
 
-            // Converte o objeto para JSON
-            var json = JsonSerializer.Serialize(payload);
+            var request = new HttpRequestMessage(
+                HttpMethod.Post,
+                "https://api.brevo.com/v3/smtp/email");
 
-            // Cria o conteúdo da requisição HTTP (JSON + encoding UTF8)
-            using var content = new StringContent(json, Encoding.UTF8, "application/json");
+            request.Headers.Add("api-key", _apiKey);
 
-            // Faz a requisição POST para o endpoint de envio de e-mail
-            var response = await client.PostAsync("/emails", content);
+            request.Content = new StringContent(
+                JsonSerializer.Serialize(payload),
+                Encoding.UTF8,
+                "application/json");
 
-            // Se a resposta não for sucesso (200-299), trata como erro
+            var response = await _httpClient.SendAsync(request);
+
+            var responseBody = await response.Content.ReadAsStringAsync();
+
             if (!response.IsSuccessStatusCode)
             {
-                // Lê o corpo da resposta de erro da API
-                var body = await response.Content.ReadAsStringAsync();
-
-                // Lança exceção com detalhes do erro (ajuda debug em produção)
-                throw new Exception($"Erro ao enviar e-mail via Resend: {response.StatusCode} - {body}");
+                throw new Exception(
+                    $"Erro ao enviar e-mail via Brevo: {response.StatusCode} - {responseBody}");
             }
         }
     }

@@ -1,11 +1,9 @@
-using Microsoft.EntityFrameworkCore;
 using Financas.Api.Data;
 using Financas.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Resend;
-using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,10 +15,7 @@ builder.Services.AddDbContext<FinancasDbContext>(options =>
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<LancamentoService>();
 builder.Services.AddScoped<CategoriaService>();
-builder.Services.AddScoped<EmailService>();
-
-// HttpClient necessário para integração com Resend
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient<EmailService>();
 builder.Services.AddScoped<ContaBancariaService>();
 builder.Services.AddScoped<CartaoCreditoService>();
 builder.Services.AddScoped<FaturaService>();
