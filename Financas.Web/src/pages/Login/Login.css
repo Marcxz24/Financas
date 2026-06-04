@@ -44,6 +44,14 @@
   gap: 30px; /* Define o espaçamento entre os elementos internos do cabeçalho */
 }
 
+.brand-logo {
+  width: 150px; /* Ajuste o tamanho para ficar harmonioso */
+  height: auto;
+  border-radius: 12px; /* Adiciona um toque moderno com cantos arredondados */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Dá profundidade */
+  margin-bottom: 20px;
+}
+
 /* Estiliza o título principal com efeito de gradiente no texto */
 .login-header h1 {
   margin: 0; /* Remove margens padrão */

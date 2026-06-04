@@ -5,8 +5,10 @@ import api from "../../services/api";
 import "./Login.css";
 // Importa o componente Link para navegação entre rotas
 import { Link, useNavigate } from "react-router-dom";
-
+// Importa o componente de botão de autenticação do Google
 import GoogleAuthButton from "../../components/GoogleAuthButton";
+
+import logoArt from "../../assets/financas-api-art.jpeg";
 
 function Login() {
   // Define o estado para armazenar mensagens de erro relacionadas ao login
@@ -32,7 +34,7 @@ function Login() {
 
     setErro("");
     // Ativa o estado de carregamento para bloquear a interface via Overlay
-    setCarregando(true); 
+    setCarregando(true);
 
     try {
       const response = await api.post("/usuarios/login", {
@@ -69,11 +71,12 @@ function Login() {
         <div className="login-card">
           {/* Cabeçalho contendo o título e a descrição */}
           <header className="login-header">
+            <img src={logoArt} alt="Finanças API Logo" className="brand-logo" />
             <h1>Finanças</h1>
 
             <p className="descricao-login">
-              Faça login para acessar sua conta e gerenciar suas finanças de forma
-              fácil e segura.
+              Faça login para acessar sua conta e gerenciar suas finanças de
+              forma fácil e segura.
             </p>
           </header>
 
@@ -108,7 +111,9 @@ function Login() {
                 onClick={() => setMostrarSenha(!mostrarSenha)}
                 title={mostrarSenha ? "Esconder senha" : "Mostrar senha"}
               >
-                <i className={mostrarSenha ? "bi bi-eye-slash" : "bi bi-eye"}></i>
+                <i
+                  className={mostrarSenha ? "bi bi-eye-slash" : "bi bi-eye"}
+                ></i>
               </button>
             </div>
 
@@ -116,8 +121,9 @@ function Login() {
             <button type="submit">Entrar</button>
 
             <div className="google-login-container">
-              <GoogleAuthButton navigate={navigate}
-              setCarregando={setCarregando} 
+              <GoogleAuthButton
+                navigate={navigate}
+                setCarregando={setCarregando}
               />
             </div>
 
