@@ -255,10 +255,17 @@ namespace Financas.Api.Services
                     .Where(p => p.FaturaId == fatura.Id)
                     .SumAsync(p => p.ValorPago);
 
-                var valorRestante = fatura.ValorTotal - totalPagoAtual;
+                var valorRestante = Math.Round(fatura.ValorTotal - totalPagoAtual, 2);
+                var valorPagamentoArredondado = Math.Round(dto.ValorPago, 2);
+
+                // LOG DE ERRO DETALHADO PARA DEBUGAR
+                if (dto.ValorPago > valorRestante)
+                {
+                    throw new ArgumentException($"ERRO DEBUG: Pago={dto.ValorPago} | Restante={valorRestante} | TotalFatura={fatura.ValorTotal} | TotalPagoNoBanco={totalPagoAtual}");
+                }
 
                 // Impede pagamentos maiores que a dívida atual da fatura
-                if (dto.ValorPago > valorRestante)
+                if (valorPagamentoArredondado > valorRestante)
                     throw new ArgumentException("Valor pago excede o valor restante da fatura.");
 
                 // Se houver uma conta bancária vinculada, realiza a baixa do saldo
@@ -290,9 +297,9 @@ namespace Financas.Api.Services
 
                 _financasDbContext.PagamentoFatura.Add(pagamento);
 
-                var novoTotalPago = totalPagoAtual + dto.ValorPago;
+                fatura.ValorPago += dto.ValorPago;
 
-                fatura.Status = novoTotalPago >= fatura.ValorTotal
+                fatura.Status = fatura.ValorPago >= fatura.ValorTotal
                     ? FaturaStatus.Paga
                     : FaturaStatus.Fechada;
 
