@@ -1,5 +1,6 @@
 ﻿using Financas.Api.Data;
 using Financas.Api.DTOs.Fatura;
+using Financas.Api.DTOs.Lancamento;
 using Financas.Api.Entities;
 using Financas.Api.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -87,15 +88,25 @@ namespace Financas.Api.Services
             return faturas;
         }
 
+        /// <summary>
+        /// Consulta o extrato detalhado de uma fatura, incluindo o histórico de pagamentos e o cálculo do saldo restante.
+        /// </summary>
+        /// <param name="faturaId">ID da fatura a ser consultada.</param>
+        /// <param name="usuarioId">ID do usuário proprietário, utilizado para validação de segurança.</param>
+        /// <returns>Retorna um objeto com os totais da fatura e a lista de pagamentos efetuados.</returns>
+        /// <exception cref="KeyNotFoundException">Lançada caso a fatura não exista ou não pertença ao usuário logado.</exception>
         public async Task<ExtratoFaturaResponseDTO> ObterExtratoFatura(int faturaId, int usuarioId)
         {
+            // Busca a fatura no banco, incluindo o cartão para garantir a verificação de posse do usuário (Multitenancy)
             var fatura = await _financasDbContext.Fatura
                 .Include(f => f.CartaoCredito)
                 .FirstOrDefaultAsync(f => f.Id == faturaId && f.CartaoCredito.UsuarioId == usuarioId);
 
+            // Valida se a fatura existe
             if (fatura == null)
                 throw new KeyNotFoundException("Fatura não encontrada.");
 
+            // Busca todos os pagamentos vinculados a esta fatura, ordenando pelos mais recentes
             var pagamentos = await _financasDbContext.PagamentoFatura
                 .Where(p => p.FaturaId == faturaId)
                 .OrderByDescending(p => p.DataPagamento)
@@ -108,20 +119,37 @@ namespace Financas.Api.Services
                     Observacao = p.Observacao
                 })
                 .ToListAsync();
-            decimal totalPago = 0;
 
+            var lancamentos = await _financasDbContext.Lancamentos
+                .Where(l => l.FaturaId == faturaId)
+                .OrderByDescending(l => l.Data)
+                .Select(l => new LancamentoExtratoDTO
+                {
+                    Id = l.Id,
+                    Descricao = l.Descricao,
+                    Valor = l.Valor,
+                    Data = l.Data,
+                    Tipo = l.Tipo.ToString()
+                })
+                .ToListAsync();
+
+            // Calcula o somatório dos pagamentos realizados
+            decimal totalPago = 0;
             if (pagamentos.Any())
                 totalPago = pagamentos.Sum(p => p.ValorPago);
 
+            // Define quanto ainda resta para quitar a fatura
             var saldoRestante = fatura.ValorTotal - totalPago;
 
+            // Monta o objeto de resposta para o DTO
             return new ExtratoFaturaResponseDTO
             {
                 FaturaId = fatura.Id,
                 ValorTotal = fatura.ValorTotal,
                 TotalPago = totalPago,
                 SaldoRestante = saldoRestante,
-                Pagamentos = pagamentos
+                Pagamentos = pagamentos,
+                Lancamentos = lancamentos
             };
         }
 
@@ -394,6 +422,36 @@ namespace Financas.Api.Services
                 await transaction.RollbackAsync();
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Retorna todas as faturas encerradas do usuário.
+        /// Considera como encerradas as faturas Pagas e Fechadas.
+        /// </summary>
+        /// <param name="usuarioId">Identificador do usuário autenticado.</param>
+        /// <returns>Lista de faturas encerradas.</returns>
+        public async Task<List<FaturaEncerradaDTO>> ListarFaturasEncerradas(int usuarioId)
+        {
+            return await _financasDbContext.Fatura
+                .Include(f => f.CartaoCredito)
+                .Where(f =>
+                    f.CartaoCredito.UsuarioId == usuarioId &&
+                    (f.Status == FaturaStatus.Paga ||
+                     f.Status == FaturaStatus.Fechada))
+                .OrderByDescending(f => f.DataFechamento)
+                .Select(f => new FaturaEncerradaDTO
+                {
+                    Id = f.Id,
+                    CartaoNome = f.CartaoCredito.Nome,
+                    DataInicio = f.DataInicio,
+                    DataFechamento = f.DataFechamento,
+                    DataVencimento = f.DataVencimento,
+                    ValorTotal = f.ValorTotal,
+                    ValorPago = f.ValorPago,
+                    SaldoPendente = f.ValorTotal - f.ValorPago,
+                    Status = f.Status.ToString()
+                })
+                .ToListAsync();
         }
     }
 }

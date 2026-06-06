@@ -110,31 +110,65 @@ namespace Financas.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Recupera o extrato detalhado de uma fatura específica.
+        /// </summary>
+        /// <param name="faturaId">O identificador único da fatura a ser consultada.</param>
+        /// <returns>Retorna um objeto contendo os detalhes do extrato em caso de sucesso.</returns>
+        /// <response code="200">Retorna o extrato da fatura.</response>
+        /// <response code="401">Se o usuário não estiver autenticado.</response>
+        /// <response code="404">Se a fatura não for encontrada.</response>
+        /// <response code="400">Se ocorrer um erro inesperado durante a consulta.</response>
         [HttpGet("{faturaId}/extrato")]
         [Authorize]
         public async Task<IActionResult> ObterExtrato(int faturaId)
         {
             try
             {
+                // Obtém o ID do usuário logado através do token de autenticação (Claims)
                 var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+                // Verifica se o claim de identificação do usuário existe
                 if (string.IsNullOrEmpty(userIdClaim))
                     return Unauthorized(new { mensagem = "Usuário não autenticado." });
 
                 var usuarioId = int.Parse(userIdClaim);
 
+                // Invoca o serviço para buscar os dados do extrato, garantindo a validação de posse do recurso
                 var extrato = await _faturaService.ObterExtratoFatura(faturaId, usuarioId);
 
+                // Retorna o resultado com sucesso
                 return Ok(extrato);
             }
             catch (KeyNotFoundException ex)
             {
+                // Retorna 404 caso a fatura não exista ou não pertença ao usuário
                 return NotFound(new { mensagem = ex.Message });
             }
             catch (Exception ex)
             {
+                // Retorna 400 para erros genéricos de processamento
                 return BadRequest(new { mensagem = ex.Message });
             }
+        }
+
+        /// <summary>
+        /// Lista todas as faturas encerradas do usuário.
+        /// Considera faturas Pagas e Fechadas.
+        /// </summary>
+        [HttpGet("listar-encerradas")]
+        public async Task<IActionResult> ListarFaturasEncerradas()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userIdClaim))
+                return Unauthorized(new { mensagem = "Usuário não autenticado." });
+
+            int usuarioId = int.Parse(userIdClaim);
+
+            var faturas = await _faturaService.ListarFaturasEncerradas(usuarioId);
+
+            return Ok(faturas);
         }
     }
 }

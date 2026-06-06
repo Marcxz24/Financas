@@ -1,4 +1,6 @@
-﻿namespace Financas.Api.DTOs.Fatura
+﻿using Financas.Api.DTOs.Lancamento;
+
+namespace Financas.Api.DTOs.Fatura
 {
     /// <summary>
     /// DTO detalhado que representa o extrato de uma fatura específica.
@@ -32,5 +34,7 @@
         /// incluindo datas, valores e observações de cada baixa.
         /// </summary>
         public List<PagamentoResponseDTO> Pagamentos { get; set; } = new();
+
+        public List<LancamentoExtratoDTO> Lancamentos { get; set; } = [];
     }
 }
