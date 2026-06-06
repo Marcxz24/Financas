@@ -1,0 +1,111 @@
+/* Estilos da página de relatórios */
+.relatorios-container {
+  width: 100%;
+  padding: 25px;
+  color: #ffffff;
+}
+
+/* Cabeçalho da página de relatórios */
+.relatorios-header {
+  margin-bottom: 30px;
+}
+
+.relatorios-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 28px;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.relatorios-header p {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.relatorios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.relatorio-card {
+  background: #1f2937;
+  border: 1px solid #2d3748;
+  border-radius: 16px;
+  padding: 25px;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.relatorio-card:hover {
+  transform: translateY(-4px);
+  border-color: #3b82f6;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.relatorio-icon {
+  width: 60px;
+  height: 60px;
+  background: rgba(59, 130, 246, 0.15);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.relatorio-icon i {
+  font-size: 28px;
+  color: #3b82f6;
+}
+
+.relatorio-card h3 {
+  margin-bottom: 10px;
+  font-size: 18px;
+  color: #ffffff;
+}
+
+.relatorio-card p {
+  color: #9ca3af;
+  line-height: 1.5;
+  min-height: 60px;
+  margin-bottom: 20px;
+}
+
+.btn-relatorio {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-weight: 600;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-relatorio:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.btn-relatorio:disabled {
+  background: #374151;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .relatorios-container {
+    padding: 15px;
+  }
+
+  .relatorios-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .relatorios-header h2 {
+    font-size: 24px;
+  }
+}

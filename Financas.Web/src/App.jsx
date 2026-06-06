@@ -15,6 +15,8 @@ import Categoria from "./pages/Categoria/Categoria";
 import ContaBancaria from "./pages/ContaBancaria/ContaBancaria";
 import CartaoCredito from "./pages/CartaoCredito/CartaoCredito";
 import Fatura from "./pages/Faturas/Fatura";
+import Relatorios from "./pages/Relatorios/Relatorios";
+import ExtratoFatura from "./pages/Relatorios/ExtratoFatura/ExtratoFatura";
 import Perfil from "./pages/Perfil/Perfil";
 import Ajuda from "./pages/Ajuda/Ajuda";
 import SessaoExpirada from "./pages/SessaoExpirada/SessaoExpirada";
@@ -61,7 +63,9 @@ function App() {
           <Route path="cartao-credito" element={<CartaoCredito />} />
 
           <Route path="fatura" element={<Fatura />} />
-          
+
+          <Route path="relatorios" element={<Relatorios />} />
+          <Route path="relatorios/extrato-faturas" element={<ExtratoFatura />} />
           <Route path="perfil" element={<Perfil />} />
 
           <Route path="ajuda" element={<Ajuda />} />

@@ -37,7 +37,7 @@ function Dashboard() {
 
           <Link to="/dashboard/fatura">Faturas</Link>
 
-          <Link to="#">Relatórios</Link>
+          <Link to="/dashboard/relatorios">Relatórios</Link>
 
           <Link to="/dashboard/perfil">Perfil</Link>
 
