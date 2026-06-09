@@ -27,6 +27,6 @@ namespace Financas.Api.DTOs.Dashboard
         public string PeriodoReferencia { get; set; } = string.Empty;
 
         // Lista reduzida com os últimos 5 movimentos financeiros
-        public List<LancamentoResumoDTO> UltimosLancamentos { get; set; } = new();
+        public List<LancamentoResumoDTO> LancamentosDoMes { get; set; } = new();
     }
 }

@@ -56,9 +56,8 @@ namespace Financas.Api.Services
             }
 
             // Busca os 5 lançamentos mais recentes, projetando para o DTO de resumo
-            var ultimosLancamentos = await lancamento
+            var lancamentosDoMes = await lancamento
                 .OrderByDescending(l => l.Data)
-                .Take(5)
                 .Select(l => new LancamentoResumoDTO
                 {
                     Id = l.Id,
@@ -79,7 +78,7 @@ namespace Financas.Api.Services
                 SaldoMensal = totalReceitas - totalDespesas,
                 SaldoBancarioTotal = saldoBancarioTotal,
                 PeriodoReferencia = $"{mes:D2}/{ano}", // Formata mês com dois dígitos (ex: 01, 02)
-                UltimosLancamentos = ultimosLancamentos
+                LancamentosDoMes = lancamentosDoMes
             };
         }
     }
