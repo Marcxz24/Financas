@@ -1,4 +1,5 @@
 /* Configurações básicas de reset e tipografia global */
+/* Remove margens e padding padrão do navegador e define o fundo e a fonte base da aplicação. */
 body {
   margin: 0;
   padding: 0;
@@ -7,6 +8,7 @@ body {
 }
 
 /* Estrutura principal da página com fundo em gradiente */
+/* Este container engloba todo o dashboard, define a direção de layout e garante que o background escuro com gradiente apareça em todo o app. */
 .dashboard-page {
   height: 100vh;
   height: 100dvh;
@@ -18,6 +20,7 @@ body {
 }
 
 /* Container para o conteúdo principal, garantindo que o rodapé fique fixo */
+/* O main interno usa padding e width controlados para centralizar e espaçar o conteúdo do Dashboard. */
 .dashboard-content {
   flex: 1 0 auto;
   min-height: 0;
@@ -93,11 +96,48 @@ body {
 }
 
 /* Layout em grade para os cards */
+/* O grid permite card sizes flexíveis e mantém quatro cards lado a lado em telas grandes. */
 .resumo-cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
   gap: 24px;
   margin-bottom: 40px;
+}
+
+/* Barra de filtros do dashboard */
+/* Agrupa selects de mês, ano e conta em um painel escuro, com padding e borda suave. */
+.dashboard-filtros {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  padding: 14px 16px;
+  background: #10131a;
+  border: 1px solid #232833;
+  border-radius: 18px;
+}
+
+/* Estilo unificado para selects do dashboard */
+/* Define aparência escura, padding e transição suave ao focar ou passar o mouse. */
+.select-filtro {
+  appearance: none;
+  background-color: #12171f;
+  color: #ffffff;
+  border: 1px solid #2f3749;
+  padding: 12px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  outline: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  min-width: 150px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.select-filtro:hover,
+.select-filtro:focus {
+  border-color: #6366f1;
 }
 
 .card {
@@ -126,6 +166,7 @@ body {
 }
 
 /* Container da lista */
+/* Painel que envolve o recurso de transações recentes. Mantém o conteúdo estruturado com fundo e bordas consistentes. */
 .ultimas-transacoes {
   background: #1a1f29;
   border: 1px solid #252a35;
@@ -146,6 +187,8 @@ body {
   gap: 12px;
 }
 
+/* Estilo de cada transação individual */
+/* Exibe as transações em linhas card-like com hover suave e espaçamento interno confortável. */
 .item-transacao {
   display: flex;
   justify-content: space-between;
@@ -197,7 +240,20 @@ body {
   transform: scale(1.05);
 }
 
+.card.saldo {
+  border-color: rgba(99, 102, 241, 0.25);
+}
+
+.saldo-positivo {
+  color: #22c55e;
+}
+
+.saldo-negativo {
+  color: #ef4444;
+}
+
 /* Cores do Valor */
+/* Usadas para sinalizar ganhos e perdas com contraste claro em texto escuro. */
 .positivo { color: #22c55e !important; font-weight: 700; }
 .negativo { color: #ef4444 !important; font-weight: 700; }
 
@@ -235,6 +291,7 @@ body {
 }
 
 /* Responsividade */
+/* Adapta o layout em telas menores: menos colunas, cards menores e transações empilhadas. */
 @media (max-width: 1024px) { .resumo-cards { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 768px) {
   .resumo-cards { grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; }
@@ -256,48 +313,6 @@ body {
   .dashboard-content { padding: 16px 12px 120px; }
 }
 
-/* Ajuste específico para o card que contém o filtro */
-.card {
-  display: flex;
-  flex-wrap: wrap; /* Permite que os elementos quebrem linha se necessário */
-  justify-content: space-between; /* Empurra o H3 para a esquerda e o Select para a direita */
-  align-items: center;
-  position: relative;
-}
-
-/* Garante que o título ocupe o espaço correto alinhado ao select */
-.card h3 {
-  margin: 0;
-  flex: 1; /* Permite que o título ocupe o espaço restante da linha */
-}
-
-/* Estilização do select otimizada para dentro do seu card escuro */
-.select-filtro-conta {
-  background-color: #1a1f29; /* Tom escuro idêntico ao fundo dos seus cards */
-  color: #ffffff;
-  border: 1px solid #334155;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  outline: none;
-  font-size: 0.85rem;
-  font-weight: 500;
-  transition: border-color 0.2s ease;
-  max-width: 170px; /* Evita que o select ocupe espaço demais horizontalmente */
-}
-
-.select-filtro-conta:focus {
-  border-color: #6366f1; /* Destaque moderno ao clicar */
-}
-
-/* Força o valor em R$ a ocupar 100% da largura da linha de baixo */
-.card p {
-  width: 100%;
-  margin-top: 16px; /* Espaçamento entre o topo (título/filtro) e o valor em dinheiro */
-  margin-bottom: 0;
-  font-size: 1.8rem; /* Ajuste para manter o destaque do seu valor */
-  font-weight: bold;
-}
 
 @media (max-width: 600px) {
   .dashboard-header {
@@ -356,15 +371,10 @@ body {
     font-size: 13px;
   }
 
-  .select-filtro-conta {
+  .select-filtro {
     max-width: 100%;
     width: 100%;
     margin-top: 10px;
-  }
-
-  .card {
-    flex-direction: column;
-    align-items: flex-start;
   }
 
   .card h3 {
