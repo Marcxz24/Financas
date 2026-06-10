@@ -20,35 +20,35 @@ function Relatorios() {
       descricao:
         "Consulte receitas recebidas por período e categoria.",
       icone: "bi-graph-up-arrow",
-      rota: "#",
+      rota: "/dashboard/relatorios/receitas",
     },
     {
       titulo: "Despesas",
       descricao:
         "Analise despesas realizadas por período e categoria.",
       icone: "bi-graph-down-arrow",
-      rota: "#",
+      rota: "/dashboard/relatorios/despesas",
     },
     {
       titulo: "Fluxo de Caixa",
       descricao:
         "Acompanhe entradas e saídas financeiras do período.",
       icone: "bi-cash-stack",
-      rota: "#",
+      rota: "/dashboard/relatorios/fluxo-caixa",
     },
     {
       titulo: "Contas Bancárias",
       descricao:
-        "Resumo completo das movimentações das contas bancárias.",
+        "Resumo completo das contas bancárias cadastradas.",
       icone: "bi-bank",
-      rota: "#",
+      rota: "/dashboard/relatorios/contas-bancarias",
     },
     {
       titulo: "Cartões de Crédito",
       descricao:
         "Relatório consolidado dos cartões cadastrados.",
       icone: "bi-credit-card",
-      rota: "#",
+      rota: "/dashboard/relatorios/cartoes-credito",
     },
   ];
 

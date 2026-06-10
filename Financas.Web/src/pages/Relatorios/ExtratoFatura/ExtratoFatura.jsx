@@ -1,6 +1,6 @@
-import "./ExtratoFatura.css";
 import { useEffect, useState } from "react";
 import api from "../../../services/api";
+import "../../Relatorios/ExtratoFatura/ExtratoFatura.css";
 
 // Página de extrato de faturas
 // Exibe faturas encerradas, detalhes do extrato e prepara impressão em PDF.

@@ -180,8 +180,9 @@
 
 .resumo-item span {
   display: block;
-  color: #9ca3af;
+  color: #94a3b8;
   font-size: 13px;
+  text-transform: uppercase;
   margin-bottom: 8px;
 }
 
