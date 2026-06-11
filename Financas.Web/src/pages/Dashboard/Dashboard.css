@@ -274,9 +274,30 @@ body {
 
 .detalhes-wrapper { display: flex; flex-direction: column; gap: 2px; }
 
-.info-item { display: flex; align-items: center; }
-.info-item small { width: 55px; color: #888; font-weight: 500; }
-.origem-txt { color: #ffffff; margin-left: 5px; font-size: 13px; }
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+.info-item small {
+  width: auto;
+  color: #888;
+  font-weight: 600;
+  margin: 0;
+}
+
+.origem-txt {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  margin-left: 0;
+  position: relative;
+  top: 6px;
+}
 
 .desc-txt {
   color: #ffffff;

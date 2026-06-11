@@ -13,3 +13,28 @@ body,
   background-color: #0b0e14;
   font-family: 'Inter', Arial, Helvetica, sans-serif;
 }
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+        180deg,
+        #24324d,
+        #1a2436
+    );
+    border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+        180deg,
+        #32415f,
+        #24324d
+    );
+}
