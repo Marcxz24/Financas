@@ -32,7 +32,7 @@ function Footer() {
 
         {/* Bloco que exibe a versão atual do sistema */}
         <div className="footer-versao">
-          v1.4.0
+          v1.4.1
         </div>
 
       </div>

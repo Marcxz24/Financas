@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import api from "../../services/api";
 import "./Fatura.css";
+import { useNavigate } from "react-router-dom";
 
 function Fatura() {
+  const navigate = useNavigate();
   const [faturas, setFaturas] = useState([]);
   const [contas, setContas] = useState([]);
   const [faturaSelecionada, setFaturaSelecionada] = useState(null);
@@ -62,7 +64,7 @@ function Fatura() {
         ValorPago: parseFloat(valor),
         DataPagamento: new Date().toISOString(),
         ContaBancariaId: contaBancariaId ? parseInt(contaBancariaId) : null,
-        observacao: obs
+        observacao: obs,
       };
 
       await api.post("/fatura/pagar", payload);
@@ -144,6 +146,18 @@ function Fatura() {
                   )}
                   {f.status === "Paga" && (
                     <span className="status-paga">Fatura Quitada</span>
+                  )}
+
+                  {/* Botão de relatório*/}
+                  {f.status === "Paga" && (
+                    <button
+                      className="btn-relatorio-fatura btn-relatorio-vermelho"
+                      onClick={() =>
+                        navigate(`/dashboard/relatorios/fatura/${f.id}`)
+                      }
+                    >
+                      <i className="bi bi-file-earmark-text"></i> Relatório
+                    </button>
                   )}
                 </div>
               </div>

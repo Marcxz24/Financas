@@ -1,3 +1,4 @@
+/* Container principal da página de relatório: centralizado com largura máxima */
 .relatorio-page {
   width: 100%;
   max-width: 1100px;
@@ -6,10 +7,12 @@
   color: #ffffff;
 }
 
+/* Espaçamento do cabeçalho da página */
 .relatorio-header {
   margin-bottom: 24px;
 }
 
+/* Título do cabeçalho com alinhamento flexível */
 .relatorio-header h2 {
   display: flex;
   align-items: center;
@@ -18,11 +21,13 @@
   margin-bottom: 8px;
 }
 
+/* Subtítulo informativo do cabeçalho */
 .relatorio-header p {
   color: #9ca3af;
   font-size: 14px;
 }
 
+/* Layout de grade para os campos de filtro */
 .relatorio-filtros {
   display: grid;
   gap: 18px;
@@ -30,6 +35,7 @@
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
+/* Card de estilo individual para cada filtro */
 .filtro-card {
   background: #0f172a;
   border: 1px solid #1f2937;
@@ -37,6 +43,7 @@
   padding: 20px;
 }
 
+/* Legenda dos campos de formulário */
 .filtro-card label {
   display: block;
   color: #cbd5e1;
@@ -44,6 +51,7 @@
   font-size: 13px;
 }
 
+/* Estilização dos inputs e selects de filtro */
 .filtro-card input,
 .filtro-card select {
   width: 100%;
@@ -55,10 +63,12 @@
   font-size: 14px;
 }
 
+/* Ajuste de fundo para opções do select em modo escuro */
 .filtro-card select option {
   background: #0f172a;
 }
 
+/* Botão principal de aplicar filtros */
 .botao-filtro {
   background: #2563eb;
   color: #ffffff;
@@ -73,6 +83,7 @@
   background: #1d4ed8;
 }
 
+/* Grade de resumo (KPIs) com ajuste responsivo */
 .relatorio-resumo {
   display: grid;
   gap: 16px;
@@ -80,6 +91,7 @@
   margin-bottom: 24px;
 }
 
+/* Card de exibição de dados resumidos */
 .resumo-card {
   background: #111827;
   border: 1px solid #1f2937;
@@ -87,6 +99,7 @@
   padding: 18px;
 }
 
+/* Label dentro do card de resumo */
 .resumo-card span {
   display: block;
   color: #94a3b8;
@@ -94,12 +107,14 @@
   font-size: 13px;
 }
 
+/* Valor em destaque dentro do card de resumo */
 .resumo-card strong {
   display: block;
   color: #ffffff;
   font-size: 18px;
 }
 
+/* Container do gráfico com bordas arredondadas e espaçamento */
 .grafico-card {
   background: #111827;
   border: 1px solid #1f2937;
@@ -108,12 +123,14 @@
   margin-bottom: 24px;
 }
 
+/* Título interno do gráfico */
 .grafico-card h3 {
   margin: 0 0 18px;
   color: #ffffff;
   font-size: 18px;
 }
 
+/* Define rolagem horizontal para containers de gráficos em telas pequenas */
 .grafico-linha-container,
 .grafico-pizza-wrapper,
 .grafico-bar-container {
@@ -122,6 +139,7 @@
   overflow-y: hidden;
 }
 
+/* Garante que os SVGs dentro dos containers mantenham proporções mínimas */
 .grafico-linha-svg,
 .grafico-bar-svg {
   display: block;
@@ -130,18 +148,21 @@
   border-radius: 16px;
 }
 
+/* Centralização para o gráfico de pizza */
 .grafico-pizza-svg {
   max-width: 100%;
   display: block;
   margin: 0 auto;
 }
 
+/* Container para botões de ação (ex: exportar PDF) */
 .relatorio-actions {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 18px;
 }
 
+/* Botão de ação para exportação */
 .botao-pdf {
   border: none;
   border-radius: 12px;
@@ -160,12 +181,14 @@
   background: #dc2626;
 }
 
+/* Configurações específicas para formatação de impressão (PDF) */
 @media print {
   body, html {
     background: #ffffff !important;
     color: #111827 !important;
   }
 
+  /* Oculta elementos que não são necessários no papel */
   .relatorio-filtros,
   .botao-pdf,
   .relatorio-actions,
@@ -173,6 +196,7 @@
     display: none !important;
   }
 
+  /* Ajusta cores e bordas para o padrão de impressão em branco */
   .relatorio-page,
   .relatorio-header,
   .resumo-card,
@@ -184,6 +208,7 @@
     box-shadow: none !important;
   }
 
+  /* Impede que blocos de conteúdo sejam cortados entre páginas */
   .grafico-card,
   .resumo-card,
   .tabela-relatorio,
@@ -223,6 +248,7 @@
   }
 }
 
+/* Estado de exibição quando não há dados no gráfico */
 .grafico-pizza-vazio {
   width: 100%;
   padding: 40px 20px;
@@ -235,12 +261,14 @@
   border-radius: 18px;
 }
 
+/* Layout de grade para legendas de gráficos */
 .relatorio-legenda {
   display: grid;
   gap: 12px;
   margin-top: 18px;
 }
 
+/* Item individual da legenda */
 .legenda-item {
   display: flex;
   align-items: center;
@@ -249,6 +277,7 @@
   font-size: 14px;
 }
 
+/* Indicador de cor da legenda */
 .legenda-cor {
   width: 14px;
   height: 14px;
@@ -256,6 +285,7 @@
   display: inline-block;
 }
 
+/* Tabela de listagem detalhada */
 .tabela-relatorio {
   width: 100%;
   border-collapse: collapse;
@@ -265,6 +295,7 @@
   overflow: hidden;
 }
 
+/* Estilização básica das células de cabeçalho e corpo da tabela */
 .tabela-relatorio th,
 .tabela-relatorio td {
   padding: 14px 16px;
@@ -273,6 +304,7 @@
   font-size: 14px;
 }
 
+/* Estilização específica dos cabeçalhos da tabela */
 .tabela-relatorio th {
   background: #0f172a;
   color: #94a3b8;
@@ -281,10 +313,12 @@
   letter-spacing: 0.04em;
 }
 
+/* Remove a borda inferior da última linha da tabela */
 .tabela-relatorio tr:last-child td {
   border-bottom: none;
 }
 
+/* Mensagens de estado para tabelas vazias ou erros */
 .sem-resultados,
 .relatorio-erro {
   padding: 24px;
@@ -295,6 +329,7 @@
   text-align: center;
 }
 
+/* Ajustes responsivos para dispositivos móveis */
 @media (max-width: 768px) {
   .relatorio-page {
     padding: 18px;

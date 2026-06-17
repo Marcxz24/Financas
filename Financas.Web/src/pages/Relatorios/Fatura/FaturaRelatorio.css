@@ -1,0 +1,107 @@
+/*
+ * FaturaRelatorio.css
+ * Classes exclusivas do relatório de fatura.
+ * Não altera nada de RelatorioReport.css nem dos outros relatórios.
+ */
+
+/* Container da barra de ações: define largura máxima, alinhamento dos botões e espaçamento interno */
+.a4-barra-acoes {
+  width: 100%;
+  max-width: 210mm;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  box-sizing: border-box;
+}
+
+/* Agrupa botões horizontalmente com espaçamento uniforme */
+.fat-btn-grupo {
+  display: flex;
+  gap: 10px;
+}
+
+/* Estilo base para todos os botões do relatório */
+.fat-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .18s, color .18s;
+}
+
+/* Variação de botão transparente para ações secundárias */
+.fat-btn--ghost {
+  background: transparent;
+  color: #374151;
+}
+.fat-btn--ghost:hover { background: rgba(0,0,0,.06); }
+
+/* Variação de botão com borda para ações neutras */
+.fat-btn--outline {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+.fat-btn--outline:hover { background: #f3f4f6; }
+
+/* Variação de botão preenchido para ações principais */
+.fat-btn--primary {
+  background: #1e3a8a;
+  color: #ffffff;
+}
+.fat-btn--primary:hover { background: #1e40af; }
+
+/* Subtítulo informativo no cabeçalho */
+.fat-cab-sub {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 2px 0 0;
+}
+
+/* Indicador visual para o tipo de lançamento */
+.fat-tipo {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 600;
+}
+.fat-tipo--despesa { background: #fee2e2; color: #b91c1c; }
+.fat-tipo--receita { background: #dcfce7; color: #15803d; }
+
+/* Estilo aplicado quando uma célula de dados não possui conteúdo */
+.fat-vazio {
+  color: #9ca3af;
+  font-style: italic;
+  text-align: center;
+  padding: 14px !important;
+}
+
+/* Container centralizado para mensagens de carregamento ou erros */
+.fat-estado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 60vh;
+  color: #9ca3af;
+  font-size: 15px;
+}
+
+/* Estilo específico para destacar erros */
+.fat-estado--erro { color: #b91c1c; }
+
+/* Botão de ação contido dentro de um estado (ex: tentar novamente) */
+.fat-estado button {
+  padding: 9px 20px;
+  background: #1e3a8a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}

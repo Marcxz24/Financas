@@ -1,0 +1,339 @@
+/*
+ * DocumentoA4.css
+ * Base oficial para relatórios de documento A4 do sistema.
+ *
+ * ESTRATÉGIA MOBILE:
+ * A folha mantém 210mm fixos. Em telas estreitas, o navegador
+ * cria scroll horizontal — o usuário vê o papel como ele é.
+ * Nenhum conteúdo é distorcido ou reorganizado.
+ *
+ * IMPRESSÃO / CTRL+P:
+ * Remove toda decoração de tela. A folha ocupa exatamente
+ * 210mm × 297mm. O padding interno serve como margem do papel.
+ * print-color-adjust garante cores e backgrounds impressos.
+ */
+
+:root {
+  --a4-w: 210mm;
+  --a4-h: 297mm;
+  --doc-mg-v:       18mm;
+  --doc-mg-h:       15mm;
+
+  --doc-bg:          #ffffff;
+  --doc-texto:       #111827;
+  --doc-muted:       #6b7280;
+  --doc-borda:       #e5e7eb;
+  --doc-borda-forte: #d1d5db;
+  --doc-primaria:    #1e3a8a;
+  --doc-alt:         #2563eb;
+  --doc-destaque:    #f3f4f6;
+  --doc-zebra:       #f9fafb;
+  --doc-fonte: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Fundo cinza "mesa" ao redor do papel */
+.a4-viewport {
+  width: 100%;
+  min-height: 100vh;
+  background: #cbd5e1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 0 48px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* A folha de papel */
+.a4-folha {
+  width: var(--a4-w);
+  min-height: var(--a4-h);
+  background: var(--doc-bg);
+  color: var(--doc-texto);
+  font-family: var(--doc-fonte);
+  font-size: 13px;
+  line-height: 1.55;
+  box-shadow:
+    0 2px 8px rgba(0,0,0,.10),
+    0 12px 32px rgba(0,0,0,.08);
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Cada página A4 dentro do documento */
+.a4-pagina {
+  width: 100%;
+  min-height: var(--a4-h);
+  padding: var(--doc-mg-v) var(--doc-mg-h) var(--doc-mg-v);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  page-break-after: always;
+  break-after: page;
+}
+
+.a4-pagina:last-of-type {
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+/* Cabeçalho interno da página */
+.a4-cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  margin-bottom: 18px;
+  border-bottom: 2px solid var(--doc-primaria);
+}
+
+.a4-cab-titulo {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--doc-primaria);
+  margin: 0;
+}
+
+.a4-cab-meta {
+  font-size: 11px;
+  color: var(--doc-muted);
+  text-align: right;
+  line-height: 1.6;
+}
+
+/* Área de conteúdo cresce para empurrar rodapé para baixo */
+.a4-conteudo { flex: 1; }
+
+/* Título de seção */
+.a4-secao-titulo {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--doc-primaria);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin: 20px 0 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--doc-borda-forte);
+}
+
+.a4-secao-titulo:first-child { margin-top: 0; }
+
+/* Grid de KPIs */
+.a4-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.a4-kpi {
+  background: var(--doc-destaque);
+  border: 1px solid var(--doc-borda);
+  border-radius: 5px;
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.a4-kpi-label {
+  display: block;
+  font-size: 10px;
+  color: var(--doc-muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: 5px;
+}
+
+.a4-kpi-valor {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--doc-texto);
+  font-variant-numeric: tabular-nums;
+}
+
+.a4-kpi-valor--verde  { color: #15803d; }
+.a4-kpi-valor--azul   { color: var(--doc-primaria); }
+.a4-kpi-valor--cinza  { color: var(--doc-muted); }
+
+/* Tabela */
+.a4-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 14px;
+  font-size: 11px;
+}
+
+.a4-tabela thead th {
+  background: var(--doc-primaria);
+  color: #fff;
+  padding: 7px 9px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.a4-tabela thead th:first-child { border-radius: 3px 0 0 0; }
+.a4-tabela thead th:last-child  { border-radius: 0 3px 0 0; }
+
+.a4-tabela tbody td {
+  padding: 6px 9px;
+  border-bottom: 1px solid var(--doc-borda);
+  vertical-align: top;
+}
+
+.a4-tabela tbody tr:nth-child(even) td {
+  background: var(--doc-zebra);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.a4-tabela .col-num  { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.a4-tabela .col-data { white-space: nowrap; }
+
+/* Linha de total com destaque */
+.a4-total-bloco {
+  margin-top: 8px;
+  border-top: 2px solid var(--doc-borda-forte);
+}
+
+.a4-total-linha {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 9px;
+  font-size: 11px;
+}
+
+.a4-total-linha--destaque {
+  background: var(--doc-primaria);
+  color: #fff;
+  border-radius: 4px;
+  padding: 10px 12px;
+  margin-top: 6px;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.a4-total-linha--destaque .a4-total-valor {
+  font-size: 17px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Badge de status */
+.a4-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.a4-badge--pago    { background: #dcfce7; color: #15803d; }
+.a4-badge--aberto  { background: #fef9c3; color: #854d0e; }
+.a4-badge--vencido { background: #fee2e2; color: #b91c1c; }
+
+/* Impede quebra de página dentro do bloco */
+.a4-unido {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+/* Rodapé da página */
+.a4-rodape {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--doc-borda);
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--doc-muted);
+}
+
+@media screen and (max-width: 820px) {
+  .a4-folha {
+    width: 100vw;
+    min-height: auto;
+    box-shadow: none;
+  }
+
+  .a4-pagina {
+    padding: 8mm 5mm;
+    min-height: auto;
+  }
+
+  .a4-kpi-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .a4-kpi-valor {
+    font-size: 13px;
+  }
+
+  .a4-tabela {
+    font-size: 10px;
+  }
+
+  .a4-tabela thead th,
+  .a4-tabela tbody td {
+    padding: 5px 6px;
+  }
+
+  .a4-barra-acoes {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 12px;
+  }
+}
+
+/* ── Impressão ───────────────────────────────────────────── */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  /* Oculta absolutamente tudo do site */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Mostra só a folha A4 e tudo dentro dela */
+  .a4-folha,
+  .a4-folha * {
+    visibility: visible;
+  }
+
+  /* Posiciona a folha no canto superior esquerdo da página impressa */
+  .a4-folha {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 210mm;
+    box-shadow: none;
+    margin: 0;
+  }
+
+  /* Garante cores e backgrounds */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Oculta a barra de ações */
+  .a4-barra-acoes {
+    display: none !important;
+  }
+
+  .a4-unido {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}

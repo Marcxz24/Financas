@@ -19,6 +19,7 @@ import Relatorios from "./pages/Relatorios/Relatorios";
 import Receitas from "./pages/Relatorios/Receitas/Receitas";
 import Despesas from "./pages/Relatorios/Despesas/Despesas";
 import FluxoCaixa from "./pages/Relatorios/FluxoCaixa/FluxoCaixa";
+import FaturaRelatorio from "./pages/Relatorios/Fatura/FaturaRelatorio";
 import Perfil from "./pages/Perfil/Perfil";
 import Ajuda from "./pages/Ajuda/Ajuda";
 import SessaoExpirada from "./pages/SessaoExpirada/SessaoExpirada";
@@ -71,6 +72,9 @@ function App() {
           <Route path="relatorios/receitas" element={<Receitas />} />
           <Route path="relatorios/despesas" element={<Despesas />} />
           <Route path="relatorios/fluxo-caixa" element={<FluxoCaixa />} />
+          // Dentro do bloco de rotas do dashboard
+          <Route path="relatorios/fatura/:id" element={<FaturaRelatorio />} />
+
 
           <Route path="perfil" element={<Perfil />} />
 

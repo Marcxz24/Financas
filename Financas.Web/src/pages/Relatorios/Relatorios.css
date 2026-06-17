@@ -1,15 +1,16 @@
-/* Estilos da página de relatórios */
+/* Container principal da página de relatórios: define margens e cor de texto global */
 .relatorios-container {
   width: 100%;
   padding: 25px;
   color: #ffffff;
 }
 
-/* Cabeçalho da página de relatórios */
+/* Área do cabeçalho da página de relatórios */
 .relatorios-header {
   margin-bottom: 30px;
 }
 
+/* Título do cabeçalho: alinhamento com ícones e margens */
 .relatorios-header h2 {
   display: flex;
   align-items: center;
@@ -19,17 +20,20 @@
   margin-bottom: 8px;
 }
 
+/* Parágrafo descritivo abaixo do título */
 .relatorios-header p {
   color: #9ca3af;
   font-size: 14px;
 }
 
+/* Grade de cards para listagem dos relatórios (responsivo) */
 .relatorios-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 20px;
 }
 
+/* Estilo base do card de cada relatório */
 .relatorio-card {
   background: #1f2937;
   border: 1px solid #2d3748;
@@ -39,12 +43,14 @@
   cursor: pointer;
 }
 
+/* Efeito de destaque ao passar o mouse sobre o card */
 .relatorio-card:hover {
   transform: translateY(-4px);
   border-color: #3b82f6;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
 }
 
+/* Container do ícone do card com fundo semitransparente */
 .relatorio-icon {
   width: 60px;
   height: 60px;
@@ -56,17 +62,20 @@
   margin-bottom: 15px;
 }
 
+/* Estilização do ícone */
 .relatorio-icon i {
   font-size: 28px;
   color: #3b82f6;
 }
 
+/* Título do relatório dentro do card */
 .relatorio-card h3 {
   margin-bottom: 10px;
   font-size: 18px;
   color: #ffffff;
 }
 
+/* Descrição do card com altura mínima para alinhamento */
 .relatorio-card p {
   color: #9ca3af;
   line-height: 1.5;
@@ -74,6 +83,7 @@
   margin-bottom: 20px;
 }
 
+/* Estilo do botão de ação do card */
 .btn-relatorio {
   width: 100%;
   border: none;
@@ -86,16 +96,19 @@
   transition: 0.2s;
 }
 
+/* Efeito de hover do botão (se habilitado) */
 .btn-relatorio:hover:not(:disabled) {
   background: #1d4ed8;
 }
 
+/* Estilo do botão quando desabilitado */
 .btn-relatorio:disabled {
   background: #374151;
   color: #9ca3af;
   cursor: not-allowed;
 }
 
+/* Ajustes de layout para dispositivos móveis */
 @media (max-width: 768px) {
   .relatorios-container {
     padding: 15px;

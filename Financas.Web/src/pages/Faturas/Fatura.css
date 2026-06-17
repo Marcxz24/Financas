@@ -56,6 +56,15 @@
   cursor: pointer;
 }
 
+/* Estilo específico para o botão de relatório quando vermelho */
+.btn-relatorio-vermelho {
+  background-color: #ef4444 !important; /* Cor vermelha */
+}
+
+.btn-relatorio-vermelho:hover {
+  background-color: #dc2626 !important; /* Vermelho mais escuro no hover */
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;

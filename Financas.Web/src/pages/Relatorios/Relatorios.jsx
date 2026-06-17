@@ -26,6 +26,13 @@ function Relatorios() {
       icone: "bi-cash-stack",
       rota: "/dashboard/relatorios/fluxo-caixa",
     },
+    // Adicione este objeto no array relatorios:
+    {
+      titulo: "Fatura",
+      descricao: "Visualize e exporte o extrato detalhado de uma fatura.",
+      icone: "bi-receipt",
+      rota: "/dashboard/relatorios/fatura", // rota de seleção — veja nota abaixo
+    },
   ];
 
   // Navega para o relatório selecionado, quando disponível
