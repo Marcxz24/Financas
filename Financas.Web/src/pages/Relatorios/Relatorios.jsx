@@ -9,46 +9,22 @@ function Relatorios() {
   // Configuração dos cards de relatório exibidos na página
   const relatorios = [
     {
-      titulo: "Extrato de Faturas",
-      descricao:
-        "Visualize todas as faturas pagas e gere relatórios detalhados.",
-      icone: "bi-receipt",
-      rota: "/dashboard/relatorios/extrato-faturas",
-    },
-    {
       titulo: "Receitas",
-      descricao:
-        "Consulte receitas recebidas por período e categoria.",
+      descricao: "Consulte receitas recebidas por período e categoria.",
       icone: "bi-graph-up-arrow",
       rota: "/dashboard/relatorios/receitas",
     },
     {
       titulo: "Despesas",
-      descricao:
-        "Analise despesas realizadas por período e categoria.",
+      descricao: "Analise despesas realizadas por período e categoria.",
       icone: "bi-graph-down-arrow",
       rota: "/dashboard/relatorios/despesas",
     },
     {
       titulo: "Fluxo de Caixa",
-      descricao:
-        "Acompanhe entradas e saídas financeiras do período.",
+      descricao: "Acompanhe entradas e saídas financeiras do período.",
       icone: "bi-cash-stack",
       rota: "/dashboard/relatorios/fluxo-caixa",
-    },
-    {
-      titulo: "Contas Bancárias",
-      descricao:
-        "Resumo completo das contas bancárias cadastradas.",
-      icone: "bi-bank",
-      rota: "/dashboard/relatorios/contas-bancarias",
-    },
-    {
-      titulo: "Cartões de Crédito",
-      descricao:
-        "Relatório consolidado dos cartões cadastrados.",
-      icone: "bi-credit-card",
-      rota: "/dashboard/relatorios/cartoes-credito",
     },
   ];
 
@@ -68,9 +44,7 @@ function Relatorios() {
           Relatórios
         </h2>
 
-        <p>
-          Central de relatórios financeiros do sistema.
-        </p>
+        <p>Central de relatórios financeiros do sistema.</p>
       </div>
 
       <div className="relatorios-grid">
@@ -88,13 +62,8 @@ function Relatorios() {
 
             <p>{relatorio.descricao}</p>
 
-            <button
-              className="btn-relatorio"
-              disabled={relatorio.rota === "#"}
-            >
-              {relatorio.rota === "#"
-                ? "Em Breve"
-                : "Acessar"}
+            <button className="btn-relatorio" disabled={relatorio.rota === "#"}>
+              {relatorio.rota === "#" ? "Em Breve" : "Acessar"}
             </button>
           </div>
         ))}

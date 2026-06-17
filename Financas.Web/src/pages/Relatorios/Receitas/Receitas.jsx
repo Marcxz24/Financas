@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../../services/api";
 import { BarChart } from "../RelatorioCharts";
-import { RelatorioDocumento } from "../RelatorioDocumento";
-import "../../Relatorios/RelatorioReport.css";
 
 function Receitas() {
   const [contas, setContas] = useState([]);
@@ -17,8 +15,6 @@ function Receitas() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
   const [receitas, setReceitas] = useState([]);
-  const [modoDocumento, setModoDocumento] = useState(false);
-  const [exportarPDFFunc, setExportarPDFFunc] = useState(null);
 
   useEffect(() => {
     // 1. Defina as funções auxiliares DENTRO do useEffect
@@ -99,10 +95,6 @@ function Receitas() {
     filtros.dataFim,
     filtros.dataInicio,
   ]);
-
-  const imprimirRelatorio = () => {
-    setModoDocumento(true);
-  };
 
   const isReceita = (item) => {
     const tipo = item.tipo;
@@ -204,95 +196,6 @@ function Receitas() {
 
   const { labels, values } = agruparPorData();
 
-  if (modoDocumento) {
-    const totalReceitas = receitas.reduce(
-      (total, item) => total + Number(item.valor || 0),
-      0,
-    );
-    const resumoData = [
-      { label: "Total de Receitas", valor: formatarMoeda(totalReceitas) },
-      { label: "Registros", valor: receitas.length },
-      {
-        label: "Período",
-        valor: `${formatarData(filtros.dataInicio) || "Sem filtro"} a ${formatarData(filtros.dataFim) || "Sem filtro"}`,
-      },
-    ];
-
-    const secoes = [
-      {
-        titulo: "Gráfico - Receitas por Dia",
-        grafico: <BarChart labels={labels} values={values} color="#22c55e" />,
-      },
-      {
-        titulo: "Detalhes das Receitas",
-        tabela: {
-          colunas: ["Data", "Descrição", "Categoria", "Conta", "Valor"],
-          dados: receitas.map((item) => [
-            formatarData(
-              item.data || item.dataLancamento || item.dataMovimento,
-            ),
-            item.descricao || item.historico || "-",
-            item.categoriaNome || item.categoria?.nome || "-",
-            item.contaBancariaNome || item.conta?.nome || "-",
-            formatarMoeda(item.valor),
-          ]),
-        },
-      },
-    ];
-
-    return (
-      <div
-        style={{ padding: "20px", background: "#f3f4f6", minHeight: "100vh" }}
-      >
-        <button
-          onClick={() => setModoDocumento(false)}
-          style={{
-            marginBottom: "20px",
-            padding: "10px 16px",
-            background: "#2563eb",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontSize: "14px",
-            fontWeight: "600",
-          }}
-        >
-          ← Voltar para Relatório
-        </button>
-        <RelatorioDocumento
-          titulo="Relatório de Receitas"
-          descricao="Detalhamento de todas as receitas cadastradas no sistema"
-          resumo={resumoData}
-          secoes={secoes}
-          onExportarPDF={setExportarPDFFunc}
-        />
-        <div style={{ padding: "20px", textAlign: "center" }}>
-          <button
-            onClick={() => {
-              if (exportarPDFFunc) exportarPDFFunc();
-            }}
-            style={{
-              padding: "12px 24px",
-              background: "#ef4444",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontSize: "16px",
-              fontWeight: "600",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-            }}
-          >
-            <i className="bi bi-file-earmark-pdf"></i> Exportar como PDF
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="relatorio-page">
       <div className="relatorio-header">
@@ -303,12 +206,6 @@ function Receitas() {
         <p>
           Consulte receitas cadastradas por período, conta bancária e categoria.
         </p>
-      </div>
-
-      <div className="relatorio-actions">
-        <button className="botao-pdf" onClick={imprimirRelatorio}>
-          <i className="bi bi-file-earmark-pdf"></i> Exportar PDF
-        </button>
       </div>
       <div className="relatorio-filtros">
         <div className="filtro-card">
@@ -398,11 +295,13 @@ function Receitas() {
         </div>
       </div>
 
-      <div className={`grafico-card ${modoDocumento ? "pdf-imprimir" : ""}`}>
+      <div className="grafico-card">
         <h3>Receitas por dia</h3>
+
         {receitas.length > 0 ? (
           <>
             <BarChart labels={labels} values={values} color="#22c55e" />
+
             <div className="relatorio-legenda">
               <div className="legenda-item">
                 <span

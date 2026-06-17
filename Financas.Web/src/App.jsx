@@ -16,15 +16,13 @@ import ContaBancaria from "./pages/ContaBancaria/ContaBancaria";
 import CartaoCredito from "./pages/CartaoCredito/CartaoCredito";
 import Fatura from "./pages/Faturas/Fatura";
 import Relatorios from "./pages/Relatorios/Relatorios";
-import ExtratoFatura from "./pages/Relatorios/ExtratoFatura/ExtratoFatura";
 import Receitas from "./pages/Relatorios/Receitas/Receitas";
 import Despesas from "./pages/Relatorios/Despesas/Despesas";
 import FluxoCaixa from "./pages/Relatorios/FluxoCaixa/FluxoCaixa";
-import RelatorioContasBancarias from "./pages/Relatorios/ContasBancarias/RelatorioContasBancarias";
-import RelatorioCartoesCredito from "./pages/Relatorios/CartoesCredito/RelatorioCartoesCredito";
 import Perfil from "./pages/Perfil/Perfil";
 import Ajuda from "./pages/Ajuda/Ajuda";
 import SessaoExpirada from "./pages/SessaoExpirada/SessaoExpirada";
+
 // Componente de Middleware para proteção de rotas (Auth check)
 import PrivateRoute from "./routes/PrivateRoute";
 
@@ -70,12 +68,10 @@ function App() {
           <Route path="fatura" element={<Fatura />} />
 
           <Route path="relatorios" element={<Relatorios />} />
-          <Route path="relatorios/extrato-faturas" element={<ExtratoFatura />} />
           <Route path="relatorios/receitas" element={<Receitas />} />
           <Route path="relatorios/despesas" element={<Despesas />} />
           <Route path="relatorios/fluxo-caixa" element={<FluxoCaixa />} />
-          <Route path="relatorios/contas-bancarias" element={<RelatorioContasBancarias />} />
-          <Route path="relatorios/cartoes-credito" element={<RelatorioCartoesCredito />} />
+
           <Route path="perfil" element={<Perfil />} />
 
           <Route path="ajuda" element={<Ajuda />} />
