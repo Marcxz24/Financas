@@ -2,6 +2,7 @@
 using Financas.Api.DTOs.Lancamento;
 using Financas.Api.Entities;
 using Financas.Api.Entities.Enums;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 
 namespace Financas.Api.Services
@@ -72,10 +73,10 @@ namespace Financas.Api.Services
                 throw new Exception("Usuário não encontrado");
 
             if (dto.CategoriaId == 0)
-                dto.CategoriaId = null; // Permite que o usuário envie "0" para criar um lançamento sem categoria
+                dto.CategoriaId = null;
 
             if (dto.ContaBancariaId == 0)
-                dto.ContaBancariaId = null; // Permite que o usuário envie "0" para criar um lançamento sem conta bancária
+                dto.ContaBancariaId = null;
 
             if (dto.CartaoCreditoId == 0)
                 dto.CartaoCreditoId = null;
@@ -85,7 +86,6 @@ namespace Financas.Api.Services
 
             if (dto.CategoriaId != null)
             {
-                // Verifica se a categoria existe e pertence ao usuário
                 var categoria = await _financasDbContext.Categorias
                     .FirstOrDefaultAsync(c => c.Id == dto.CategoriaId && c.UsuarioId == usuarioId);
 
@@ -121,42 +121,116 @@ namespace Financas.Api.Services
                     throw new ArgumentException("O valor deve ser maior que zero.");
 
                 var totalAberto = await _cartaoCreditoService.ObterTotalEmAberto(cartaoCredito.Id, usuarioId);
-
                 var limiteDisponivel = cartaoCredito.Limite - totalAberto;
 
+                // Valida o limite contra o valor TOTAL da compra, independente do número de parcelas
                 if (dto.Valor > limiteDisponivel)
                     throw new InvalidOperationException("Limite do cartão de crédito excedido.");
 
                 fatura = await _faturaService.ObterOuCriarFaturaAtualEntidade(cartaoCredito.Id, usuarioId, dto.Data);
-            
+
                 if (fatura.Status != FaturaStatus.Aberta)
                     throw new InvalidOperationException("Não é permitido adicionar lançamentos a uma fatura que não esteja aberta.");
             }
 
-            // 2. Mapeamento: Transforma o DTO (dados que vieram da web) na Entidade (classe que vai pro banco)
+            // Se o lançamento for parcelado (mais de uma vez), seguimos por este caminho
+            if (dto.QuantidadeParcelas > 1)
+            {
+                // Validação 1: Parcelamento só é permitido com cartão de crédito
+                if (cartaoCredito == null)
+                    throw new InvalidOperationException("Parcelamento só é permitido para compras no cartão de crédito.");
+
+                // Validação 2: Receita não pode ser parcelada
+                if (dto.Tipo == TipoLancamento.Receita)
+                    throw new InvalidOperationException("Não é permitido parcelar uma receita.");
+
+                // Calcula o valor de cada parcela
+                var valorParcela = Math.Round(dto.Valor / dto.QuantidadeParcelas, 2);
+
+                Lancamento? primeiraParcela = null;
+
+                using var transaction = await _financasDbContext.Database.BeginTransactionAsync();
+                try
+                {
+                    for (int i = 0; i < dto.QuantidadeParcelas; i++)
+                    {
+                        // Calcula a fatura correta para cada mês da parcela
+                        var dataParcela = dto.Data.AddMonths(i);
+                        var faturaParParcela = await _faturaService
+                            .ObterOuCriarFaturaAtualEntidade(cartaoCredito.Id, usuarioId, dataParcela);
+
+                        var parcela = new Lancamento
+                        {
+                            Descricao = $"{dto.Descricao} ({i + 1}/{dto.QuantidadeParcelas})",
+                            Valor = valorParcela,
+                            Data = dataParcela,
+                            Tipo = dto.Tipo,
+                            UsuarioId = usuarioId,
+                            CategoriaId = dto.CategoriaId,
+                            CartaoCreditoId = dto.CartaoCreditoId,
+                            NumeroParcela = i + 1,
+                            TotalParcelas = dto.QuantidadeParcelas,
+                            FaturaId = faturaParParcela.Id,
+                            // Na primeira parcela (i == 0) não há pai — ela É o pai
+                            // Nas demais, aponta para o Id da primeira parcela salva
+                            LancamentoPaiId = primeiraParcela?.Id
+                        };
+
+                        faturaParParcela.ValorTotal += valorParcela;
+
+                        _financasDbContext.Lancamentos.Add(parcela);
+                        await _financasDbContext.SaveChangesAsync(); // Salva para gerar o Id
+
+                        // Guarda a referência da primeira parcela para as demais apontarem para ela
+                        if (i == 0)
+                            primeiraParcela = parcela;
+                    }
+
+                    await transaction.CommitAsync();
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+
+                // Retorna os dados da primeira parcela como confirmação
+                return new LancamentoResponseDTO
+                {
+                    Id = primeiraParcela!.Id,
+                    UsuarioId = usuarioId,
+                    Descricao = primeiraParcela.Descricao,
+                    Valor = primeiraParcela.Valor,
+                    Data = primeiraParcela.Data,
+                    Tipo = primeiraParcela.Tipo.ToString(),
+                    CategoriaId = primeiraParcela.CategoriaId,
+                    CartaoCreditoId = primeiraParcela.CartaoCreditoId,
+                    FaturaId = primeiraParcela.FaturaId,
+                    NumeroParcela = primeiraParcela.NumeroParcela,
+                    TotalParcelas = primeiraParcela.TotalParcelas
+                };
+            }
+
+            // Processamento de lançamentos simples (sem parcelamento)
             var lancamento = new Lancamento
             {
                 Descricao = dto.Descricao,
                 Valor = dto.Valor,
                 Data = dto.Data,
                 Tipo = dto.Tipo,
-                UsuarioId = usuarioId, // Vincula o lançamento ao ID do usuário logado
-                CategoriaId = dto.CategoriaId, // Pode ser nulo, o que é permitido pela configuração do banco
-                ContaBancariaId = dto.ContaBancariaId, // Pode ser nulo, o que é permitido pela configuração do banco
-                CartaoCreditoId = dto.CartaoCreditoId, // Pode ser nulo, o que é permitido pela configuração do banco
-                FaturaId = fatura?.Id // Vincula o lançamento à fatura, se houver
+                UsuarioId = usuarioId,
+                CategoriaId = dto.CategoriaId,
+                ContaBancariaId = dto.ContaBancariaId,
+                CartaoCreditoId = dto.CartaoCreditoId,
+                FaturaId = fatura?.Id,
+                NumeroParcela = 1,
+                TotalParcelas = 1
             };
 
-            // Se houver uma conta vinculada, atualiza o saldo em memória
             if (contaBancaria != null)
-            {
-                // Soma se for Receita ou subtrai se for Despesa, 
-                // preparando a alteração para ser salva no banco de dados.
                 AplicarValor(contaBancaria, dto.Valor, dto.Tipo);
-            }
 
-            // 3. Transação: Garante a integridade das operações ao salvar no banco de dados
-            using var transaction = await _financasDbContext.Database.BeginTransactionAsync();
+            using var transactionSimples = await _financasDbContext.Database.BeginTransactionAsync();
             try
             {
                 if (fatura != null)
@@ -165,18 +239,16 @@ namespace Financas.Api.Services
                     fatura.ValorTotal += dto.Valor;
                 }
 
-                // 4. Persistência: Adiciona o objeto ao rastreamento do EF Core e salva no MySQL
                 _financasDbContext.Lancamentos.Add(lancamento);
                 await _financasDbContext.SaveChangesAsync();
-                await transaction.CommitAsync();
+                await transactionSimples.CommitAsync();
             }
             catch
             {
-                await transaction.RollbackAsync();
+                await transactionSimples.RollbackAsync();
                 throw;
             }
 
-            // 4. Retorno: Transforma a entidade salva em um DTO de resposta (Response)
             return new LancamentoResponseDTO
             {
                 Id = lancamento.Id,
@@ -184,14 +256,16 @@ namespace Financas.Api.Services
                 Descricao = lancamento.Descricao,
                 Valor = lancamento.Valor,
                 Data = lancamento.Data,
-                Tipo = lancamento.Tipo.ToString(), // Converte o Enum de Tipo para String
+                Tipo = lancamento.Tipo.ToString(),
                 CategoriaId = lancamento.CategoriaId,
                 CategoriaNome = lancamento.Categoria?.Nome,
                 ContaBancariaId = lancamento.ContaBancariaId,
                 ContaBancariaNome = lancamento.ContaBancaria?.Nome,
                 CartaoCreditoId = lancamento.CartaoCreditoId,
                 CartaoCreditoNome = lancamento.CartaoCredito?.Nome,
-                FaturaId = lancamento.FaturaId
+                FaturaId = lancamento.FaturaId,
+                NumeroParcela = lancamento.NumeroParcela,
+                TotalParcelas = lancamento.TotalParcelas
             };
         }
 
@@ -223,6 +297,8 @@ namespace Financas.Api.Services
                 CartaoCreditoId = l.CartaoCreditoId,
                 CartaoCreditoNome = l.CartaoCredito?.Nome,
                 FaturaId = l.FaturaId,
+                NumeroParcela = l.NumeroParcela,
+                TotalParcelas = l.TotalParcelas,
             }).ToList();
         }
 
@@ -262,7 +338,9 @@ namespace Financas.Api.Services
                 ContaBancariaNome = lancamento.ContaBancaria?.Nome,
                 CartaoCreditoId = lancamento.CartaoCreditoId,
                 CartaoCreditoNome = lancamento.CartaoCredito?.Nome,
-                FaturaId = lancamento.FaturaId
+                FaturaId = lancamento.FaturaId,
+                NumeroParcela = lancamento.NumeroParcela,
+                TotalParcelas = lancamento.TotalParcelas,
             };
         }
 
@@ -284,6 +362,9 @@ namespace Financas.Api.Services
             // Isso impede que um usuário tente editar o ID de um lançamento de terceiros via API.
             if (lancamento.UsuarioId != usuarioId)
                 throw new UnauthorizedAccessException("Sem permissão para alterar este lançamento.");
+
+            if (lancamento.TotalParcelas > 1)
+                throw new InvalidOperationException("Não é permitido editar uma parcela individualmente. Delete e recrie o parcelamento.");
 
             if (dto.ContaBancariaId != lancamento.ContaBancariaId)
                 throw new InvalidOperationException("Não é permitido alterar a conta bancária de um lançamento. Delete e recrie.");
@@ -395,7 +476,9 @@ namespace Financas.Api.Services
                 ContaBancariaNome = lancamento.ContaBancaria?.Nome,
                 CartaoCreditoId = lancamento.CartaoCreditoId,
                 CartaoCreditoNome = lancamento.CartaoCredito?.Nome,
-                FaturaId = lancamento.FaturaId
+                FaturaId = lancamento.FaturaId,
+                NumeroParcela = lancamento.NumeroParcela,
+                TotalParcelas = lancamento.TotalParcelas,
             };
         }
 
@@ -424,6 +507,12 @@ namespace Financas.Api.Services
             // O carregamento antecipado (Include) da fatura permite acessar o status da fatura diretamente na entidade do lançamento, evitando consultas adicionais ao banco de dados.
             if (lancamento.Fatura != null && (lancamento.Fatura.Status == FaturaStatus.Fechada || lancamento.Fatura.Status == FaturaStatus.Paga))
                 throw new InvalidOperationException("Não é permitido excluir um lançamento vinculado a uma fatura fechada ou paga.");
+
+            var temParcelasFilhas = await _financasDbContext.Lancamentos
+                .AnyAsync(l => l.LancamentoPaiId == lancamento.Id);
+
+            if (temParcelasFilhas)
+                throw new InvalidOperationException("Não é permitido excluir um lançamento que possui parcelas filhas. Exclua as parcelas primeiro.");
 
             using var transaction = await _financasDbContext.Database.BeginTransactionAsync(); // Inicia uma transação para garantir a atomicidade das operações
 

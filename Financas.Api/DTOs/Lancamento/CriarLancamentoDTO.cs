@@ -56,5 +56,12 @@ namespace Financas.Api.DTOs.Lancamento
         /// Sendo opcional (int?), permite distinguir lançamentos de conta corrente (nulos) de despesas de cartão.
         /// </summary>
         public int? CartaoCreditoId { get; set; }
+
+        /// <summary>
+        /// Indica o número de parcelas para lançamentos parcelados.
+        /// Não sendo obrigatório, o valor padrão é 1 (não parcelado).
+        /// </summary>
+        [Range(1, 48, ErrorMessage = "O parcelamento deve ser entre 1 e 48 vezes")]
+        public int QuantidadeParcelas { get; set; } = 1;
     }
 }

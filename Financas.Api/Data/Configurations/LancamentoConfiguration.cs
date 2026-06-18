@@ -31,6 +31,18 @@ namespace Financas.Api.Data.Configurations
                 .IsRequired()
                 .HasColumnType("decimal(10,2)");
 
+            // Configura o número da parcela e o total de parcelas para lançamentos parcelados. Ambos são obrigatórios, mesmo para lançamentos à vista (onde NumeroParcela = 1 e TotalParcelas = 1).
+            // Isso garante consistência no modelo de dados, permitindo que o sistema trate lançamentos à vista e parcelados de forma uniforme.
+            builder.Property(p => p.NumeroParcela)
+                .HasColumnName("numero_parcela")
+                .IsRequired();
+
+            // O campo TotalParcelas é crucial para identificar se um lançamento é parcelado (TotalParcelas > 1) ou à vista (TotalParcelas = 1).
+            // Ele é obrigatório para garantir que o sistema sempre saiba quantas parcelas um lançamento possui, evitando ambiguidades e facilitando o controle financeiro.
+            builder.Property(p => p.TotalParcelas)
+                .HasColumnName("total_parcelas")
+                .IsRequired();
+
             // Mapeia a data do lançamento para a coluna 'data_lancamento'
             builder.Property(date => date.Data)
                 .HasColumnName("data_lancamento")
@@ -68,6 +80,12 @@ namespace Financas.Api.Data.Configurations
             // exista temporariamente sem estar vinculado a uma fatura (ex: lançamento pendente).
             builder.Property(l => l.FaturaId)
                 .HasColumnName("fatura_id")
+                .IsRequired(false);
+
+            // Mapeia a FK do lançamento pai. O IsRequired(false) permite que um lançamento
+            // exista sem estar vinculado a um pai (lançamentos simples e primeira parcela).
+            builder.Property(l => l.LancamentoPaiId)
+                .HasColumnName("lancamento_pai_id")
                 .IsRequired(false);
 
             // Cria um índice para melhorar performance nas consultas por usuário
@@ -120,6 +138,14 @@ namespace Financas.Api.Data.Configurations
             builder.HasOne(l => l.Fatura)
                 .WithMany(f => f.Lancamentos)
                 .HasForeignKey(l => l.FaturaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configuração do Relacionamento de Auto-Referência (Lançamento Pai):
+            // Permite que um lançamento seja vinculado a outro lançamento como seu "pai", criando uma hierarquia entre lançamentos (ex: um lançamento original e suas parcelas).
+            // O uso do Restrict garante que você não delete um lançamento pai que ainda possua lançamentos filhos vinculados a ele, preservando a integridade da hierarquia de lançamentos.
+            builder.HasOne(l => l.LancamentoPai)
+                .WithMany()
+                .HasForeignKey(l => l.LancamentoPaiId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

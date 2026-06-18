@@ -67,10 +67,31 @@ namespace Financas.Api.Entities
         public int? FaturaId { get; set; }
 
         /// <summary>
+        /// Indica o número da parcela atual em um lançamento parcelado.
+        /// </summary>
+        public int NumeroParcela { get; set; } = 1;
+
+        /// <summary>
+        /// Indica o total de parcelas em que o lançamento foi dividido.
+        /// </summary>
+        public int TotalParcelas { get; set; } = 1;
+
+        /// <summary>
+        /// Refere-se ao lançamento original em casos de lançamentos parcelados.
+        /// </summary>
+        public int? LancamentoPaiId { get; set; }
+
+        /// <summary>
         /// Propriedade de navegação virtual para acessar os detalhes da fatura vinculada.
         /// Permite que o Entity Framework carregue os dados da fatura (ex: data de vencimento) junto ao lançamento.
         /// </summary>
         public virtual Fatura? Fatura { get; set; }
+
+        /// <summary>
+        /// Propriedade de navegação para acessar os detalhes do lançamento pai, caso este seja uma parcela de um lançamento maior.
+        /// Permite que o sistema mantenha a hierarquia entre lançamentos parcelados e seu lançamento original, facilitando consultas e relatórios.
+        /// </sumary>
+        public Lancamento? LancamentoPai { get; set; }
 
         /// <summary>
         /// Propriedade de navegação que permite acessar os dados completos da categoria associada.

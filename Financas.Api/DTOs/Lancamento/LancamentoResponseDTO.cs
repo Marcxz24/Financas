@@ -64,10 +64,33 @@ namespace Financas.Api.DTOs.Lancamento
         /// </summary>
         public string? ContaBancariaNome { get; set; }
 
+        /// <summary>
+        /// Identificador do cartão de crédito associado ao lançamento, se aplicável.
+        /// Utilizado para diferenciar despesas de cartão de crédito de outras transações. Nulo para lançamentos sem cartão.
+        /// </summary>
         public int? CartaoCreditoId { get; set; }
 
+        /// <summary>
+        /// Identificador para o nome do cartão de crédito associado ao lançamento, se aplicável.
+        /// </summary>
         public string? CartaoCreditoNome { get; set; }
 
+        /// <summary>
+        /// Identificador da fatura associada ao lançamento, se for uma despesa de cartão de crédito. Nulo para lançamentos sem fatura.
+        /// Serve para vincular despesas de cartão de crédito à fatura correspondente, facilitando a organização e o controle financeiro.
+        /// </summary>
         public int? FaturaId { get; set; }
+
+        /// <summary>
+        /// Número da parcela atual (ex: 2 em uma compra de 3x).
+        /// Para lançamentos simples, o valor sempre será 1.
+        /// </summary>
+        public int NumeroParcela { get; set; }
+
+        /// <summary>
+        /// Total de parcelas do lançamento (ex: 3 em uma compra de 3x).
+        /// Para lançamentos simples, o valor sempre será 1.
+        /// </summary>
+        public int TotalParcelas { get; set; }
     }
 }
