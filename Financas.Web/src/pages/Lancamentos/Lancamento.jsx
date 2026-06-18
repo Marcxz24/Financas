@@ -13,6 +13,7 @@ function Lancamento() {
   const [categoriaId, setCategoriaId] = useState("");
   const [contaBancariaId, setContaBancariaId] = useState(0);
   const [cartaoCreditoId, setCartaoCreditoId] = useState(0);
+  const [quantidadeParcelas, setQuantidadeParcelas] = useState(1);
 
   // Estados para armazenamento das listas de seleção
   const [categorias, setCategorias] = useState([]);
@@ -24,12 +25,33 @@ function Lancamento() {
   const { id } = useParams();
   const modo = id ? "editar" : "criar";
 
+  // Parcelamento só é exibido para Despesa vinculada a Cartão de Crédito, e apenas no modo criar
+  const exibirParcelamento = modo === "criar" && Number(tipo) === 2 && Number(cartaoCreditoId) !== 0;
+
+  // Preview do valor por parcela (calculado localmente, sem chamada à API)
+  const valorParcela =
+    valor && quantidadeParcelas > 1
+      ? (Number(valor) / quantidadeParcelas).toFixed(2)
+      : null;
+
   // Função para formatar a data/hora local para o padrão YYYY-MM-DDTHH:mm
   const obterDataHoraAtual = () => {
     const agora = new Date();
     return new Date(agora.getTime() - agora.getTimezoneOffset() * 60000)
       .toISOString()
       .slice(0, 16);
+  };
+
+  // Ao trocar o tipo para Receita, reseta parcelas para 1
+  const handleTipoChange = (e) => {
+    setTipo(Number(e.target.value));
+    setQuantidadeParcelas(1);
+  };
+
+  // Ao selecionar conta bancária, reseta parcelas para 1 (parcelamento não é permitido em conta)
+  const handleContaBancariaChange = (e) => {
+    setContaBancariaId(e.target.value);
+    setQuantidadeParcelas(1);
   };
 
   // Carrega dados das listas e busca o lançamento caso seja modo edição
@@ -83,6 +105,8 @@ function Lancamento() {
       categoriaId: categoriaId && Number(categoriaId) !== 0 ? Number(categoriaId) : 0,
       contaBancariaId: Number(contaBancariaId) === 0 ? null : Number(contaBancariaId),
       cartaoCreditoId: Number(cartaoCreditoId) === 0 ? null : Number(cartaoCreditoId),
+      // Envia quantidadeParcelas apenas quando parcelamento estiver visível; caso contrário força 1
+      quantidadeParcelas: exibirParcelamento ? Number(quantidadeParcelas) : 1,
     };
 
     try {
@@ -120,132 +144,162 @@ function Lancamento() {
 
   return (
     <div className="lancamento-page">
-        <div className="lancamento-card">
-          <header className="lancamento-header">
-            <h1>{modo === "criar" ? "Novo Lançamento" : "Gerenciar Lançamento"}</h1>
-            <p className="descricao-header">
-              {modo === "criar"
-                ? "Adicione uma nova movimentação financeira."
-                : "Revise os dados para alterar ou excluir o registro."}
-            </p>
-          </header>
+      <div className="lancamento-card">
+        <header className="lancamento-header">
+          <h1>{modo === "criar" ? "Novo Lançamento" : "Gerenciar Lançamento"}</h1>
+          <p className="descricao-header">
+            {modo === "criar"
+              ? "Adicione uma nova movimentação financeira."
+              : "Revise os dados para alterar ou excluir o registro."}
+          </p>
+        </header>
 
-          <form onSubmit={handleSalvar} className="lancamentos-box">
+        <form onSubmit={handleSalvar} className="lancamentos-box">
+          <div className="detalhes-wrapper">
+            <label>Descrição</label>
+            <input
+              type="text"
+              className="item-lancamento"
+              placeholder="Ex: Aluguel, Supermercado..."
+              value={descricao}
+              onChange={(e) => setDescricao(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="grid-form">
             <div className="detalhes-wrapper">
-              <label>Descrição</label>
+              <label>Valor</label>
               <input
-                type="text"
+                type="number"
+                step="0.01"
                 className="item-lancamento"
-                placeholder="Ex: Aluguel, Supermercado..."
-                value={descricao}
-                onChange={(e) => setDescricao(e.target.value)}
+                value={valor}
+                onChange={(e) => setValor(e.target.value)}
                 required
               />
             </div>
-
-            <div className="grid-form">
-              <div className="detalhes-wrapper">
-                <label>Valor</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  className="item-lancamento"
-                  value={valor}
-                  onChange={(e) => setValor(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="detalhes-wrapper">
-                <label>Tipo</label>
-                <select
-                  className="item-lancamento"
-                  value={tipo}
-                  onChange={(e) => setTipo(Number(e.target.value))}
-                >
-                  <option value={1} style={{ background: "#1a1f29" }}>Receita (+)</option>
-                  <option value={2} style={{ background: "#1a1f29" }}>Despesa (-)</option>
-                </select>
-              </div>
+            <div className="detalhes-wrapper">
+              <label>Tipo</label>
+              <select
+                className="item-lancamento"
+                value={tipo}
+                onChange={handleTipoChange}
+              >
+                <option value={1} style={{ background: "#1a1f29" }}>Receita (+)</option>
+                <option value={2} style={{ background: "#1a1f29" }}>Despesa (-)</option>
+              </select>
             </div>
+          </div>
 
-            <div className="grid-form">
+          <div className="grid-form">
+            <div className="detalhes-wrapper">
+              <label>Data e Hora</label>
+              <input
+                type="datetime-local"
+                className="item-lancamento"
+                value={data}
+                onChange={(e) => setData(e.target.value)}
+                required
+              />
+            </div>
+            <div className="detalhes-wrapper">
+              <label>Categoria</label>
+              <select
+                className="item-lancamento"
+                value={categoriaId}
+                onChange={(e) => setCategoriaId(e.target.value)}
+              >
+                <option value="" style={{ background: "#1a1f29" }}>Selecione uma categoria</option>
+                {categorias.map((cat) => (
+                  <option key={cat.id} value={cat.id} style={{ background: "#1a1f29" }}>
+                    {cat.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid-form">
+            <div className="detalhes-wrapper">
+              <label>Conta Bancária</label>
+              <select
+                className="item-lancamento"
+                value={contaBancariaId}
+                onChange={handleContaBancariaChange}
+              >
+                <option value={0} style={{ background: "#1a1f29" }}>Nenhuma / Dinheiro</option>
+                {contas.map((conta) => (
+                  <option key={conta.id} value={conta.id} style={{ background: "#1a1f29" }}>
+                    {conta.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="detalhes-wrapper">
+              <label>Cartão de Crédito</label>
+              <select
+                className="item-lancamento"
+                value={cartaoCreditoId}
+                onChange={(e) => setCartaoCreditoId(e.target.value)}
+              >
+                <option value={0} style={{ background: "#1a1f29" }}>Nenhum</option>
+                {cartoes.map((cartao) => (
+                  <option key={cartao.id} value={cartao.id} style={{ background: "#1a1f29" }}>
+                    {cartao.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Bloco de parcelamento — visível apenas no modo criar, para Despesa + Cartão de Crédito */}
+          {exibirParcelamento && (
+            <div className="parcelamento-bloco">
               <div className="detalhes-wrapper">
-                <label>Data e Hora</label>
-                <input
-                  type="datetime-local"
-                  className="item-lancamento"
-                  value={data}
-                  onChange={(e) => setData(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="detalhes-wrapper">
-                <label>Categoria</label>
+                <label>Parcelamento</label>
                 <select
                   className="item-lancamento"
-                  value={categoriaId}
-                  onChange={(e) => setCategoriaId(e.target.value)}
+                  value={quantidadeParcelas}
+                  onChange={(e) => setQuantidadeParcelas(Number(e.target.value))}
                 >
-                  <option value="" style={{ background: "#1a1f29" }}>Selecione uma categoria</option>
-                  {categorias.map((cat) => (
-                    <option key={cat.id} value={cat.id} style={{ background: "#1a1f29" }}>
-                      {cat.nome}
+                  {Array.from({ length: 48 }, (_, i) => i + 1).map((n) => (
+                    <option key={n} value={n} style={{ background: "#1a1f29" }}>
+                      {n === 1 ? "À vista (1x)" : `${n}x`}
                     </option>
                   ))}
                 </select>
               </div>
-            </div>
 
-            <div className="grid-form">
-              <div className="detalhes-wrapper">
-                <label>Conta Bancária</label>
-                <select
-                  className="item-lancamento"
-                  value={contaBancariaId}
-                  onChange={(e) => setContaBancariaId(e.target.value)}
-                >
-                  <option value={0} style={{ background: "#1a1f29" }}>Nenhuma / Dinheiro</option>
-                  {contas.map((conta) => (
-                    <option key={conta.id} value={conta.id} style={{ background: "#1a1f29" }}>
-                      {conta.nome}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="detalhes-wrapper">
-                <label>Cartão de Crédito</label>
-                <select
-                  className="item-lancamento"
-                  value={cartaoCreditoId}
-                  onChange={(e) => setCartaoCreditoId(e.target.value)}
-                >
-                  <option value={0} style={{ background: "#1a1f29" }}>Nenhum</option>
-                  {cartoes.map((cartao) => (
-                    <option key={cartao.id} value={cartao.id} style={{ background: "#1a1f29" }}>
-                      {cartao.nome}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="acoes-form-container">
-              <button type="submit" className="btn-salvar">
-                {modo === "criar" ? "Realizar Lançamento" : "Salvar Alterações"}
-              </button>
-
-              {modo === "editar" && (
-                <button type="button" onClick={handleExcluir} className="btn-deletar">
-                  Excluir Registro
-                </button>
+              {/* Preview do valor por parcela, exibido apenas quando parcelado em 2x ou mais */}
+              {valorParcela && (
+                <p className="parcela-preview">
+                  {quantidadeParcelas}x de{" "}
+                  <strong>
+                    R$ {Number(valorParcela).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  </strong>
+                </p>
               )}
-
-              <Link to="/dashboard" className="link-voltar">Voltar para o Dashboard</Link>
             </div>
+          )}
 
-            {erro && <p className="mensagem-erro">{erro}</p>}
-          </form>
-        </div>
+          <div className="acoes-form-container">
+            <button type="submit" className="btn-salvar">
+              {modo === "criar" ? "Realizar Lançamento" : "Salvar Alterações"}
+            </button>
+
+            {modo === "editar" && (
+              <button type="button" onClick={handleExcluir} className="btn-deletar">
+                Excluir Registro
+              </button>
+            )}
+
+            <Link to="/dashboard" className="link-voltar">Voltar para o Dashboard</Link>
+          </div>
+
+          {erro && <p className="mensagem-erro">{erro}</p>}
+        </form>
+      </div>
     </div>
   );
 }

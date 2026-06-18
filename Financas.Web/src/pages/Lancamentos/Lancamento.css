@@ -192,6 +192,37 @@
 }
 
 /* =========================================
+   5b. BLOCO DE PARCELAMENTO
+   ========================================= */
+.parcelamento-bloco {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: rgba(59, 130, 246, 0.06);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: var(--radius-input);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.parcela-preview {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+  text-align: center;
+}
+
+.parcela-preview strong {
+  color: var(--primary);
+  font-size: 15px;
+}
+
+/* =========================================
    6. RESPONSIVIDADE (TABLET E DESKTOP)
    ========================================= */
 @media (max-width: 600px) {
