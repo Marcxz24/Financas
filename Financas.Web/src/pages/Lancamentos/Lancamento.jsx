@@ -26,7 +26,8 @@ function Lancamento() {
   const modo = id ? "editar" : "criar";
 
   // Parcelamento só é exibido para Despesa vinculada a Cartão de Crédito, e apenas no modo criar
-  const exibirParcelamento = modo === "criar" && Number(tipo) === 2 && Number(cartaoCreditoId) !== 0;
+  const exibirParcelamento =
+    modo === "criar" && Number(tipo) === 2 && Number(cartaoCreditoId) !== 0;
 
   // Preview do valor por parcela (calculado localmente, sem chamada à API)
   const valorParcela =
@@ -42,16 +43,44 @@ function Lancamento() {
       .slice(0, 16);
   };
 
-  // Ao trocar o tipo para Receita, reseta parcelas para 1
-  const handleTipoChange = (e) => {
-    setTipo(Number(e.target.value));
-    setQuantidadeParcelas(1);
-  };
-
   // Ao selecionar conta bancária, reseta parcelas para 1 (parcelamento não é permitido em conta)
   const handleContaBancariaChange = (e) => {
     setContaBancariaId(e.target.value);
     setQuantidadeParcelas(1);
+  };
+
+  // Ao selecionar categoria, ajusta o tipo de lançamento conforme a categoria selecionada
+  const handleCategoriaChange = (e) => {
+    const categoriaSelecionadaId = Number(e.target.value);
+
+    setCategoriaId(categoriaSelecionadaId);
+
+    // Nenhuma categoria selecionada
+    if (!categoriaSelecionadaId) {
+      return;
+    }
+
+    const categoria = categorias.find((c) => c.id === categoriaSelecionadaId);
+
+    if (!categoria) return;
+
+    if (categoria.tipo === 1 || categoria.tipo === "Receita") {
+      setTipo(1);
+    } else {
+      setTipo(2);
+    }
+
+    setQuantidadeParcelas(1);
+  };
+
+  const handleCartaoCreditoChange = (e) => {
+    const cartaoId = Number(e.target.value);
+
+    setCartaoCreditoId(cartaoId);
+
+    if (cartaoId > 0) {
+      setTipo(2); // Despesa
+    }
   };
 
   // Carrega dados das listas e busca o lançamento caso seja modo edição
@@ -69,7 +98,9 @@ function Lancamento() {
         setCartoes(resCartoes.data);
 
         if (id && id !== "undefined") {
-          const response = await api.get(`/lancamentos/visualizar-lancamento/${id}`);
+          const response = await api.get(
+            `/lancamentos/visualizar-lancamento/${id}`,
+          );
           const d = response.data;
 
           setDescricao(d.descricao || "");
@@ -102,9 +133,12 @@ function Lancamento() {
       data: data,
       tipo: Number(tipo),
       // Envia 0 se nenhuma categoria for selecionada para acionar o reset no C#
-      categoriaId: categoriaId && Number(categoriaId) !== 0 ? Number(categoriaId) : 0,
-      contaBancariaId: Number(contaBancariaId) === 0 ? null : Number(contaBancariaId),
-      cartaoCreditoId: Number(cartaoCreditoId) === 0 ? null : Number(cartaoCreditoId),
+      categoriaId:
+        categoriaId && Number(categoriaId) !== 0 ? Number(categoriaId) : 0,
+      contaBancariaId:
+        Number(contaBancariaId) === 0 ? null : Number(contaBancariaId),
+      cartaoCreditoId:
+        Number(cartaoCreditoId) === 0 ? null : Number(cartaoCreditoId),
       // Envia quantidadeParcelas apenas quando parcelamento estiver visível; caso contrário força 1
       quantidadeParcelas: exibirParcelamento ? Number(quantidadeParcelas) : 1,
     };
@@ -113,7 +147,10 @@ function Lancamento() {
       if (modo === "criar") {
         await api.post("/lancamentos/criar-lancamento", dadosParaEnviar);
       } else {
-        await api.patch(`/lancamentos/atualizar-lancamentos/${id}`, dadosParaEnviar);
+        await api.patch(
+          `/lancamentos/atualizar-lancamentos/${id}`,
+          dadosParaEnviar,
+        );
       }
       navigate("/dashboard");
     } catch (error) {
@@ -136,7 +173,8 @@ function Lancamento() {
       } catch (error) {
         console.error("Erro ao excluir:", error);
         const mensagemErro =
-          error.response?.data?.message || "Erro ao excluir o lançamento. Verifique a conexão.";
+          error.response?.data?.message ||
+          "Erro ao excluir o lançamento. Verifique a conexão.";
         setErro(mensagemErro);
       }
     }
@@ -146,7 +184,9 @@ function Lancamento() {
     <div className="lancamento-page">
       <div className="lancamento-card">
         <header className="lancamento-header">
-          <h1>{modo === "criar" ? "Novo Lançamento" : "Gerenciar Lançamento"}</h1>
+          <h1>
+            {modo === "criar" ? "Novo Lançamento" : "Gerenciar Lançamento"}
+          </h1>
           <p className="descricao-header">
             {modo === "criar"
               ? "Adicione uma nova movimentação financeira."
@@ -181,13 +221,20 @@ function Lancamento() {
             </div>
             <div className="detalhes-wrapper">
               <label>Tipo</label>
+
               <select
                 className="item-lancamento"
                 value={tipo}
-                onChange={handleTipoChange}
+                onChange={(e) => setTipo(Number(e.target.value))}
+                disabled={!!categoriaId || !!cartaoCreditoId}
               >
-                <option value={1} style={{ background: "#1a1f29" }}>Receita (+)</option>
-                <option value={2} style={{ background: "#1a1f29" }}>Despesa (-)</option>
+                <option value={1} style={{ background: "#1a1f29" }}>
+                  Receita (+)
+                </option>
+
+                <option value={2} style={{ background: "#1a1f29" }}>
+                  Despesa (-)
+                </option>
               </select>
             </div>
           </div>
@@ -205,14 +252,22 @@ function Lancamento() {
             </div>
             <div className="detalhes-wrapper">
               <label>Categoria</label>
+
               <select
                 className="item-lancamento"
                 value={categoriaId}
-                onChange={(e) => setCategoriaId(e.target.value)}
+                onChange={handleCategoriaChange}
               >
-                <option value="" style={{ background: "#1a1f29" }}>Selecione uma categoria</option>
+                <option value="" style={{ background: "#1a1f29" }}>
+                  Sem categoria
+                </option>
+
                 {categorias.map((cat) => (
-                  <option key={cat.id} value={cat.id} style={{ background: "#1a1f29" }}>
+                  <option
+                    key={cat.id}
+                    value={cat.id}
+                    style={{ background: "#1a1f29" }}
+                  >
                     {cat.nome}
                   </option>
                 ))}
@@ -228,9 +283,15 @@ function Lancamento() {
                 value={contaBancariaId}
                 onChange={handleContaBancariaChange}
               >
-                <option value={0} style={{ background: "#1a1f29" }}>Nenhuma / Dinheiro</option>
+                <option value={0} style={{ background: "#1a1f29" }}>
+                  Nenhuma / Dinheiro
+                </option>
                 {contas.map((conta) => (
-                  <option key={conta.id} value={conta.id} style={{ background: "#1a1f29" }}>
+                  <option
+                    key={conta.id}
+                    value={conta.id}
+                    style={{ background: "#1a1f29" }}
+                  >
                     {conta.nome}
                   </option>
                 ))}
@@ -238,14 +299,22 @@ function Lancamento() {
             </div>
             <div className="detalhes-wrapper">
               <label>Cartão de Crédito</label>
+
               <select
                 className="item-lancamento"
                 value={cartaoCreditoId}
-                onChange={(e) => setCartaoCreditoId(e.target.value)}
+                onChange={handleCartaoCreditoChange}
               >
-                <option value={0} style={{ background: "#1a1f29" }}>Nenhum</option>
+                <option value={0} style={{ background: "#1a1f29" }}>
+                  Nenhum
+                </option>
+
                 {cartoes.map((cartao) => (
-                  <option key={cartao.id} value={cartao.id} style={{ background: "#1a1f29" }}>
+                  <option
+                    key={cartao.id}
+                    value={cartao.id}
+                    style={{ background: "#1a1f29" }}
+                  >
                     {cartao.nome}
                   </option>
                 ))}
@@ -261,7 +330,9 @@ function Lancamento() {
                 <select
                   className="item-lancamento"
                   value={quantidadeParcelas}
-                  onChange={(e) => setQuantidadeParcelas(Number(e.target.value))}
+                  onChange={(e) =>
+                    setQuantidadeParcelas(Number(e.target.value))
+                  }
                 >
                   {Array.from({ length: 48 }, (_, i) => i + 1).map((n) => (
                     <option key={n} value={n} style={{ background: "#1a1f29" }}>
@@ -276,7 +347,10 @@ function Lancamento() {
                 <p className="parcela-preview">
                   {quantidadeParcelas}x de{" "}
                   <strong>
-                    R$ {Number(valorParcela).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                    R${" "}
+                    {Number(valorParcela).toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2,
+                    })}
                   </strong>
                 </p>
               )}
@@ -289,12 +363,18 @@ function Lancamento() {
             </button>
 
             {modo === "editar" && (
-              <button type="button" onClick={handleExcluir} className="btn-deletar">
+              <button
+                type="button"
+                onClick={handleExcluir}
+                className="btn-deletar"
+              >
                 Excluir Registro
               </button>
             )}
 
-            <Link to="/dashboard" className="link-voltar">Voltar para o Dashboard</Link>
+            <Link to="/dashboard" className="link-voltar">
+              Voltar para o Dashboard
+            </Link>
           </div>
 
           {erro && <p className="mensagem-erro">{erro}</p>}
