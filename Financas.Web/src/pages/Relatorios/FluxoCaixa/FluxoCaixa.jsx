@@ -177,6 +177,15 @@ function FluxoCaixa() {
     return acc;
   }, {});
 
+  const recebimentosPorCategoria = entradas.reduce((acc, item) => {
+    const nomeCategoria =
+      item.categoriaNome || item.categoria?.nome || "Sem categoria";
+
+    acc[nomeCategoria] = (acc[nomeCategoria] || 0) + Number(item.valor || 0);
+
+    return acc;
+  }, {});
+
   const palette = [
     "#ef4444",
     "#f97316",
@@ -189,6 +198,14 @@ function FluxoCaixa() {
     "#ec4899",
   ];
   const categoriasSlices = Object.entries(gastoPorCategoria).map(
+    ([label, value], index) => ({
+      label,
+      value,
+      color: palette[index % palette.length],
+    }),
+  );
+
+  const recebimentosSlices = Object.entries(recebimentosPorCategoria).map(
     ([label, value], index) => ({
       label,
       value,
@@ -335,49 +352,73 @@ function FluxoCaixa() {
         )}
       </div>
 
+      <div className="grafico-card">
+        <h3>Recebimentos por categoria</h3>
+
+        {recebimentosSlices.length > 0 ? (
+          <>
+            <PieChart slices={recebimentosSlices} size={280} innerRadius={40} />
+
+            <div className="relatorio-legenda">
+              {recebimentosSlices.map((item) => (
+                <div key={item.label} className="legenda-item">
+                  <span
+                    className="legenda-cor"
+                    style={{ background: item.color }}
+                  />
+                  {item.label}: {formatarMoeda(item.value)}
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="sem-resultados">
+            Não há recebimentos categorizados neste período.
+          </div>
+        )}
+      </div>
+
       {erro && <div className="relatorio-erro">{erro}</div>}
 
       <div className="grafico-card">
-  <h3>Detalhamento por movimento</h3>
-  {loading ? (
-    <div className="sem-resultados">Carregando dados...</div>
-  ) : (fluxo.entradas.length + fluxo.saidas.length) > 0 ? (
-    <div className="tabela-container-scroll">
-      <table className="tabela-relatorio">
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Descrição</th>
-            <th>Tipo</th>
-            <th>Categoria</th>
-            <th>Valor</th>
-          </tr>
-        </thead>
-        <tbody>
-          {[...fluxo.entradas, ...fluxo.saidas].map((item, index) => (
-            <tr key={item.id || index}>
-              <td>
-                {formatarData(
-                  item.data || item.dataLancamento || item.dataMovimento
-                )}
-              </td>
-              <td>{item.descricao || item.historico || "-"}</td>
-              <td>
-                {isReceita(item) ? "Receita" : "Despesa"}
-              </td>
-              <td>{item.categoriaNome || item.categoria?.nome || "-"}</td>
-              <td>{formatarMoeda(item.valor)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  ) : (
-    <div className="sem-resultados">
-      Nenhum registro encontrado no período selecionado.
-    </div>
-  )}
-</div>
+        <h3>Detalhamento por movimento</h3>
+        {loading ? (
+          <div className="sem-resultados">Carregando dados...</div>
+        ) : fluxo.entradas.length + fluxo.saidas.length > 0 ? (
+          <div className="tabela-container-scroll">
+            <table className="tabela-relatorio">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Descrição</th>
+                  <th>Tipo</th>
+                  <th>Categoria</th>
+                  <th>Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...fluxo.entradas, ...fluxo.saidas].map((item, index) => (
+                  <tr key={item.id || index}>
+                    <td>
+                      {formatarData(
+                        item.data || item.dataLancamento || item.dataMovimento,
+                      )}
+                    </td>
+                    <td>{item.descricao || item.historico || "-"}</td>
+                    <td>{isReceita(item) ? "Receita" : "Despesa"}</td>
+                    <td>{item.categoriaNome || item.categoria?.nome || "-"}</td>
+                    <td>{formatarMoeda(item.valor)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="sem-resultados">
+            Nenhum registro encontrado no período selecionado.
+          </div>
+        )}
+      </div>
     </div>
   );
 }
