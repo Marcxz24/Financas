@@ -3,6 +3,7 @@ using System;
 using Financas.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Financas.Api.Migrations
 {
     [DbContext(typeof(FinancasDbContext))]
-    partial class FinancasDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260621183442_CriarTabelaMetasGasto")]
+    partial class CriarTabelaMetasGasto
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -247,6 +250,16 @@ namespace Financas.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<int>("Ano")
+                        .HasColumnType("int")
+                        .HasColumnName("ano");
+
+                    b.Property<bool>("Ativo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true)
+                        .HasColumnName("ativo");
+
                     b.Property<int?>("CartaoCreditoId")
                         .HasColumnType("int")
                         .HasColumnName("cartao_credito_id");
@@ -259,23 +272,9 @@ namespace Financas.Api.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("data_criacao");
 
-                    b.Property<DateTime>("DataFinal")
-                        .HasColumnType("date")
-                        .HasColumnName("data_final");
-
-                    b.Property<DateTime>("DataInicio")
-                        .HasColumnType("date")
-                        .HasColumnName("data_inicio");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)")
-                        .HasColumnName("nome");
-
-                    b.Property<int>("TipoMeta")
+                    b.Property<int>("Mes")
                         .HasColumnType("int")
-                        .HasColumnName("tipo_meta");
+                        .HasColumnName("mes");
 
                     b.Property<int>("UsuarioId")
                         .HasColumnType("int")
@@ -292,6 +291,8 @@ namespace Financas.Api.Migrations
                     b.HasIndex("CategoriaId");
 
                     b.HasIndex("UsuarioId");
+
+                    b.HasIndex("UsuarioId", "Mes", "Ano");
 
                     b.ToTable("metas_gasto", (string)null);
                 });

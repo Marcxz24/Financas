@@ -5,13 +5,22 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
+/// <summary>
+/// Configuração principal da aplicação ASP.NET Core.
+/// Responsável por registrar dependências, configurar middleware, autenticação JWT,
+/// CORS, Swagger e inicialização do pipeline HTTP.
+/// </summary>
+
 var builder = WebApplication.CreateBuilder(args);
 
+// Recupera string de conexão do appsettings
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
+// Registro do DbContext com MySQL
 builder.Services.AddDbContext<FinancasDbContext>(options =>
     options.UseMySQL(connectionString ?? throw new Exception("Connection String não encontrada")));
 
+// Injeção de dependências dos serviços da aplicação
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<LancamentoService>();
 builder.Services.AddScoped<CategoriaService>();
@@ -22,7 +31,9 @@ builder.Services.AddScoped<FaturaService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<AjudaService>();
+builder.Services.AddScoped<MetaGastoService>();
 
+// Configuração de CORS para liberar o frontend (local e produção)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
@@ -39,10 +50,10 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Controllers
+// Registro dos controllers da API
 builder.Services.AddControllers();
 
-// Swagger
+// Configuração do Swagger para documentação da API
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>
@@ -53,6 +64,7 @@ builder.Services.AddSwaggerGen(options =>
         Version = "v1"
     });
 
+    // Configuração de autenticação Bearer no Swagger
     options.AddSecurityDefinition("Bearer",
         new Microsoft.OpenApi.Models.OpenApiSecurityScheme
         {
@@ -81,7 +93,7 @@ builder.Services.AddSwaggerGen(options =>
         });
 });
 
-// JWT
+// Configuração de autenticação JWT
 var jwtKey = builder.Configuration["Jwt:Key"]
     ?? throw new Exception("Jwt:key não configurada");
 
@@ -107,6 +119,7 @@ builder.Services.AddAuthentication(options =>
         )
     };
 
+    // Personaliza resposta quando token expira ou é inválido
     options.Events = new JwtBearerEvents
     {
         OnChallenge = context =>
@@ -115,13 +128,17 @@ builder.Services.AddAuthentication(options =>
 
             context.Response.StatusCode = 401;
             context.Response.ContentType = "application/json";
-            return context.Response.WriteAsync("{\"error\": \"Sua sessão expirou. Por favor, faça login novamente.\"}");
+
+            return context.Response.WriteAsync(
+                "{\"error\": \"Sua sessão expirou. Por favor, faça login novamente.\"}"
+            );
         }
     };
 });
 
 var app = builder.Build();
 
+// Pipeline HTTP
 app.UseHttpsRedirection();
 
 app.UseCors("Frontend");
@@ -129,9 +146,11 @@ app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Swagger sempre habilitado
 app.UseSwagger();
 app.UseSwaggerUI();
 
+// Endpoint simples de health check
 app.MapGet("/healthz", () => Results.Ok("Healthy"));
 
 app.MapControllers();

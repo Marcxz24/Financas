@@ -56,6 +56,6 @@ namespace Financas.Api.Entities
         /// <summary>
         /// Representa a coleção de lançamentos associados a este cartão de crédito.
         /// </summary>
-        public virtual ICollection<Lancamento> Lancamentos { get; set; } = new List<Lancamento>(); 
+        public virtual ICollection<Lancamento> Lancamentos { get; set; } = new List<Lancamento>();
     }
 }

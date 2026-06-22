@@ -4,54 +4,43 @@ using Microsoft.EntityFrameworkCore;
 namespace Financas.Api.Data
 {
     /// <summary>
-    /// DbContext é a classe principal que gerencia a conexão com o banco de dados e as operações de leitura/gravação.
+    /// Contexto principal do Entity Framework Core responsável pelo acesso ao banco de dados.
+    /// Centraliza o mapeamento das entidades e configurações do sistema financeiro.
     /// </summary>
-
-    // O FinancasDbContext herda de DbContext, que é a classe base do Entity Framework Core para trabalhar com bancos de dados.
     public class FinancasDbContext : DbContext
     {
-        // O construtor recebe as opções de configuração do DbContext, como a string de conexão, e as passa para a classe base.
+        // Configuração base do DbContext (injeção de opções como string de conexão)
         public FinancasDbContext(DbContextOptions<FinancasDbContext> options) : base(options) { }
-        
-        // A propriedade DbSet<Usuario> representa a coleção de entidades do tipo Usuario no banco de dados. 
-        // O Entity Framework Core usará essa propriedade para mapear a tabela correspondente no banco de dados,
-        // e realizar operações CRUD (Create, Read, Update, Delete) sobre os registros de usuários.
+
+        // Usuários do sistema
         public DbSet<Usuario> Usuarios { get; set; }
 
-        // Define uma propriedade que representa a tabela "Lancamentos" no banco de dados.
-        // O EF Core usa o tipo 'DbSet<T>' para mapear a classe 'Lancamento' para uma tabela real.
+        // Lançamentos financeiros (receitas e despesas)
         public DbSet<Lancamento> Lancamentos { get; set; }
 
-        // Representa a coleção de entidades 'Categoria' no nível de memória.
-        // O EF Core utiliza este DbSet para traduzir operações de código em comandos DML 
-        // (Data Manipulation Language) específicos para a tabela física 'categorias'.
+        // Categorias utilizadas para organizar lançamentos
         public DbSet<Categoria> Categorias { get; set; }
 
-        // Representa a coleção de entidades 'ContaBancaria' no nível de memória.
-        // O EF Core utiliza este DbSet para traduzir operações de código em comandos DML
-        // (Data Manipulation Language) específicos para a tabela física 'contas_bancarias'.
+        // Contas bancárias cadastradas pelo usuário
         public DbSet<ContaBancaria> ContasBancarias { get; set; }
 
-        // Representa a coleção de entidades 'CartaoCredito' no nível de memória.
-        // O EF Core utiliza este DbSet para traduzir operações de código em comandos DML
+        // Cartões de crédito cadastrados no sistema
         public DbSet<CartaoCredito> CartaoCredito { get; set; }
 
-        // Representa a tabela de Faturas no banco de dados.
-        // Através deste DbSet, o EF Core gerencia os ciclos financeiros e vincula os lançamentos aos cartões.
+        // Faturas geradas a partir dos cartões de crédito
         public DbSet<Fatura> Fatura { get; set; }
 
-        // Representa a tabela de Pagamentos de Faturas.
-        // Este DbSet armazena o histórico detalhado de cada transação (total ou parcial) realizada para quitar uma fatura.
+        // Pagamentos realizados nas faturas (total ou parcial)
         public DbSet<PagamentoFatura> PagamentoFatura { get; set; }
 
-        // O método usado para configurar o modelo do banco de dados (mapeamento das entidades)
+        // Metas financeiras de gasto ou receita
+        public DbSet<MetasGasto> MetasGasto { get; set; }
+
+        // Aplica automaticamente todas as configurações Fluent API do assembly
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Aplica automaticamente todas as classes de configuração (Fluent API)
-            // Ele procura no assembly (projeto) por classes que implementam IEntityTypeConfiguration.
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(FinancasDbContext).Assembly);
 
-            // Chama a implementação base do DbContext.
             base.OnModelCreating(modelBuilder);
         }
     }
