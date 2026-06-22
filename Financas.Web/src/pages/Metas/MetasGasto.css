@@ -1,0 +1,312 @@
+/**
+ * MetasGasto.css
+ *
+ * Estilos responsáveis pela interface da página de Metas Financeiras.
+ * Define layout geral, cards de resumo, lista de progresso, modal e responsividade.
+ * A ideia aqui é manter uma UI consistente com tema escuro e foco em leitura de dados financeiros.
+ */
+
+/* ========================================= */
+/* Layout Principal e Container Global       */
+/* ========================================= */
+
+.metas-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: calc(100vh - 80px);
+  background-color: #12161f;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 2rem;
+  color: #fff;
+}
+
+/* Área de filtros no topo (caso seja expandido futuramente) */
+.filtros-topo {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  max-width: 1200px;
+  margin-bottom: 2rem;
+}
+
+.filtros-topo select {
+  background-color: #1e2327;
+  color: #aeb5bc;
+  border: 1px solid #3b4248;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  outline: none;
+}
+
+/* ========================================= */
+/* Cartões de Resumo (KPIs financeiros)      */
+/* ========================================= */
+
+.resumo-cards {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  max-width: 1200px;
+  margin-bottom: 2rem;
+}
+
+/* Card individual de indicador financeiro */
+.card-info {
+  flex: 1;
+  background-color: #1e2327;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.card-info span {
+  font-size: 0.85rem;
+  color: #727a82;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.card-info h2 {
+  font-size: 1.8rem;
+  margin: 0.5rem 0 0 0;
+}
+
+/* Utilitários simples para destaque de valores */
+.text-green { color: #28a745; }
+.text-red { color: #dc3545; }
+
+/* ========================================= */
+/* Painel principal da listagem de metas     */
+/* ========================================= */
+
+.painel-metas {
+  background-color: #1e2327;
+  width: 100%;
+  max-width: 1200px;
+  padding: 1.5rem 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.painel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.painel-header h2 {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+/* Botão principal de criação de nova meta */
+.btn-adicionar {
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-adicionar:hover {
+  background-color: #218838;
+}
+
+/* ========================================= */
+/* Lista de metas e barras de progresso      */
+/* ========================================= */
+
+.lista-barras {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Container de cada meta individual */
+.meta-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.meta-bar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+/* Nome e descrição da meta */
+.meta-nome {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+/* Área de ações e valores da meta */
+.meta-dados {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+/* Botões de ação (editar / remover) */
+.btn-acao {
+  background-color: #3b4248;
+  color: #caced3;
+  border: none;
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.btn-acao:hover {
+  background-color: #495259;
+  color: #fff;
+}
+
+/* Barra de progresso base */
+.progress-bg {
+  width: 100%;
+  height: 12px;
+  background-color: #2b3137;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Preenchimento dinâmico da barra */
+.progress-fill {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  border-radius: 6px;
+  transition: width 0.4s ease;
+}
+
+/* cores alternativas (caso queira usar via classe no futuro) */
+.fill-green { background-color: #28a745; }
+.fill-red { background-color: #dc3545; }
+
+/* ========================================= */
+/* Modal (criação e edição de metas)         */
+/* ========================================= */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* Card central do modal */
+.metas-card {
+  background-color: #1e2327;
+  width: 100%;
+  max-width: 480px;
+  padding: 2.5rem;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+}
+
+.metas-card h1 {
+  font-size: 1.5rem;
+  color: #72b6eb;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* Grupo padrão de inputs */
+.input-group {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  color: #aeb5bc;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.input-group input,
+.input-group select {
+  background-color: #3b4248;
+  border: none;
+  border-radius: 4px;
+  padding: 0.9rem;
+  color: #ffffff;
+  font-size: 1rem;
+  outline: none;
+}
+
+/* Botões do modal */
+.btn-salvar {
+  background-color: #1e70c1;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.btn-cancelar {
+  background-color: #3b4248;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* Mensagem de erro exibida no modal */
+.mensagem-erro {
+  background-color: #4a0f0f;
+  color: #ff5252;
+  text-align: center;
+  padding: 0.8rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-top: 1.5rem;
+  border: 1px solid #751919;
+}
+
+/* ========================================= */
+/* Responsividade                            */
+/* ========================================= */
+
+@media (max-width: 1024px) {
+  .resumo-cards { flex-wrap: wrap; }
+  .card-info { min-width: 45%; }
+}
+
+@media (max-width: 768px) {
+  .metas-page { padding: 1rem; }
+  .resumo-cards { flex-direction: column; }
+  .painel-header,
+  .meta-bar-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}

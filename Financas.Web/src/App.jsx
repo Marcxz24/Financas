@@ -1,3 +1,11 @@
+/**
+ * App.jsx
+ *
+ * Responsável por centralizar o roteamento principal da aplicação.
+ * Define rotas públicas, privadas e estrutura de navegação aninhada (Dashboard como layout base).
+ * Também controla acesso autenticado através do PrivateRoute.
+ */
+
 import {
   BrowserRouter,
   Routes,
@@ -20,27 +28,26 @@ import Receitas from "./pages/Relatorios/Receitas/Receitas";
 import Despesas from "./pages/Relatorios/Despesas/Despesas";
 import FluxoCaixa from "./pages/Relatorios/FluxoCaixa/FluxoCaixa";
 import FaturaRelatorio from "./pages/Relatorios/Fatura/FaturaRelatorio";
+import Metas from "./pages/Metas/MetasGasto";
 import Perfil from "./pages/Perfil/Perfil";
 import Ajuda from "./pages/Ajuda/Ajuda";
 import SessaoExpirada from "./pages/SessaoExpirada/SessaoExpirada";
 
-// Componente de Middleware para proteção de rotas (Auth check)
+// Middleware de proteção de rotas (validação de autenticação)
 import PrivateRoute from "./routes/PrivateRoute";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Rotas Públicas: Acesso livre sem autenticação */}
+
+        {/* Rotas públicas não dependem de autenticação */}
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/criar-conta" element={<Register />} />
         <Route path="/sessao-expirada" element={<SessaoExpirada />} />
 
-        {/* Rotas Privadas: Envolvidas por PrivateRoute. 
-          O padrão de rota aninhada (Nested Routes) permite que a Dashboard 
-          atue como um layout pai para as sub-páginas.
-        */}
+        {/* Rotas protegidas por autenticação */}
         <Route
           path="/dashboard"
           element={
@@ -49,40 +56,50 @@ function App() {
             </PrivateRoute>
           }
         >
-          {/* Index: Rota padrão ao acessar /dashboard */}
+
+          {/* Rota padrão do dashboard (home interna) */}
           <Route index element={<ResumoFinanceiro />} />
 
-          {/* Rotas com parâmetros dinâmicos (ID) p/ reutilização de componentes (CRUD) */}
+          {/* Lançamentos financeiros (CRUD com e sem ID) */}
           <Route path="lancamento" element={<Lancamento />} />
           <Route path="lancamento/:id" element={<Lancamento />} />
 
-          {/* Rotas de Categoria: Listagem, criação e edição */}
+          {/* Categorias (CRUD) */}
           <Route path="categoria" element={<Categoria />} />
           <Route path="categoria/:id" element={<Categoria />} />
 
-          {/* Rotas de Conta Bancária: Listagem, criação e edição */}
+          {/* Contas bancárias */}
           <Route path="contas-bancarias" element={<ContaBancaria />} />
-          
-          {/* Rotas de Cartão de Crédito: Listagem, criação e edição */}
+
+          {/* Cartões de crédito */}
           <Route path="cartao-credito" element={<CartaoCredito />} />
 
+          {/* Faturas */}
           <Route path="fatura" element={<Fatura />} />
 
+          {/* Relatórios gerais e segmentados */}
           <Route path="relatorios" element={<Relatorios />} />
           <Route path="relatorios/receitas" element={<Receitas />} />
           <Route path="relatorios/despesas" element={<Despesas />} />
           <Route path="relatorios/fluxo-caixa" element={<FluxoCaixa />} />
-          // Dentro do bloco de rotas do dashboard
+
+          {/* Relatório detalhado de fatura por ID */}
           <Route path="relatorios/fatura/:id" element={<FaturaRelatorio />} />
 
+          {/* Módulo de metas financeiras */}
+          <Route path="metas" element={<Metas />} />
 
+          {/* Perfil do usuário */}
           <Route path="perfil" element={<Perfil />} />
 
+          {/* Central de ajuda/suporte */}
           <Route path="ajuda" element={<Ajuda />} />
+
         </Route>
 
-        {/* Wildcard (*): Fallback p/ rotas inexistentes, redirecionando p/ login */}
+        {/* Fallback para rotas inexistentes */}
         <Route path="*" element={<Navigate to="/" />} />
+
       </Routes>
     </BrowserRouter>
   );

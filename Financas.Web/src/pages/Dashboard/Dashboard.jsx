@@ -1,29 +1,39 @@
-import "./Dashboard.css"; // Importa o arquivo de estilos CSS para aplicar o layout visual da página
-import { Link, useNavigate, Outlet } from "react-router-dom"; // Importa hooks e componentes do React Router para navegação
-import Footer from "../../components/Footer/Footer"; // Importa o componente Footer para exibir o rodapé da página
+/**
+ * Dashboard.jsx
+ *
+ * Componente layout principal das rotas autenticadas.
+ * Responsável por estruturar navegação global do sistema (menu superior),
+ * controle de sessão (logout) e renderização das páginas internas via Outlet.
+ */
+
+import "./Dashboard.css"; // Estilos da estrutura principal do painel
+import { Link, useNavigate, Outlet } from "react-router-dom"; // Navegação e renderização de rotas aninhadas
+import Footer from "../../components/Footer/Footer"; // Rodapé global do sistema
 
 function Dashboard() {
-  // O hook 'useNavigate' é usado para redirecionar o usuário programaticamente (via código)
+  // Hook responsável por navegação programática entre rotas
   const navigate = useNavigate();
 
-  // Função disparada ao clicar no botão de sair
+  // Responsável por encerrar a sessão do usuário
   const handleLogout = () => {
-    // Remove o token de autenticação armazenado no navegador (localStorage)
-    // Isso encerra a sessão do usuário localmente
+    // Remove token de autenticação armazenado localmente
     localStorage.removeItem("token");
 
-    // Redireciona o usuário de volta para a rota raiz ("/"), geralmente a tela de login
+    // Redireciona para tela pública de login
     navigate("/");
   };
 
   return (
     <div className="dashboard-page">
+
+      {/* Cabeçalho fixo com identidade do sistema e menu principal */}
       <header className="dashboard-header">
         <div className="logo-area">
           <h1>Finanças</h1>
           <span>Painel Financeiro</span>
         </div>
 
+        {/* Navegação principal entre módulos do sistema */}
         <nav className="menu-top">
           <Link to="/dashboard">Dashboard</Link>
 
@@ -37,24 +47,30 @@ function Dashboard() {
 
           <Link to="/dashboard/fatura">Faturas</Link>
 
+          <Link to="/dashboard/metas">Metas</Link>
+
           <Link to="/dashboard/relatorios">Relatórios</Link>
 
           <Link to="/dashboard/perfil">Perfil</Link>
 
           <Link to="/dashboard/ajuda">Ajuda</Link>
 
+          {/* Ação de encerramento de sessão */}
           <button className="btn-logout" onClick={handleLogout}>
             Sair
           </button>
         </nav>
       </header>
 
-      {/* AQUI ESTÁ A MUDANÇA: Criamos o container que rola */}
+      {/* Container responsável por scroll e layout do conteúdo interno */}
       <div className="dashboard-scroll-container">
+        
         <main className="dashboard-content">
-          {/* Rotas filhas */}
+          {/* Renderização dinâmica das páginas internas do dashboard */}
           <Outlet />
         </main>
+
+        {/* Rodapé global do sistema */}
         <Footer />
       </div>
     </div>

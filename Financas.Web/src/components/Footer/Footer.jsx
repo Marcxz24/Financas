@@ -1,38 +1,49 @@
+/**
+ * Footer.jsx
+ *
+ * Componente responsável pelo rodapé global da aplicação.
+ * Exibe informações institucionais, autoria do sistema e versão atual.
+ * Utilizado como elemento fixo de identidade visual em todas as páginas.
+ */
+
 // Importa o arquivo de estilos CSS específico para o componente Footer
 import "./Footer.css";
 
 // Define o componente funcional Footer que será renderizado na interface
 function Footer() {
-  // Obtém o ano corrente do sistema para exibição dinâmica no copyright
+  // Captura o ano atual dinamicamente para manter o copyright sempre atualizado
   const anoAtual = new Date().getFullYear();
 
   return (
-    // Elemento principal de rodapé com a classe de estilo 'footer-sistema'
+    // Estrutura principal do rodapé
     <footer className="footer-sistema">
-      {/* Container interno para centralização e organização do conteúdo */}
+      
+      {/* Container responsável por organizar layout interno do footer */}
       <div className="footer-conteudo">
 
-        {/* Bloco de informações do rodapé (Copyright e Desenvolvedor) */}
+        {/* Área de informações institucionais */}
         <div className="footer-info">
-          {/* Exibe o ano atual dinâmico e o nome do sistema */}
+
+          {/* Exibe copyright com ano dinâmico */}
           <span>
             © {anoAtual} Finanças
           </span>
 
-          {/* Elemento visual para separação entre informações */}
+          {/* Separador visual entre informações */}
           <span className="footer-separador">
             •
           </span>
 
-          {/* Exibe a autoria do projeto com destaque no nome */}
+          {/* Identificação do desenvolvedor responsável pelo sistema */}
           <span>
             Desenvolvido por <strong>Marco Antônio Q Ribeiro</strong>
           </span>
+
         </div>
 
-        {/* Bloco que exibe a versão atual do sistema */}
+        {/* Exibição da versão atual do sistema */}
         <div className="footer-versao">
-          v1.5.4
+          v1.6.0
         </div>
 
       </div>
@@ -40,5 +51,5 @@ function Footer() {
   );
 }
 
-// Exporta o componente para que possa ser utilizado em outros arquivos (como no Dashboard)
+// Exporta o componente para uso global na aplicação
 export default Footer;
