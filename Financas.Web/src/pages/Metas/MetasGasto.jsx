@@ -3,64 +3,78 @@
  *
  * Página responsável pelo gerenciamento de metas financeiras do usuário.
  * Realiza CRUD completo (criar, listar, editar e excluir) integrado com a API.
- * Também calcula indicadores de progresso e exibe visualmente o avanço das metas.
+ *
+ * Suporta dois tipos de meta com regras de campos exclusivas:
+ * - Despesa (tipoMeta === 0): sem ContaBancariaId
+ * - Patrimônio (tipoMeta === 1): ContaBancariaId obrigatório; sem CategoriaId/CartaoCreditoId
  */
+
+// Componente principal para gerenciamento completo de metas financeiras realizando operações de criação, leitura, atualização e exclusão na API.
 
 import { useState, useEffect } from "react";
 import api from "../../services/api";
 import "../Metas/MetasGasto.css";
 
 function MetasGasto() {
-  // Estado de erro global da página (validação e falhas de API)
+  // Armazena mensagens de erro globais para validações de formulário e falhas de requisição na API.
   const [erro, setErro] = useState("");
 
-  // Estados do formulário de criação/edição de meta
+  // Estados responsáveis por armazenar os dados preenchidos no formulário de criação e edição das metas.
   const [descricao, setDescricao] = useState("");
   const [valor, setValor] = useState("");
   const [dataInicio, setDataInicio] = useState("");
   const [dataFinal, setDataFinal] = useState("");
-  const [tipoMeta, setTipoMeta] = useState(0); // 0: Despesa | 1: Receita
+  const [tipoMeta, setTipoMeta] = useState(0);
+  // Identificador da conta bancária vinculado à meta, sendo obrigatório apenas quando o tipo de meta for classificado como Patrimônio.
+  const [contaBancariaId, setContaBancariaId] = useState("");
 
-  // Lista de metas carregadas da API
+  // Armazena a lista de metas e contas bancárias recuperadas diretamente da API para exibição na interface.
   const [metas, setMetas] = useState([]);
+  const [contasBancarias, setContasBancarias] = useState([]);
 
-  // Controla se está em modo edição (ID ativo) ou criação (null)
+  // Variáveis de controle para gerenciar a abertura do modal, identificar a meta em edição e forçar atualizações na listagem da tela.
   const [idEdicao, setIdEdicao] = useState(null);
-
-  // Controle de exibição do modal de formulário
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Gatilho simples para forçar recarregamento da lista após alterações
   const [atualizarLista, setAtualizarLista] = useState(0);
 
-  // Define o modo da tela com base na existência de ID de edição
+  // Gerencia os filtros aplicados aos cards de resumo e armazena os detalhes temporários carregados em tempo real na seleção da meta.
+  const [idFiltroMeta, setIdFiltroMeta] = useState("");
+  const [metaDetalhe, setMetaDetalhe] = useState(null);
+  const [carregandoDetalhe, setCarregandoDetalhe] = useState(false);
+
+  // Define dinamicamente se o formulário está operando em modo de criação de uma nova meta ou na edição de um registro existente.
   const modo = idEdicao ? "editar" : "criar";
 
-  // Carrega metas sempre que o gatilho de atualização muda
+  // Busca simultaneamente as metas cadastradas e as contas bancárias no servidor assim que o componente é renderizado ou a lista é atualizada.
   useEffect(() => {
-    const buscarMetas = async () => {
+    const carregarDados = async () => {
       try {
-        const res = await api.get("/metas-gasto/listar-metas-gasto");
-        setMetas(res.data);
+        const [resMetas, resContas] = await Promise.all([
+          api.get("/metas-gasto/listar-metas-gasto"),
+          api.get("/contas-bancarias/listar-conta-bancaria"),
+        ]);
+
+        setMetas(resMetas.data);
+        setContasBancarias(resContas.data);
       } catch (error) {
-        console.error("Erro ao carregar metas:", error);
+        console.error("Erro ao carregar dados:", error);
         setErro("Erro ao sincronizar informações com o servidor.");
       }
     };
 
-    buscarMetas();
+    carregarDados();
   }, [atualizarLista]);
 
-  // Limpa todos os campos do formulário
+  // Limpa rigorosamente todos os campos do formulário para garantir que os dados de uma operação anterior não interfiram na próxima interação do usuário.
   const limparFormulario = () => {
     setDescricao("");
     setValor("");
     setDataInicio("");
     setDataFinal("");
     setTipoMeta(0);
+    setContaBancariaId("");
   };
 
-  // Abre modal no modo criação
   const handleAbrirModalNovo = () => {
     setIdEdicao(null);
     limparFormulario();
@@ -68,52 +82,84 @@ function MetasGasto() {
     setIsModalOpen(true);
   };
 
-  // Fecha modal e reseta estados relacionados
   const handleFecharModal = () => {
     setIsModalOpen(false);
     setIdEdicao(null);
     setErro("");
   };
 
-  // Ativa modo edição carregando dados da meta selecionada
+  // Preenche de forma automatizada todos os inputs do formulário no modal utilizando os dados da meta selecionada para agilizar o processo de edição.
   const handleAtivarEdicao = (id) => {
     setIdEdicao(id);
     setErro("");
 
     const metaSel = metas.find((m) => m.id === id);
 
+
     if (metaSel) {
       setDescricao(metaSel.nome || "");
       setValor(metaSel.valorMeta || "");
       setTipoMeta(metaSel.tipoMeta ?? 0);
-
-      // Ajuste de formato para input date (YYYY-MM-DD)
       setDataInicio(
-        metaSel.dataInicio ? String(metaSel.dataInicio).split("T")[0] : ""
+        metaSel.dataInicio ? String(metaSel.dataInicio).split("T")[0] : "",
       );
       setDataFinal(
-        metaSel.dataFinal ? String(metaSel.dataFinal).split("T")[0] : ""
+        metaSel.dataFinal ? String(metaSel.dataFinal).split("T")[0] : "",
+      );
+
+      // Restaura corretamente o vínculo visual da conta bancária caso a meta carregada pelo usuário seja do tipo Patrimônio.
+      setContaBancariaId(
+        metaSel.contaBancariaId != null ? String(metaSel.contaBancariaId) : "",
       );
 
       setIsModalOpen(true);
     }
   };
 
-  // Salva criação ou atualização de meta
+  // Realiza a validação lógica e comercial dos dados antes de submetê-los, bloqueando o envio de metas de Patrimônio sem uma conta selecionada.
+  const validarFormulario = () => {
+    if (tipoMeta === 1 && !contaBancariaId) {
+      setErro("Selecione uma conta bancária para a meta de Patrimônio.");
+      return false;
+    }
+
+    return true;
+  };
+
+  // Estrutura dinamicamente o objeto de dados que será enviado ao servidor, formatando os horários limites das datas informadas.
+  const montarPayload = () => {
+    const base = {
+      nome: descricao,
+      tipoMeta: Number(tipoMeta),
+      valorMeta: Number(valor),
+      dataInicio: `${dataInicio}T00:00:00`,
+      dataFinal: `${dataFinal}T23:59:59`,
+    };
+
+    if (tipoMeta === 0) {
+      // Para metas de Despesa, os identificadores de categoria e cartão de crédito são rigorosamente anulados no payload de requisição.
+      return {
+        ...base,
+        categoriaId: null,
+        cartaoCreditoId: null,
+      };
+    }
+
+      // Para metas de Patrimônio, a requisição anexa exclusivamente o ID da conta bancária e descarta automaticamente configurações desnecessárias de despesas.
+    return {
+      ...base,
+      contaBancariaId: Number(contaBancariaId),
+    };
+  };
+
+  // Gerencia o ciclo completo de submissão do formulário identificando se a operação acionada pelo usuário representa a criação ou a edição da meta.
   const handleSalvar = async (e) => {
     e.preventDefault();
     setErro("");
 
-    // Payload compatível com a API
-    const dados = {
-      nome: descricao,
-      categoriaId: null,
-      cartaoCreditoId: null,
-      valorMeta: Number(valor),
-      tipoMeta: Number(tipoMeta),
-      dataInicio: `${dataInicio}T00:00:00`,
-      dataFinal: `${dataFinal}T23:59:59`,
-    };
+    if (!validarFormulario()) return;
+
+    const dados = montarPayload();
 
     try {
       if (modo === "criar") {
@@ -125,8 +171,6 @@ function MetasGasto() {
       limparFormulario();
       setIdEdicao(null);
       setIsModalOpen(false);
-
-      // Força atualização da listagem
       setAtualizarLista((prev) => prev + 1);
     } catch (error) {
       let mensagemErro = "Erro ao salvar meta.";
@@ -145,7 +189,7 @@ function MetasGasto() {
     }
   };
 
-  // Remove meta após confirmação do usuário
+  // Aciona um modal nativo do navegador para solicitar confirmação de segurança do usuário antes de solicitar a remoção definitiva da meta na API.
   const handleExcluir = async (id) => {
     if (window.confirm("Deseja realmente excluir esta meta?")) {
       try {
@@ -157,40 +201,116 @@ function MetasGasto() {
     }
   };
 
-  // Cálculos agregados para cards de resumo
-  const metaTotal = metas.reduce((acc, m) => acc + (m.valorMeta || 0), 0);
-  const gastoAtualTotal = metas.reduce(
-    (acc, m) => acc + (m.valorGastoAtual || 0),
-    0
-  );
-  const saldoRestanteTotal = metaTotal - gastoAtualTotal;
+  // Controla a interação do usuário com o filtro principal, manipulando a exibição individual ou o agrupamento completo das informações nos cards.
+  const handleFiltroMeta = async (e) => {
+    const idSelecionado = e.target.value;
+    setIdFiltroMeta(idSelecionado);
 
+    if (!idSelecionado) {
+      setMetaDetalhe(null);
+      return;
+    }
+
+    setCarregandoDetalhe(true);
+    setMetaDetalhe(null);
+
+    try {
+      const res = await api.get(`/metas-gasto/${idSelecionado}`);
+      setMetaDetalhe(res.data);
+    } catch (error) {
+      console.error("Erro ao carregar detalhe da meta:", error);
+      setErro("Erro ao carregar detalhe da meta selecionada.");
+    } finally {
+      setCarregandoDetalhe(false);
+    }
+  };
+
+  // Processa os valores financeiros exibidos nos painéis superiores executando reduções em tempo real quando o filtro global está em modo geral.
+  const metaTotal = metaDetalhe
+    ? metaDetalhe.valorMeta
+    : metas.reduce((acc, m) => acc + (m.valorMeta || 0), 0);
+
+  const valorAtualTotal = metaDetalhe
+    ? metaDetalhe.valorAtual
+    : metas.reduce((acc, m) => acc + (m.valorAtual || 0), 0);
+
+  const saldoRestanteTotal = metaTotal - valorAtualTotal;
+
+  // Retorna dinamicamente a coloração hexadecimal apropriada da barra de progresso analisando diretamente o status devolvido pela lógica do backend.
+  const obterCorBarra = (status) => {
+    if (status === "Estourado") return "#ff4d4d";
+    if (status === "Atenção") return "#f0ad4e";
+    if (status === "Meta atingida") return "#1e70c1";
+    return "#4caf50";
+  };
+
+  const formatarMoeda = (valor) => (valor || 0).toFixed(2).replace(".", ",");
+
+  // Monta e renderiza a estrutura completa da interface contendo o sistema de filtros, os totalizadores dinâmicos, a listagem interativa e os modais ocultos.
   return (
     <div className="metas-page">
+      {/* Renderiza o filtro principal na parte superior para isolar e analisar o progresso financeiro de uma meta específica. */}
+      <div className="filtro-meta-wrapper">
+        <select
+          className="filtro-meta-select"
+          value={idFiltroMeta}
+          onChange={handleFiltroMeta}
+        >
+          <option value="">Todas as metas</option>
+          {metas.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.nome}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      {/* Resumo geral das metas */}
+      {/* Painel informativo superior que unifica e recalcula o total estipulado, o valor atingido e o saldo restante baseado no contexto do filtro. */}
       <div className="resumo-cards">
         <div className="card-info">
           <span>META TOTAL</span>
-          <h2>R$ {metaTotal.toFixed(2).replace(".", ",")}</h2>
+          <h2>
+            {carregandoDetalhe ? "..." : `R$ ${formatarMoeda(metaTotal)}`}
+          </h2>
         </div>
 
         <div className="card-info">
           <span>VALOR ATUAL</span>
           <h2 className="text-green">
-            R$ {gastoAtualTotal.toFixed(2).replace(".", ",")}
+            {carregandoDetalhe ? "..." : `R$ ${formatarMoeda(valorAtualTotal)}`}
           </h2>
         </div>
 
         <div className="card-info">
           <span>SALDO RESTANTE</span>
           <h2 className="text-green">
-            R$ {saldoRestanteTotal.toFixed(2).replace(".", ",")}
+            {carregandoDetalhe
+              ? "..."
+              : `R$ ${formatarMoeda(saldoRestanteTotal)}`}
           </h2>
         </div>
+
+        {/* O card complementar de status detalhado é inserido condicionalmente no layout exclusivamente quando o usuário isola uma meta no filtro. */}
+        {metaDetalhe && !carregandoDetalhe && (
+          <div className="card-info">
+            <span>STATUS</span>
+            <h2 style={{ fontSize: "1.2rem" }}>
+              {metaDetalhe.status}
+              <span
+                style={{
+                  fontSize: "0.95rem",
+                  color: "#aaa",
+                  marginLeft: "0.5rem",
+                }}
+              >
+                ({metaDetalhe.percentualUtilizado.toFixed(1)}%)
+              </span>
+            </h2>
+          </div>
+        )}
       </div>
 
-      {/* Lista principal de metas com progresso visual */}
+      {/* Estrutura visual que lista sequencialmente todas as metas cadastradas apresentando seus limites, indicadores visuais e botões de gerenciamento rápido. */}
       <div className="painel-metas">
         <div className="painel-header">
           <h2>Suas Metas</h2>
@@ -202,27 +322,24 @@ function MetasGasto() {
         <div className="lista-barras">
           {metas.map((m) => {
             const limite = m.valorMeta || 0;
-            const gasto = m.valorGastoAtual || 0;
-            const faltam = limite - gasto;
-            const pct = limite > 0 ? (gasto / limite) * 100 : 0;
+            // Normaliza e calcula matematicamente os atributos monetários da listagem para construir as proporções de preenchimento da barra de progresso da meta.
+            const atual = m.valorAtual || 0;
+            const faltam = limite - atual;
+            const pct = limite > 0 ? (atual / limite) * 100 : 0;
 
-            const corBarra =
-              m.status === "Estourado" ? "#ff4d4d" : "#4caf50";
-
-            const tipoLabel = m.tipoMeta === 1 ? "Receita" : "Despesa";
-
-            const dataFinalExibicao = m.dataFinal
-              ? new Date(m.dataFinal).toLocaleDateString()
+            const corBarra = obterCorBarra(m.status);
+            const tipoLabel = m.tipoMeta === 1 ? "Patrimônio" : "Despesa";
+            const dataFinalExib = m.dataFinal
+              ? new Date(m.dataFinal).toLocaleDateString("pt-BR")
               : "N/A";
 
             return (
               <div key={m.id} className="meta-bar-item">
-
-                {/* Cabeçalho da meta com ações */}
+                {/* Exibe detalhadamente as configurações principais do registro como nomenclatura, formato e limites e abriga os gatilhos diretos de edição e remoção. */}
                 <div className="meta-bar-header">
                   <div className="meta-nome">
                     <span>
-                      {m.nome} ({tipoLabel}) - Até {dataFinalExibicao}
+                      {m.nome} ({tipoLabel}) — Até {dataFinalExib}
                     </span>
                   </div>
 
@@ -235,8 +352,8 @@ function MetasGasto() {
                       color: "#ccc",
                     }}
                   >
-                    R$ {gasto.toFixed(2).replace(".", ",")} atual
-                    (Faltam R$ {faltam.toFixed(2).replace(".", ",")})
+                    R$ {formatarMoeda(atual)} atual (Faltam R${" "}
+                    {formatarMoeda(faltam)})
                   </div>
 
                   <div className="meta-dados">
@@ -246,7 +363,6 @@ function MetasGasto() {
                     >
                       Editar
                     </button>
-
                     <button
                       className="btn-acao"
                       onClick={() => handleExcluir(m.id)}
@@ -256,36 +372,31 @@ function MetasGasto() {
                   </div>
                 </div>
 
-                {/* Barra de progresso da meta */}
+                {/* Projeta uma régua gráfica no front-end para fornecer uma perspectiva analítica e intuitiva da aderência do usuário em relação à meta financeira. */}
                 <div className="progress-bg">
                   <div
                     className="progress-fill"
                     style={{
-                      width: `${pct > 100 ? 100 : pct}%`,
+                      width: `${Math.min(pct, 100)}%`,
                       backgroundColor: corBarra,
                     }}
                   >
-                    <span>
-                      {pct.toFixed(0)}%
-                    </span>
+                    <span>{pct.toFixed(0)}%</span>
                   </div>
                 </div>
-
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* Modal de criação/edição */}
+      {/* Conjunto flutuante sobreposto que consolida todo o formulário de captação de dados essenciais para o fluxo de registro ou atualização de metas do sistema. */}
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="metas-card">
-
             <h1>{modo === "criar" ? "Nova Meta" : "Editar Meta"}</h1>
 
             <form onSubmit={handleSalvar} className="metas-form">
-
               <div className="input-group">
                 <label>Descrição</label>
                 <input
@@ -300,12 +411,36 @@ function MetasGasto() {
                 <label>Tipo de Meta</label>
                 <select
                   value={tipoMeta}
-                  onChange={(e) => setTipoMeta(Number(e.target.value))}
+                  onChange={(e) => {
+                    setTipoMeta(Number(e.target.value));
+                    // Remove por precaução qualquer vínculo anterior de conta bancária no estado local caso o usuário alterne para uma categoria de despesa convencional.
+                    setContaBancariaId("");
+                    setErro("");
+                  }}
                 >
                   <option value={0}>Despesa</option>
-                  <option value={1}>Receita</option>
+                  <option value={1}>Patrimônio</option>
                 </select>
               </div>
+
+              {/* Renderiza condicionalmente e obriga o preenchimento de uma conta bancária de referência garantindo que o sistema obedeça as regras exclusivas do tipo Patrimônio. */}
+              {tipoMeta === 1 && (
+                <div className="input-group">
+                  <label>Conta Bancária *</label>
+                  <select
+                    value={contaBancariaId}
+                    onChange={(e) => setContaBancariaId(e.target.value)}
+                    required
+                  >
+                    <option value="">Selecione uma conta</option>
+                    {contasBancarias.map((c) => (
+                      <option key={c.id} value={String(c.id)}>
+                        {c.nome}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="input-group">
                 <label>Valor Limite</label>
@@ -318,7 +453,7 @@ function MetasGasto() {
               </div>
 
               <div className="input-group">
-                <label>Data Inicio</label>
+                <label>Data Início</label>
                 <input
                   type="date"
                   value={dataInicio}
@@ -337,9 +472,7 @@ function MetasGasto() {
                 />
               </div>
 
-              {erro && (
-                <div className="mensagem-erro">{erro}</div>
-              )}
+              {erro && <div className="mensagem-erro">{erro}</div>}
 
               <button type="submit" className="btn-salvar">
                 Salvar
@@ -352,7 +485,6 @@ function MetasGasto() {
               >
                 Cancelar
               </button>
-
             </form>
           </div>
         </div>

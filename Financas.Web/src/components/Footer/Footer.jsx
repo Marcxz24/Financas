@@ -43,7 +43,7 @@ function Footer() {
 
         {/* Exibição da versão atual do sistema */}
         <div className="footer-versao">
-          v1.6.0
+          v1.6.1
         </div>
 
       </div>
