@@ -3,74 +3,61 @@
 namespace Financas.Api.DTOs.MetasGasto
 {
     /// <summary>
-    /// DTO completo utilizado para detalhar uma meta de gasto.
-    /// Retorna todas as informações relevantes, incluindo valores, período e vínculos.
+    /// DTO completo retornado nas operações de criação, atualização e consulta de uma meta.
+    /// Inclui todos os campos de vínculo, progresso calculado e status atual da meta.
     /// </summary>
     public class MetaGastoResponseDTO
     {
-        /// <summary>
-        /// Identificador único da meta.
-        /// </summary>
+        /// <summary>Identificador único da meta.</summary>
         public int Id { get; set; }
 
-        /// <summary>
-        /// Nome da meta definido pelo usuário.
-        /// </summary>
+        /// <summary>Nome da meta definido pelo usuário.</summary>
         public string Nome { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Valor total estabelecido como objetivo da meta.
-        /// </summary>
+        /// <summary>Valor total estabelecido como objetivo da meta.</summary>
         public decimal ValorMeta { get; set; }
 
-        /// <summary>
-        /// Tipo da meta, define se é baseada em despesas ou receitas.
-        /// </summary>
+        /// <summary>Tipo da meta: Despesa ou Patrimônio.</summary>
         public TipoMeta TipoMeta { get; set; }
 
         /// <summary>
-        /// Valor acumulado até o momento dentro do período da meta.
+        /// Valor de progresso calculado conforme o tipo da meta:
+        /// - Despesa: soma das transações no período filtradas por categoria/cartão.
+        /// - Patrimônio: saldo da conta vinculada ou soma de todas as contas do usuário.
         /// </summary>
-        public decimal ValorGastoAtual { get; set; }
+        public decimal ValorAtual { get; set; }
 
-        /// <summary>
-        /// Data de início do período em que a meta está ativa.
-        /// </summary>
+        /// <summary>Percentual de progresso em relação ao ValorMeta (0 a N).</summary>
+        public decimal PercentualUtilizado { get; set; }
+
+        /// <summary>Status calculado com base no tipo e percentual de progresso.</summary>
+        public string Status { get; set; } = string.Empty;
+
+        /// <summary>Data de início do período de vigência da meta.</summary>
         public DateTime DataInicio { get; set; }
 
-        /// <summary>
-        /// Data de término do período de vigência da meta.
-        /// </summary>
+        /// <summary>Data de término do período de vigência da meta.</summary>
         public DateTime DataFinal { get; set; }
 
-        /// <summary>
-        /// Identificador opcional da categoria vinculada à meta.
-        /// </summary>
+        /// <summary>Identificador da categoria vinculada (somente Despesa).</summary>
         public int? CategoriaId { get; set; }
 
-        /// <summary>
-        /// Nome da categoria associada à meta, quando aplicável.
-        /// </summary>
+        /// <summary>Nome da categoria vinculada, quando aplicável.</summary>
         public string? CategoriaNome { get; set; }
 
-        /// <summary>
-        /// Identificador opcional do cartão de crédito vinculado à meta.
-        /// </summary>
+        /// <summary>Identificador do cartão de crédito vinculado (somente Despesa).</summary>
         public int? CartaoCreditoId { get; set; }
 
-        /// <summary>
-        /// Nome do cartão de crédito associado à meta, quando aplicável.
-        /// </summary>
+        /// <summary>Nome do cartão de crédito vinculado, quando aplicável.</summary>
         public string? CartaoNome { get; set; }
 
         /// <summary>
-        /// Percentual de utilização da meta com base no valor acumulado.
+        /// Identificador da conta bancária vinculada (somente Patrimônio).
+        /// Quando nulo, o progresso considera todas as contas do usuário.
         /// </summary>
-        public decimal PercentualUtilizado { get; set; }
+        public int? ContaBancariaId { get; set; }
 
-        /// <summary>
-        /// Status calculado da meta (ex: dentro do limite, atenção, estourado).
-        /// </summary>
-        public string Status { get; set; } = string.Empty;
+        /// <summary>Nome da conta bancária vinculada, quando aplicável.</summary>
+        public string? ContaNome { get; set; }
     }
 }

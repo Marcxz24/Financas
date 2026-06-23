@@ -8,12 +8,13 @@ using System.Security.Claims;
 namespace Financas.Api.Controllers
 {
     /// <summary>
-    /// Controller responsável por gerenciar operações de metas de gasto.
-    /// Expõe endpoints para criação, listagem, resumo, atualização e remoção de metas.
-    /// Todas as operações são autenticadas e vinculadas ao usuário logado.
+    /// Controller responsável por gerenciar operações de metas financeiras.
+    /// Suporta metas do tipo Despesa (baseadas em lançamentos) e Patrimônio (baseadas em saldo de conta).
+    /// Todas as operações são autenticadas e isoladas por usuário.
     /// </summary>
     [ApiController]
     [Route("api/metas-gasto")]
+    [Authorize]
     public class MetasGastoController : ControllerBase
     {
         private readonly MetaGastoService _metaGastoService;
@@ -24,18 +25,21 @@ namespace Financas.Api.Controllers
         }
 
         /// <summary>
-        /// Cria uma nova meta de gasto para o usuário autenticado.
+        /// Cria uma nova meta financeira para o usuário autenticado.
         /// </summary>
         [HttpPost("criar-meta-gasto")]
-        [Authorize]
         public async Task<ActionResult<MetaGastoResponseDTO>> CriarMetaGasto([FromBody] CriarMetaGastoDTO dto)
         {
             try
             {
-                var usuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+                var usuarioId = ObterUsuarioId();
                 var meta = await _metaGastoService.CriarMetaGasto(dto, usuarioId);
 
-                return CreatedAtAction(nameof(GetMetasGasto), new { id = meta.Id }, meta);
+                return CreatedAtAction(nameof(GetMetaGastoPorId), new { id = meta.Id }, meta);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
@@ -44,17 +48,15 @@ namespace Financas.Api.Controllers
         }
 
         /// <summary>
-        /// Retorna todas as metas de gasto do usuário autenticado.
+        /// Retorna todas as metas financeiras do usuário autenticado.
         /// </summary>
         [HttpGet("listar-metas-gasto")]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<MetaGastoListagemDTO>>> GetMetasGasto()
         {
             try
             {
-                var usuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+                var usuarioId = ObterUsuarioId();
                 var metas = await _metaGastoService.GetMetasGasto(usuarioId);
-
                 return Ok(metas);
             }
             catch (Exception ex)
@@ -64,17 +66,37 @@ namespace Financas.Api.Controllers
         }
 
         /// <summary>
-        /// Retorna um resumo das metas de gasto do usuário autenticado, ideal para dashboards e cards.
+        /// Retorna o detalhe completo de uma meta específica do usuário autenticado.
+        /// </summary>
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<MetaGastoResponseDTO>> GetMetaGastoPorId(int id)
+        {
+            try
+            {
+                var usuarioId = ObterUsuarioId();
+                var meta = await _metaGastoService.GetMetaGastoPorId(id, usuarioId);
+                return Ok(meta);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Retorna um resumo das metas do usuário autenticado, ideal para dashboards e cards.
         /// </summary>
         [HttpGet("resumo-metas-gasto")]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<MetaGastoResumoDTO>>> GetResumoMetasGasto()
         {
             try
             {
-                var usuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+                var usuarioId = ObterUsuarioId();
                 var resumo = await _metaGastoService.GetResumoMetasGasto(usuarioId);
-
                 return Ok(resumo);
             }
             catch (Exception ex)
@@ -84,17 +106,15 @@ namespace Financas.Api.Controllers
         }
 
         /// <summary>
-        /// Atualiza uma meta de gasto existente do usuário autenticado.
+        /// Atualiza uma meta financeira existente do usuário autenticado.
         /// </summary>
-        [HttpPatch("atualizar-meta-gasto/{id}")]
-        [Authorize]
+        [HttpPatch("atualizar-meta-gasto/{id:int}")]
         public async Task<ActionResult<MetaGastoResponseDTO>> AtualizarMetaGasto([FromBody] AtualizarMetaGastoDTO dto, int id)
         {
             try
             {
-                var usuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+                var usuarioId = ObterUsuarioId();
                 var metaAtualizada = await _metaGastoService.AtualizarMetaGasto(dto, id, usuarioId);
-
                 return Ok(metaAtualizada);
             }
             catch (KeyNotFoundException ex)
@@ -112,17 +132,15 @@ namespace Financas.Api.Controllers
         }
 
         /// <summary>
-        /// Remove uma meta de gasto do usuário autenticado.
+        /// Remove uma meta financeira do usuário autenticado.
         /// </summary>
-        [HttpDelete("deletar-meta-gasto/{id}")]
-        [Authorize]
+        [HttpDelete("deletar-meta-gasto/{id:int}")]
         public async Task<ActionResult> DeletarMetaGasto(int id)
         {
             try
             {
-                var usuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+                var usuarioId = ObterUsuarioId();
                 await _metaGastoService.DeletarMetaGasto(id, usuarioId);
-
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
@@ -138,5 +156,14 @@ namespace Financas.Api.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        // ── Extração centralizada do ID do usuário ────────────────────────────────
+
+        /// <summary>
+        /// Extrai e converte o identificador do usuário autenticado a partir das claims do token JWT.
+        /// Centralizado para evitar repetição e facilitar manutenção futura.
+        /// </summary>
+        private int ObterUsuarioId()
+            => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
     }
 }

@@ -34,6 +34,11 @@ public class MetasGasto
     public decimal ValorMeta { get; set; }
 
     /// <summary>
+    /// Identificador da conta bancária associada à meta, caso o controle seja por conta.
+    /// </summary>
+    public int? ContaBancariaId { get; set; }
+
+    /// <summary>
     /// Define se a meta é baseada em despesas ou receitas.
     /// </summary>
     public TipoMeta TipoMeta { get; set; } = TipoMeta.Despesa;
@@ -67,4 +72,9 @@ public class MetasGasto
     /// Navegação opcional para o cartão de crédito vinculado à meta.
     /// </summary>
     public virtual CartaoCredito? CartaoCredito { get; set; }
+
+    /// <summary>
+    /// Navegação para a conta bancária associada à meta, caso o controle seja por conta.
+    /// </summary>
+    public virtual ContaBancaria? ContaBancaria { get; set; }
 }

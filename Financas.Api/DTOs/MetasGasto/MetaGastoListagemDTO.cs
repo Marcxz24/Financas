@@ -3,54 +3,41 @@
 namespace Financas.Api.DTOs.MetasGasto
 {
     /// <summary>
-    /// DTO otimizado para listagem de metas de gasto.
-    /// Usado principalmente em grids, tabelas e telas de resumo.
+    /// DTO otimizado para listagem de metas de gasto em grids e telas de resumo.
+    /// Inclui progresso calculado e status atual de cada meta.
     /// </summary>
     public class MetaGastoListagemDTO
     {
-        /// <summary>
-        /// Identificador único da meta.
-        /// </summary>
+        /// <summary>Identificador único da meta.</summary>
         public int Id { get; set; }
 
-        /// <summary>
-        /// Nome da meta exibido para o usuário.
-        /// </summary>
+        /// <summary>Nome da meta exibido para o usuário.</summary>
         public string Nome { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Valor total definido como objetivo da meta.
-        /// </summary>
+        /// <summary>Valor total definido como objetivo da meta.</summary>
         public decimal ValorMeta { get; set; }
 
-        /// <summary>
-        /// Tipo da meta, define se é baseada em despesas ou receitas.
-        /// </summary>
+        /// <summary> Identificador da conta bancaria associada à meta, se houver.</summary>
+        public int? ContaBancariaId { get; set; }
+
+        /// <summary>Tipo da meta: Despesa ou Patrimônio.</summary>
         public TipoMeta TipoMeta { get; set; }
 
         /// <summary>
-        /// Valor já acumulado até o momento dentro do período da meta.
+        /// Valor de progresso calculado conforme o tipo da meta.
         /// </summary>
-        public decimal ValorGastoAtual { get; set; }
+        public decimal ValorAtual { get; set; }
 
-        /// <summary>
-        /// Percentual de utilização da meta com base no valor atual.
-        /// </summary>
+        /// <summary>Percentual de utilização da meta com base no valor atual.</summary>
         public decimal PercentualUtilizado { get; set; }
 
-        /// <summary>
-        /// Data de início do período da meta.
-        /// </summary>
+        /// <summary>Data de início do período da meta.</summary>
         public DateTime DataInicio { get; set; }
 
-        /// <summary>
-        /// Data de término do período da meta.
-        /// </summary>
+        /// <summary>Data de término do período da meta.</summary>
         public DateTime DataFinal { get; set; }
 
-        /// <summary>
-        /// Status calculado da meta (ex: dentro do limite, atenção, estourado).
-        /// </summary>
+        /// <summary>Status calculado da meta (ex: Dentro do limite, Atenção, Estourado).</summary>
         public string Status { get; set; } = string.Empty;
     }
 }

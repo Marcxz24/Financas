@@ -3,6 +3,7 @@ using System;
 using Financas.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Financas.Api.Migrations
 {
     [DbContext(typeof(FinancasDbContext))]
-    partial class FinancasDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260622233757_AddContaBancariaId")]
+    partial class AddContaBancariaId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

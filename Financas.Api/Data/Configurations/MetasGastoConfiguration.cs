@@ -39,6 +39,11 @@ namespace Financas.Api.Data.Configurations
                 .HasColumnName("cartao_credito_id")
                 .IsRequired(false);
 
+            // Conta bancária associada à meta (campo opcional)
+            builder.Property(m => m.ContaBancariaId)
+                .HasColumnName("conta_bancaria_id")
+                .IsRequired(false);
+
             // Valor monetário da meta com precisão definida para evitar erros de arredondamento
             builder.Property(m => m.ValorMeta)
                 .HasColumnName("valor_meta")
@@ -84,6 +89,12 @@ namespace Financas.Api.Data.Configurations
             builder.HasOne(m => m.CartaoCredito)
                 .WithMany()
                 .HasForeignKey(m => m.CartaoCreditoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Relacionamento opcional com conta bancária
+            builder.HasOne(m => m.ContaBancaria)
+                .WithMany()
+                .HasForeignKey(m => m.ContaBancariaId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Índice para otimizar consultas filtradas por usuário
