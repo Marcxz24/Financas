@@ -18,7 +18,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 // Registro do DbContext com MySQL
 builder.Services.AddDbContext<FinancasDbContext>(options =>
-    options.UseMySQL(connectionString ?? throw new Exception("Connection String não encontrada")));
+    options.UseNpgsql(connectionString ?? throw new Exception("Connection String não encontrada")));
 
 // Injeção de dependências dos serviços da aplicação
 builder.Services.AddScoped<UsuarioService>();

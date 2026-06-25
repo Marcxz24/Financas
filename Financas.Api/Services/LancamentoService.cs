@@ -72,6 +72,9 @@ namespace Financas.Api.Services
             if (usuario == null)
                 throw new Exception("Usuário não encontrado");
 
+            // 2. Normalização da data para UTC, garantindo consistência no armazenamento e evitando problemas de fuso horário
+            var dataNormalizada = DateTime.SpecifyKind(dto.Data, DateTimeKind.Utc);
+
             if (dto.CategoriaId == 0)
                 dto.CategoriaId = null;
 
@@ -127,7 +130,7 @@ namespace Financas.Api.Services
                 if (dto.Valor > limiteDisponivel)
                     throw new InvalidOperationException("Limite do cartão de crédito excedido.");
 
-                fatura = await _faturaService.ObterOuCriarFaturaAtualEntidade(cartaoCredito.Id, usuarioId, dto.Data);
+                fatura = await _faturaService.ObterOuCriarFaturaAtualEntidade(cartaoCredito.Id, usuarioId, dataNormalizada);
 
                 if (fatura.Status != FaturaStatus.Aberta)
                     throw new InvalidOperationException("Não é permitido adicionar lançamentos a uma fatura que não esteja aberta.");
@@ -155,7 +158,7 @@ namespace Financas.Api.Services
                     for (int i = 0; i < dto.QuantidadeParcelas; i++)
                     {
                         // Calcula a fatura correta para cada mês da parcela
-                        var dataParcela = dto.Data.AddMonths(i);
+                        var dataParcela = dataNormalizada.AddMonths(i);
                         var faturaParParcela = await _faturaService
                             .ObterOuCriarFaturaAtualEntidade(cartaoCredito.Id, usuarioId, dataParcela);
 
@@ -216,7 +219,7 @@ namespace Financas.Api.Services
             {
                 Descricao = dto.Descricao,
                 Valor = dto.Valor,
-                Data = dto.Data,
+                Data = dataNormalizada,
                 Tipo = dto.Tipo,
                 UsuarioId = usuarioId,
                 CategoriaId = dto.CategoriaId,
@@ -430,7 +433,7 @@ namespace Financas.Api.Services
                 lancamento.Tipo = (Entities.Enums.TipoLancamento)dto.Tipo; // Converte o valor recebido para o Enum correspondente
 
             if (dto.Data != null)
-                lancamento.Data = dto.Data.Value;
+                lancamento.Data = DateTime.SpecifyKind(dto.Data.Value, DateTimeKind.Utc);
 
             // 5. Persistência: O EF Core detecta que o objeto 'lancamento' foi modificado e gera o comando UPDATE
             using var transaction = await _financasDbContext.Database.BeginTransactionAsync(); // Inicia uma transação para garantir a atomicidade das operações

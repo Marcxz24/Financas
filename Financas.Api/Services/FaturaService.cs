@@ -210,9 +210,15 @@ namespace Financas.Api.Services
             // Tratamento para meses com 28, 29 ou 30 dias (ex: Fevereiro)
             var ultimoDiaMes = DateTime.DaysInMonth(ano, mes);
 
-            var dataFechamento = new DateTime(ano, mes, Math.Min(diaFechamento, ultimoDiaMes));
+            var dataFechamento = DateTime.SpecifyKind(
+                new DateTime(ano, mes, Math.Min(diaFechamento, ultimoDiaMes)),
+                DateTimeKind.Utc);
+
             var dataInicio = dataFechamento.AddMonths(-1).AddDays(1);
-            var dataVencimento = new DateTime(ano, mes, Math.Min(diaVencimento, ultimoDiaMes));
+
+            var dataVencimento = DateTime.SpecifyKind(
+                new DateTime(ano, mes, Math.Min(diaVencimento, ultimoDiaMes)),
+                DateTimeKind.Utc);
 
             // Busca por uma fatura já existente que cubra este exato período
             var fatura = await _financasDbContext.Fatura

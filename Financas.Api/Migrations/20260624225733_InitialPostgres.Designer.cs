@@ -5,35 +5,40 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace Financas.Api.Migrations
 {
     [DbContext(typeof(FinancasDbContext))]
-    [Migration("20260621184821_AdicionarNomeMetaGasto")]
-    partial class AdicionarNomeMetaGasto
+    [Migration("20260624225733_InitialPostgres")]
+    partial class InitialPostgres
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
-                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Financas.Api.Entities.CartaoCredito", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("DiaFechamento")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("dia_fechamento");
 
                     b.Property<int>("DiaVencimento")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("dia_vencimento");
 
                     b.Property<decimal>("Limite")
@@ -43,15 +48,15 @@ namespace Financas.Api.Migrations
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("nome_cartao_credito");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("status_cartao_credito");
 
                     b.Property<int>("UsuarioId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("usuario_id");
 
                     b.HasKey("Id");
@@ -65,29 +70,31 @@ namespace Financas.Api.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DataCadastro")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("data_cadastro");
 
                     b.Property<string>("Icone")
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("icone");
 
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("nome");
 
                     b.Property<int>("Tipo")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("tipo");
 
                     b.Property<int>("UsuarioId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("usuario_id");
 
                     b.HasKey("Id");
@@ -101,12 +108,14 @@ namespace Financas.Api.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("nome_conta_bancaria");
 
                     b.Property<decimal>("Saldo")
@@ -114,11 +123,11 @@ namespace Financas.Api.Migrations
                         .HasColumnName("saldo_conta_bancaria");
 
                     b.Property<int>("Tipo")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("tipo_conta_bancaria");
 
                     b.Property<int>("UsuarioId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("usuario_id");
 
                     b.HasKey("Id");
@@ -132,26 +141,28 @@ namespace Financas.Api.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CartaoCreditoId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("cartao_credito_id");
 
                     b.Property<DateTime>("DataFechamento")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("data_fechamento");
 
                     b.Property<DateTime>("DataInicio")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("data_inicio");
 
                     b.Property<DateTime>("DataVencimento")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("data_vencimento");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("status_fatura");
 
                     b.Property<decimal>("ValorPago")
@@ -175,52 +186,54 @@ namespace Financas.Api.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("CartaoCreditoId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("cartao_credito_id");
 
                     b.Property<int?>("CategoriaId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("categoria_id");
 
                     b.Property<int?>("ContaBancariaId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("conta_bancaria_id");
 
                     b.Property<DateTime>("Data")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("data_lancamento");
 
                     b.Property<string>("Descricao")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("descricao");
 
                     b.Property<int?>("FaturaId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("fatura_id");
 
                     b.Property<int?>("LancamentoPaiId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("lancamento_pai_id");
 
                     b.Property<int>("NumeroParcela")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("numero_parcela");
 
                     b.Property<int>("Tipo")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("tipo");
 
                     b.Property<int>("TotalParcelas")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("total_parcelas");
 
                     b.Property<int>("UsuarioId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("usuario_id");
 
                     b.Property<decimal>("Valor")
@@ -244,86 +257,29 @@ namespace Financas.Api.Migrations
                     b.ToTable("lancamentos", (string)null);
                 });
 
-            modelBuilder.Entity("Financas.Api.Entities.MetasGasto", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("Ano")
-                        .HasColumnType("int")
-                        .HasColumnName("ano");
-
-                    b.Property<bool>("Ativo")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasDefaultValue(true)
-                        .HasColumnName("ativo");
-
-                    b.Property<int?>("CartaoCreditoId")
-                        .HasColumnType("int")
-                        .HasColumnName("cartao_credito_id");
-
-                    b.Property<int?>("CategoriaId")
-                        .HasColumnType("int")
-                        .HasColumnName("categoria_id");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("data_criacao");
-
-                    b.Property<int>("Mes")
-                        .HasColumnType("int")
-                        .HasColumnName("mes");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)")
-                        .HasColumnName("nome");
-
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("int")
-                        .HasColumnName("usuario_id");
-
-                    b.Property<decimal>("ValorMeta")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("valor_meta");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CartaoCreditoId");
-
-                    b.HasIndex("CategoriaId");
-
-                    b.HasIndex("UsuarioId");
-
-                    b.HasIndex("UsuarioId", "Mes", "Ano");
-
-                    b.ToTable("metas_gasto", (string)null);
-                });
-
             modelBuilder.Entity("Financas.Api.Entities.PagamentoFatura", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("ContaBancariaId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("conta_bancaria_id");
 
                     b.Property<DateTime>("DataPagamento")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("data_pagamento");
 
                     b.Property<int>("FaturaId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("fatura_id");
 
                     b.Property<string>("Observacao")
                         .HasMaxLength(500)
-                        .HasColumnType("varchar(500)")
+                        .HasColumnType("character varying(500)")
                         .HasColumnName("observacao");
 
                     b.Property<decimal>("ValorPago")
@@ -343,47 +299,49 @@ namespace Financas.Api.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DataCadastro")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("data_cadastro");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("email");
 
                     b.Property<bool>("EmailConfirmado")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
+                        .HasColumnType("boolean")
                         .HasDefaultValue(false)
                         .HasColumnName("email_confirmado");
 
                     b.Property<string>("EmailPendente")
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("email_pendente");
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasColumnType("text")
                         .HasColumnName("password");
 
                     b.Property<string>("TokenConfirmacao")
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("token_confirmacao");
 
                     b.Property<DateTime?>("TokenExpiracao")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("token_expiracao");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("username");
 
                     b.HasKey("Id");
@@ -392,6 +350,69 @@ namespace Financas.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("usuarios", (string)null);
+                });
+
+            modelBuilder.Entity("MetasGasto", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CartaoCreditoId")
+                        .HasColumnType("integer")
+                        .HasColumnName("cartao_credito_id");
+
+                    b.Property<int?>("CategoriaId")
+                        .HasColumnType("integer")
+                        .HasColumnName("categoria_id");
+
+                    b.Property<int?>("ContaBancariaId")
+                        .HasColumnType("integer")
+                        .HasColumnName("conta_bancaria_id");
+
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_criacao");
+
+                    b.Property<DateTime>("DataFinal")
+                        .HasColumnType("date")
+                        .HasColumnName("data_final");
+
+                    b.Property<DateTime>("DataInicio")
+                        .HasColumnType("date")
+                        .HasColumnName("data_inicio");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("nome");
+
+                    b.Property<int>("TipoMeta")
+                        .HasColumnType("int")
+                        .HasColumnName("tipo_meta");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_id");
+
+                    b.Property<decimal>("ValorMeta")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("valor_meta");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CartaoCreditoId");
+
+                    b.HasIndex("CategoriaId");
+
+                    b.HasIndex("ContaBancariaId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("metas_gasto", (string)null);
                 });
 
             modelBuilder.Entity("Financas.Api.Entities.CartaoCredito", b =>
@@ -484,31 +505,6 @@ namespace Financas.Api.Migrations
                     b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("Financas.Api.Entities.MetasGasto", b =>
-                {
-                    b.HasOne("Financas.Api.Entities.CartaoCredito", "CartaoCredito")
-                        .WithMany()
-                        .HasForeignKey("CartaoCreditoId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Financas.Api.Entities.Categoria", "Categoria")
-                        .WithMany()
-                        .HasForeignKey("CategoriaId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Financas.Api.Entities.Usuario", "Usuario")
-                        .WithMany()
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CartaoCredito");
-
-                    b.Navigation("Categoria");
-
-                    b.Navigation("Usuario");
-                });
-
             modelBuilder.Entity("Financas.Api.Entities.PagamentoFatura", b =>
                 {
                     b.HasOne("Financas.Api.Entities.ContaBancaria", "ContaBancaria")
@@ -525,6 +521,38 @@ namespace Financas.Api.Migrations
                     b.Navigation("ContaBancaria");
 
                     b.Navigation("Fatura");
+                });
+
+            modelBuilder.Entity("MetasGasto", b =>
+                {
+                    b.HasOne("Financas.Api.Entities.CartaoCredito", "CartaoCredito")
+                        .WithMany()
+                        .HasForeignKey("CartaoCreditoId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Financas.Api.Entities.Categoria", "Categoria")
+                        .WithMany()
+                        .HasForeignKey("CategoriaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Financas.Api.Entities.ContaBancaria", "ContaBancaria")
+                        .WithMany()
+                        .HasForeignKey("ContaBancariaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Financas.Api.Entities.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CartaoCredito");
+
+                    b.Navigation("Categoria");
+
+                    b.Navigation("ContaBancaria");
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("Financas.Api.Entities.CartaoCredito", b =>
