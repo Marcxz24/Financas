@@ -46,7 +46,8 @@ builder.Services.AddCors(options =>
                 "https://financas-navy.vercel.app"
             )
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
