@@ -49,6 +49,8 @@ function Dashboard() {
 
           <Link to="/dashboard/metas">Metas</Link>
 
+          <Link to="/dashboard/chatIA">Chat IA</Link>
+
           <Link to="/dashboard/relatorios">Relatórios</Link>
 
           <Link to="/dashboard/perfil">Perfil</Link>

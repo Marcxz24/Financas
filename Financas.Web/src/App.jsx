@@ -29,6 +29,7 @@ import Despesas from "./pages/Relatorios/Despesas/Despesas";
 import FluxoCaixa from "./pages/Relatorios/FluxoCaixa/FluxoCaixa";
 import FaturaRelatorio from "./pages/Relatorios/Fatura/FaturaRelatorio";
 import Metas from "./pages/Metas/MetasGasto";
+import ChatIA from "./pages/ChatIA/ChatIA"
 import Perfil from "./pages/Perfil/Perfil";
 import Ajuda from "./pages/Ajuda/Ajuda";
 import SessaoExpirada from "./pages/SessaoExpirada/SessaoExpirada";
@@ -88,6 +89,9 @@ function App() {
 
           {/* Módulo de metas financeiras */}
           <Route path="metas" element={<Metas />} />
+
+          {/* Módulo do Chat com a IA para analises financeiras*/}
+          <Route path="chatIA" element={<ChatIA/>} />
 
           {/* Perfil do usuário */}
           <Route path="perfil" element={<Perfil />} />

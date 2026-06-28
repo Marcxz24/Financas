@@ -1,0 +1,91 @@
+/* Container principal: define o layout centralizado, fundo escuro e estilo de card */
+.chat-ia-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 24px;
+  background-color: #121212; /* Cor de fundo quase preta para reduzir fadiga visual */
+  border: 1px solid #2d2d2d; /* Borda fina para delimitar o card */
+  border-radius: 16px;       /* Cantos arredondados modernos */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); /* Sombra suave para dar profundidade */
+  color: #e0e0e0;            /* Cor do texto principal em cinza claro */
+}
+
+/* Título: estilização do cabeçalho com destaque visual */
+.chat-ia-container h3 {
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  color: #ffffff;
+  border-bottom: 2px solid #3b82f6; /* Sublinhado em azul para indicar marca de IA */
+  padding-bottom: 10px;
+  display: inline-block;
+}
+
+/* Área de texto (textarea): estilo de editor para o usuário digitar */
+.chat-ia-container textarea {
+  width: 100%;
+  height: 120px;
+  padding: 16px;
+  background-color: #1e1e1e; /* Fundo levemente mais claro que o container */
+  border: 1px solid #333;
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 1rem;
+  resize: none;              /* Bloqueia redimensionamento manual */
+  transition: border-color 0.3s; /* Transição suave na interação */
+}
+
+/* Estilo aplicado quando o usuário clica para digitar */
+.chat-ia-container textarea:focus {
+  outline: none;
+  border-color: #3b82f6;     /* Muda a borda para azul ao focar */
+}
+
+/* Botão: estilização focada em usabilidade e conversão */
+.chat-ia-container button {
+  margin-top: 15px;
+  width: 100%;
+  padding: 14px;
+  background-color: #3b82f6; /* Azul vibrante (cor principal) */
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+/* Efeito ao passar o mouse sobre o botão (hover) */
+.chat-ia-container button:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+/* Estilo visual para o estado desabilitado (quando a IA está pensando) */
+.chat-ia-container button:disabled {
+  background-color: #444;
+  cursor: not-allowed;
+}
+
+/* Caixa de resposta: área dedicada para exibir o texto gerado pela IA */
+.resposta-box {
+  margin-top: 25px;
+  padding: 24px;
+  background-color: #1a1a1a; /* Fundo diferenciado para destacar a resposta */
+  border-radius: 12px;
+  border-left: 4px solid #3b82f6; /* Borda lateral azul, estilo padrão de interfaces de chat */
+  line-height: 1.7;
+  color: #d1d5db;            /* Cinza suave para facilitar leitura longa */
+  font-size: 1.05rem;
+}
+
+/* Parágrafos internos: garante formatação consistente na resposta */
+.resposta-box p {
+  margin: 0;
+  white-space: pre-wrap;     /* Preserva quebras de linha enviadas pela IA */
+}
+
+/* Animação suave para quando o botão estiver no estado de "Pensando..." */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
