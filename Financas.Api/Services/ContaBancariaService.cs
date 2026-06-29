@@ -1,6 +1,7 @@
 ﻿using Financas.Api.Data;
 using Financas.Api.DTOs.ContaBancaria;
 using Financas.Api.Entities;
+using Financas.Api.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Financas.Api.Services
@@ -30,14 +31,26 @@ namespace Financas.Api.Services
         /// <exception cref="Exception">Lançada caso o utilizador proprietário não exista.</exception>
         public async Task<ContaBancariaResponseDTO> CriarContaBancaria(CriarContaBancariaDTO dto, int userId)
         {
-            // 1. Validação de Existência: Verifica se o utilizador realmente existe antes de criar a conta.
+            // 1. Validação de Existência:
+            // Verifica se o utilizador realmente existe antes de criar a conta.
             var usuario = await _financasDbContext.Usuarios
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (usuario == null)
                 throw new Exception("Usuário não encontrado");
 
-            // 2. Mapeamento: Transforma o DTO de entrada na Entidade de domínio (ContaBancaria).
+            // 2. Validação de Regra de Negócio:
+            // Garante que o usuário possua apenas uma Carteira Física.
+            await ValidarCarteiraFisica(userId, dto.Tipo);
+
+            // 3. Mapeamento:
+            // Transforma o DTO de entrada na entidade de domínio (ContaBancaria).
+            //
+            // OBS.:
+            // A Carteira Física utiliza a mesma entidade de Conta Bancária.
+            // O comportamento é diferenciado apenas pelo campo Tipo,
+            // permitindo reaproveitar toda a infraestrutura já existente
+            // (saldo, lançamentos, dashboard, IA e patrimônio).
             var contaBancaria = new ContaBancaria
             {
                 UsuarioId = userId,
@@ -46,18 +59,19 @@ namespace Financas.Api.Services
                 Saldo = dto.Saldo
             };
 
-            // 3. Persistência: Adiciona ao rastreamento do EF Core e guarda no MySQL de forma assíncrona.
+            // 4. Persistência:
+            // Adiciona ao rastreamento do EF Core e salva no banco.
             _financasDbContext.ContasBancarias.Add(contaBancaria);
             await _financasDbContext.SaveChangesAsync();
 
-            // 4. Resposta: Mapeia a Entidade persistida para o DTO de resposta.
-            // O ID já vem preenchido pelo banco (Auto-incremento).
+            // 5. Resposta:
+            // Mapeia a entidade persistida para o DTO de resposta.
             return new ContaBancariaResponseDTO
             {
                 Id = contaBancaria.Id,
                 UsuarioId = userId,
                 Nome = contaBancaria.Nome,
-                Tipo = contaBancaria.Tipo.ToString(), // Conversão do Enum para string amigável
+                Tipo = contaBancaria.Tipo.ToString(),
                 Saldo = contaBancaria.Saldo
             };
         }
@@ -114,6 +128,7 @@ namespace Financas.Api.Services
 
             // 4. Atualização Seletiva:
             // Só altera os campos que o usuário enviou no JSON (campos não nulos no DTO).
+            // A Carteira Física utiliza a mesma entidade ContaBancaria.
             if (dto.Nome != null)
                 contaBancaria.Nome = dto.Nome;
 
@@ -176,6 +191,24 @@ namespace Financas.Api.Services
 
             // 5. Persistência (Executa o DELETE dos lançamentos e da conta em uma única transação)
             await _financasDbContext.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Valida as regras de criação da Carteira Física.
+        /// Garante que cada usuário possua apenas uma Carteira Física cadastrada.
+        /// </summary>
+        private async Task ValidarCarteiraFisica(int userId, TipoContaBancaria tipo)
+        {
+            if (tipo != TipoContaBancaria.Fisica)
+                return;
+
+            var carteiraExiste = await _financasDbContext.ContasBancarias
+                .AnyAsync(c =>
+                    c.UsuarioId == userId &&
+                    c.Tipo == TipoContaBancaria.Fisica);
+
+            if (carteiraExiste)
+                throw new Exception("O usuário já possui uma Carteira Física cadastrada.");
         }
     }
 }

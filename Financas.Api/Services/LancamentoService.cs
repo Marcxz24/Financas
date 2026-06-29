@@ -65,16 +65,17 @@ namespace Financas.Api.Services
         // Método para criar um novo lançamento (receita ou despesa)
         public async Task<LancamentoResponseDTO> CriarLancamento(CriarLancamentoDTO dto, int usuarioId)
         {
-            // 1. Validação: Verifica se o usuário que está tentando criar o lançamento realmente existe
+            // 1. Validação: Verifica se o usuário existe.
             var usuario = await _financasDbContext.Usuarios
                 .FirstOrDefaultAsync(u => u.Id == usuarioId);
 
             if (usuario == null)
                 throw new Exception("Usuário não encontrado");
 
-            // 2. Normalização da data para UTC, garantindo consistência no armazenamento e evitando problemas de fuso horário
+            // 2. Normalização da data para UTC.
             var dataNormalizada = DateTime.SpecifyKind(dto.Data, DateTimeKind.Utc);
 
+            // 3. Normaliza IDs opcionais.
             if (dto.CategoriaId == 0)
                 dto.CategoriaId = null;
 
@@ -84,16 +85,26 @@ namespace Financas.Api.Services
             if (dto.CartaoCreditoId == 0)
                 dto.CartaoCreditoId = null;
 
+            // 4. Valida a origem financeira do lançamento.
             if (dto.ContaBancariaId != null && dto.CartaoCreditoId != null)
-                throw new InvalidOperationException("Não é permitido informar conta bancária e cartão ao mesmo tempo.");
+                throw new InvalidOperationException(
+                    "Não é permitido informar uma Conta Bancária e um Cartão de Crédito ao mesmo tempo.");
 
+            if (dto.ContaBancariaId == null && dto.CartaoCreditoId == null)
+                throw new InvalidOperationException(
+                    "É obrigatório informar uma Conta Bancária ou um Cartão de Crédito.");
+
+            // 5. Valida a categoria informada.
             if (dto.CategoriaId != null)
             {
                 var categoria = await _financasDbContext.Categorias
-                    .FirstOrDefaultAsync(c => c.Id == dto.CategoriaId && c.UsuarioId == usuarioId);
+                    .FirstOrDefaultAsync(c =>
+                        c.Id == dto.CategoriaId &&
+                        c.UsuarioId == usuarioId);
 
                 if (categoria == null)
-                    throw new KeyNotFoundException("Categoria não encontrada ou não pertence ao usuário.");
+                    throw new KeyNotFoundException(
+                        "Categoria não encontrada ou não pertence ao usuário.");
             }
 
             ContaBancaria? contaBancaria = null;
@@ -370,7 +381,7 @@ namespace Financas.Api.Services
                 throw new InvalidOperationException("Não é permitido editar uma parcela individualmente. Delete e recrie o parcelamento.");
 
             if (dto.ContaBancariaId != lancamento.ContaBancariaId)
-                throw new InvalidOperationException("Não é permitido alterar a conta bancária de um lançamento. Delete e recrie.");
+                throw new InvalidOperationException("A conta bancária não pode ser alterada. Para movimentar valores entre contas, utilize uma transferência.");
 
             if (dto.CartaoCreditoId.HasValue && dto.CartaoCreditoId != lancamento.CartaoCreditoId)
                 throw new InvalidOperationException("Não é permitido alterar o cartão de crédito de um lançamento. Delete e recrie.");

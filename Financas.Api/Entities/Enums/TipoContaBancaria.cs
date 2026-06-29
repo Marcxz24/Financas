@@ -43,6 +43,13 @@
         /// <summary>
         /// Conta mantida em moeda estrangeira (Dólar, Euro), comum em bancos digitais modernos para uso no exterior (ex: Nomad, Inter Global).
         /// </summary>
-        Internacional = 8
+        Internacional = 8,
+
+        /// <summary>
+        /// Representa dinheiro em espécie (cédulas e moedas) mantido fisicamente pelo usuário.
+        /// É utilizada para controlar o saldo disponível em carteira e participa normalmente
+        /// dos cálculos de patrimônio, receitas, despesas e movimentações financeiras.
+        /// </summary>
+        Fisica = 9
     }
 }
