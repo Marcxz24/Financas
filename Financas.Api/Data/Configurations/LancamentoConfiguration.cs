@@ -46,6 +46,7 @@ namespace Financas.Api.Data.Configurations
             // Mapeia a data do lançamento para a coluna 'data_lancamento'
             builder.Property(date => date.Data)
                 .HasColumnName("data_lancamento")
+                .HasColumnType("timestamp without time zone")
                 .IsRequired();
 
             // Configura o tipo (ex: "Receita" ou "Despesa") com limite de 25 caracteres

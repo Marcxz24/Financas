@@ -73,7 +73,7 @@ namespace Financas.Api.Services
                 throw new Exception("Usuário não encontrado");
 
             // 2. Normalização da data para UTC.
-            var dataNormalizada = DateTime.SpecifyKind(dto.Data, DateTimeKind.Utc);
+            var dataNormalizada = DateTime.SpecifyKind(dto.Data, DateTimeKind.Local);
 
             // 3. Normaliza IDs opcionais.
             if (dto.CategoriaId == 0)
@@ -444,7 +444,7 @@ namespace Financas.Api.Services
                 lancamento.Tipo = (Entities.Enums.TipoLancamento)dto.Tipo; // Converte o valor recebido para o Enum correspondente
 
             if (dto.Data != null)
-                lancamento.Data = DateTime.SpecifyKind(dto.Data.Value, DateTimeKind.Utc);
+                lancamento.Data = DateTime.SpecifyKind(dto.Data.Value, DateTimeKind.Local);
 
             // 5. Persistência: O EF Core detecta que o objeto 'lancamento' foi modificado e gera o comando UPDATE
             using var transaction = await _financasDbContext.Database.BeginTransactionAsync(); // Inicia uma transação para garantir a atomicidade das operações
