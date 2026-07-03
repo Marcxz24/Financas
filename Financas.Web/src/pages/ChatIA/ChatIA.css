@@ -83,6 +83,28 @@
   white-space: pre-wrap;     /* Preserva quebras de linha enviadas pela IA */
 }
 
+/* Força o estilo correto na caixa de ajuda */
+.ia-info-box {
+  background-color: #1a1a1a !important; /* Fundo escuro sóbrio */
+  border: 1px solid #333 !important;    /* Borda sutil */
+  color: #e0e0e0 !important;             /* Texto claro */
+  padding: 16px;
+  margin-bottom: 20px;
+  border-radius: 12px;
+}
+
+/* Garante que os textos e listas dentro da caixa respeitem o tema */
+.ia-info-box p, 
+.ia-info-box ul, 
+.ia-info-box li {
+  color: #d1d5db !important; /* Cinza claro para leitura confortável */
+}
+
+/* Garante que o "Como usar:" fique legível */
+.ia-info-box strong {
+  color: #ffffff !important;
+}
+
 /* Animação suave para quando o botão estiver no estado de "Pensando..." */
 @keyframes pulse {
     0% { opacity: 1; }

@@ -10,13 +10,31 @@ const ChatIA = () => {
 
   // Função para converter marcações de Markdown (**) em elementos negrito (<strong>) do React
   const formatarTexto = (texto) => {
-    return texto.split(/(\*\*.*?\*\*)/g).map((parte, index) => {
-      // Verifica se o trecho do texto está entre asteriscos duplos
-      if (parte.startsWith("**") && parte.endsWith("**")) {
-        return <strong key={index}>{parte.slice(2, -2)}</strong>;
+    // Divide o texto em linhas para preservar a estrutura de tópicos
+    return texto.split("\n").map((linha, i) => {
+      // 1. Verifica se é um título (começa com ###)
+      if (linha.startsWith("###")) {
+        return (
+          <h4 key={i} style={{ marginTop: "15px", color: "#3b82f6" }}>
+            {linha.replace("###", "").trim()}
+          </h4>
+        );
       }
-      // Retorna o texto normal caso não seja negrito
-      return parte;
+
+      // 2. Processa o restante da linha (negrito e texto comum)
+      // Usamos split para separar o que está entre **
+      const partes = linha.split(/(\*\*.*?\*\*)/g);
+
+      return (
+        <p key={i} style={{ marginBottom: "8px" }}>
+          {partes.map((parte, j) => {
+            if (parte.startsWith("**") && parte.endsWith("**")) {
+              return <strong key={j}>{parte.slice(2, -2)}</strong>;
+            }
+            return parte;
+          })}
+        </p>
+      );
     });
   };
 
@@ -52,22 +70,73 @@ const ChatIA = () => {
     // Container principal do componente
     <div className="chat-ia-container">
       <h3>🤖 Assistente Financeiro IA</h3>
-      {/* Campo de entrada para o usuário digitar a pergunta */}
+
+      {/* Bloco de ajuda estilizado */}
+      <div
+        className="ia-info-box"
+        style={{
+          fontSize: "0.9rem",
+          color: "#555",
+          marginBottom: "15px",
+          padding: "10px",
+          background: "#f9f9f9",
+          borderRadius: "8px",
+        }}
+      >
+        <h4>
+          ❓<strong>Como usar:</strong> Nossa IA analisa seu cenário atual antes
+          de responder.
+        </h4>
+        <br />
+        <ul style={{ margin: "5px 0", paddingLeft: "20px" }}>
+          <li>
+            <strong>Foco total:</strong> Não precisa de perguntas complexas. Uma
+            simples saudação (como "Oi" ou "Bom dia") já ativa nossa análise
+            completa, comparando suas receitas, gastos e metas do período atual.
+          </li>
+          <br />
+          <li>
+            <strong>Seja específico:</strong> Você pode ser direto para obter
+            respostas focadas. Pergunte coisas como "Onde posso cortar gastos?",
+            "Como estão minhas metas de economia?" ou "Tenho saldo para novas
+            compras?".
+          </li>
+          <br />
+          <li>
+            <strong>Análise Estruturada:</strong> Para facilitar sua tomada de decisão,
+            entregamos as respostas divididas em 3 pilares:{" "}
+            <strong>Problemas</strong> (o que exige atenção imediata),{" "}
+            <strong>Pontos Positivos</strong> (suas vitórias financeiras) e{" "}
+            <strong>Recomendações</strong> (ações práticas para melhorar).
+          </li>
+        </ul>
+      </div>
+
+      {/* Rótulo indicativo para o chat */}
+      <p
+        style={{
+          color: "#d1d5db",
+          fontSize: "0.9rem",
+          marginBottom: "8px",
+          marginTop: "10px",
+        }}
+      >
+        💬 <strong>Chat financeiro:</strong> Digite sua pergunta abaixo
+      </p>
+
       <textarea
         value={pergunta}
         onChange={(e) => setPergunta(e.target.value)}
         placeholder="Ex: Analise minhas despesas e me dê uma opinião."
       />
-      {/* Botão de envio, desabilitado durante o carregamento */}
+
       <button onClick={enviarPergunta} disabled={loading}>
         {loading ? "Pensando..." : "Enviar Pergunta"}
       </button>
 
-      {/* Exibe a caixa de resposta apenas se houver uma resposta disponível */}
       {resposta && (
         <div className="resposta-box">
-          {/* Renderiza o texto formatado com suporte a negrito */}
-          <p>{formatarTexto(resposta)}</p>
+          <div>{formatarTexto(resposta)}</div>
         </div>
       )}
     </div>
