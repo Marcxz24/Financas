@@ -11,16 +11,28 @@ namespace Financas.Api.Services
     /// Serviço orquestrador do módulo de Inteligência Artificial.
     /// Responsabilidades exclusivas deste serviço:
     ///   1. Validar o usuário autenticado.
-    ///   2. Carregar o contexto financeiro completo do banco de dados.
-    ///   3. Montar o prompt estruturado para o LLM via PromptBuilder interno.
-    ///   4. Delegar a comunicação HTTP ao OpenRouterService (baixo acoplamento).
-    ///   5. Retornar o resultado encapsulado no RespostaIADTO.
-    /// Nenhuma chamada HTTP à OpenRouter ocorre aqui — apenas orquestração.
+    ///   2. Detectar o escopo temporal da pergunta (mensal ou comparativo) e
+    ///      aplicar um filtro rígido de período em todo o carregamento de dados.
+    ///   3. Carregar o contexto financeiro do banco de dados, estritamente
+    ///      limitado ao escopo detectado (nunca dados de fora do período).
+    ///   4. Montar o prompt estruturado para o LLM via PromptBuilder interno,
+    ///      separando claramente "período atual" de "referência histórica".
+    ///   5. Delegar a comunicação HTTP ao GoogleGeminiService (baixo acoplamento).
+    ///   6. Retornar o resultado encapsulado no RespostaIADTO.
+    /// Nenhuma chamada HTTP ao Gemini ocorre aqui — apenas orquestração.
+    ///
+    /// GARANTIA DE ESCOPO TEMPORAL (contrato deste serviço):
+    ///   - O período principal de análise é sempre um único mês/ano.
+    ///   - Dados de outros meses só entram no prompt como um resumo agregado
+    ///     e compacto (no máximo 3 meses), e apenas quando a pergunta indicar
+    ///     explicitamente uma análise comparativa/trimestral.
+    ///   - "Últimos lançamentos" NUNCA extrapola o mês/ano de referência —
+    ///     não existe mais busca "global" por lançamentos recentes.
     /// </summary>
     public class IAService
     {
         private readonly FinancasDbContext _context;
-        private readonly OpenRouterService _openRouterService;
+        private readonly GoogleGeminiService _googleGeminiService;
         private readonly ILogger<IAService> _logger;
 
         // ── Constante de prompt de sistema ────────────────────────────────────
@@ -28,33 +40,88 @@ namespace Financas.Api.Services
         /// <summary>
         /// System Prompt separado do prompt do usuário, seguindo boas práticas de
         /// engenharia de prompt para LLMs. Define o papel, as regras de comportamento
-        /// e as restrições do assistente financeiro.
+        /// e as restrições do assistente financeiro — com ênfase reforçada em nunca
+        /// misturar períodos, mesmo quando dados históricos estiverem presentes no
+        /// contexto para fins de comparação.
         /// </summary>
         private const string SystemPrompt =
-            "Você é um assistente especializado em educação financeira, organização financeira, " +
-            "planejamento financeiro, orçamento pessoal, investimentos, controle de gastos, " +
-            "cartões de crédito, patrimônio e metas financeiras. " +
-            "Responda sempre em português brasileiro, de forma clara, objetiva e acessível. " +
-            "Utilize EXCLUSIVAMENTE as informações financeiras fornecidas no contexto abaixo — " +
-            "jamais invente dados, valores ou suposições que não estejam presentes. " +
-            "Quando os dados forem insuficientes para responder com precisão, oriente o usuário " +
-            "sobre quais informações adicionais seriam necessárias. " +
-            "Seja empático e motivador, sempre buscando orientar o usuário a melhorar " +
-            "sua saúde financeira de forma prática e sustentável.";
+            "Você é um assistente especialista em educação financeira e organização financeira. " +
+            "Responda sempre em português brasileiro. " +
+            "Baseie-se EXCLUSIVAMENTE nos dados fornecidos na requisição atual, sem usar contexto " +
+            "externo, memória de conversas anteriores ou qualquer conhecimento não presente no texto enviado. " +
+            "O bloco 'DADOS DO PERÍODO ATUAL' é o escopo OBRIGATÓRIO e principal da análise. " +
+            "Se, e somente se, a pergunta do usuário pedir explicitamente uma comparação entre meses, " +
+            "trimestre ou evolução ao longo do tempo, você pode usar também o bloco 'REFERÊNCIA HISTÓRICA' " +
+            "— mas apenas os valores agregados exatamente como fornecidos, nunca invente lançamentos, " +
+            "categorias, meses ou valores que não estejam explicitamente listados. " +
+            "Nunca trate dados de um período como se pertencessem a outro. " +
+            "Não infira ou assuma dados de períodos não presentes no contexto. Não assuma valores ausentes. " +
+            "Se o escopo da pergunta não estiver claro ou os dados forem insuficientes, informe isso claramente. " +
+            "Responda apenas o que foi solicitado, sem expandir a análise para outros períodos. " +
+            "Sempre apresente a resposta em três tópicos: Problemas, Pontos positivos e Recomendações práticas.";
 
         /// <summary>
-        /// Construtor com injeção de dependência do DbContext, OpenRouterService e Logger.
+        /// Limite máximo de meses considerados em qualquer análise comparativa/
+        /// histórica. Este é o teto rígido citado nos requisitos de escopo
+        /// temporal — nenhum método de carregamento pode ultrapassá-lo.
+        /// </summary>
+        private const int MaxMesesComparativo = 3;
+
+        /// <summary>
+        /// Palavras-chave (em minúsculas, sem acentuação especial tratada à parte)
+        /// que indicam que o usuário pediu uma análise comparativa/trimestral em
+        /// vez de uma análise de um único mês. Mantida como lista simples e
+        /// auditável — qualquer novo termo deve ser adicionado aqui.
+        /// </summary>
+        private static readonly string[] PalavrasChaveComparativo =
+        {
+            "trimestre", "trimestral",
+            "últimos 3 meses", "ultimos 3 meses",
+            "3 últimos meses", "3 ultimos meses",
+            "últimos meses", "ultimos meses",
+            "vários meses", "varios meses",
+            "comparar", "comparativo", "comparação", "comparacao",
+            "evolução", "evolucao", "evoluiu", "evoluir",
+            "ao longo do tempo", "tendência", "tendencia"
+        };
+
+        /// <summary>
+        /// Tipo de escopo temporal identificado a partir da pergunta do usuário.
+        /// </summary>
+        private enum TipoEscopoTemporal
+        {
+            /// <summary>Análise restrita a um único mês/ano (padrão).</summary>
+            Mensal,
+
+            /// <summary>Análise comparativa entre até <see cref="MaxMesesComparativo"/> meses.</summary>
+            Comparativo
+        }
+
+        /// <summary>
+        /// Representa o escopo temporal já resolvido para a requisição atual:
+        /// o tipo de análise, o mês/ano principal de referência, e quantos meses
+        /// de referência histórica (0 a <see cref="MaxMesesComparativo"/>) devem
+        /// ser carregados como contexto adicional.
+        /// </summary>
+        private sealed record EscopoTemporalIA(
+            TipoEscopoTemporal Tipo,
+            int MesReferencia,
+            int AnoReferencia,
+            int QuantidadeMesesHistorico);
+
+        /// <summary>
+        /// Construtor com injeção de dependência do DbContext, GoogleGeminiService e Logger.
         /// </summary>
         /// <param name="context">Contexto do EF Core para acesso ao banco de dados.</param>
-        /// <param name="openRouterService">Serviço de comunicação HTTP com a OpenRouter.</param>
+        /// <param name="googleGeminiService">Serviço de comunicação HTTP com o Gemini.</param>
         /// <param name="logger">Logger estruturado para rastreabilidade das operações.</param>
         public IAService(
             FinancasDbContext context,
-            OpenRouterService openRouterService,
+            GoogleGeminiService googleGeminiService,
             ILogger<IAService> logger)
         {
             _context = context;
-            _openRouterService = openRouterService;
+            _googleGeminiService = googleGeminiService;
             _logger = logger;
         }
 
@@ -64,7 +131,9 @@ namespace Financas.Api.Services
 
         /// <summary>
         /// Método principal do módulo de IA. Orquestra todo o fluxo:
-        /// validação → carregamento de contexto → montagem de prompt → chamada à IA → resposta.
+        /// validação → detecção de escopo temporal → carregamento de contexto
+        /// (limitado ao escopo) → montagem de prompt → chamada à IA → resposta.
+        /// Assinatura pública inalterada.
         /// </summary>
         /// <param name="dto">DTO contendo a pergunta do usuário.</param>
         /// <param name="usuarioId">ID do usuário autenticado extraído do token JWT.</param>
@@ -80,36 +149,77 @@ namespace Financas.Api.Services
             // 1. Validação do usuário autenticado
             var usuario = await ValidarUsuarioAsync(usuarioId);
 
-            // 2. Carregamento do contexto financeiro completo via EF Core
-            var contexto = await CarregarContextoFinanceiroAsync(usuarioId, usuario.Username);
+            // 2. Detecção do escopo temporal a partir da pergunta (mensal x comparativo)
+            var escopo = DetectarEscopoTemporal(dto.Pergunta);
+
+            _logger.LogInformation(
+                "[IAService] Escopo temporal detectado: {Tipo} | Período de referência: {Mes:D2}/{Ano} | " +
+                "Meses de referência histórica: {QuantidadeMeses}.",
+                escopo.Tipo, escopo.MesReferencia, escopo.AnoReferencia, escopo.QuantidadeMesesHistorico);
+
+            // 3. Carregamento do contexto financeiro, estritamente limitado ao escopo
+            var contexto = await CarregarContextoFinanceiroAsync(usuarioId, usuario.Username, escopo);
 
             _logger.LogInformation(
                 "[IAService] Contexto financeiro carregado. Contas: {Contas}, Cartões: {Cartoes}, " +
-                "Metas: {Metas}, Lançamentos recentes: {Lancamentos}.",
+                "Metas: {Metas}, Lançamentos do período: {Lancamentos}.",
                 contexto.ContasBancarias.Count,
                 contexto.CartaoCreditos.Count,
                 contexto.Metas.Count,
                 contexto.UltimosLancamentos.Count);
 
-            // 3. Montagem do prompt estruturado para o LLM
-            var userPrompt = MontarPromptCompleto(contexto, dto.Pergunta);
+            // 4. Montagem do prompt estruturado para o LLM, com separação clara
+            //    entre dados do período atual e referência histórica (se houver)
+            var userPrompt = MontarPromptCompleto(contexto, dto.Pergunta, escopo);
 
-            // 4. Delegação da chamada HTTP ao OpenRouterService
-            var respostaTexto = await _openRouterService.EnviarMensagemAsync(SystemPrompt, userPrompt);
+            // 5. Delegação da chamada HTTP ao GoogleGeminiService
+            var respostaTexto = await _googleGeminiService.EnviarMensagemAsync(SystemPrompt, userPrompt);
 
             _logger.LogInformation(
                 "[IAService] Resposta da IA recebida com sucesso para usuário {UsuarioId}.",
                 usuarioId);
 
-            // 5. Retorno encapsulado no DTO de resposta
+            // 6. Retorno encapsulado no DTO de resposta
             return new RespostaIADTO
             {
                 Resposta = respostaTexto,
                 PerguntaOriginal = dto.Pergunta,
-                GeradoEm = DateTime.UtcNow,
-                ModeloUtilizado = _openRouterService.ObterNomeModelo(),
+                GeradoEm = DateTime.Now,
+                ModeloUtilizado = _googleGeminiService.ObterNomeModelo(),
                 Sucesso = true
             };
+        }
+
+        // ════════════════════════════════════════════════════════════════════
+        // DETECÇÃO DE ESCOPO TEMPORAL
+        // ════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Analisa a pergunta do usuário para identificar se a análise solicitada
+        /// é mensal (padrão, um único mês) ou comparativa (trimestral/múltiplos
+        /// meses). O mês/ano de referência principal é sempre o mês/ano corrente
+        /// — este serviço não recebe um período explícito no DTO de entrada,
+        /// então "o período solicitado" é sempre ancorado no momento da pergunta.
+        ///
+        /// Quando a análise é comparativa, o número de meses de referência
+        /// histórica é sempre limitado a <see cref="MaxMesesComparativo"/>,
+        /// independentemente do que a pergunta sugira (ex.: "últimos 6 meses"
+        /// ainda assim é limitado a 3, para conter custo e evitar respostas
+        /// baseadas em janelas temporais grandes demais).
+        /// </summary>
+        private static EscopoTemporalIA DetectarEscopoTemporal(string pergunta)
+        {
+            var perguntaNormalizada = (pergunta ?? string.Empty).Trim().ToLowerInvariant();
+
+            // Extrai mês e ano baseados na string (ex: "junho")
+            var (mes, ano) = ExtrairMesAnoDaPergunta(perguntaNormalizada);
+
+            var ehComparativo = PalavrasChaveComparativo
+                .Any(palavraChave => perguntaNormalizada.Contains(palavraChave));
+
+            return ehComparativo
+                ? new EscopoTemporalIA(TipoEscopoTemporal.Comparativo, mes, ano, MaxMesesComparativo)
+                : new EscopoTemporalIA(TipoEscopoTemporal.Mensal, mes, ano, 0);
         }
 
         // ════════════════════════════════════════════════════════════════════
@@ -119,24 +229,26 @@ namespace Financas.Api.Services
         // ════════════════════════════════════════════════════════════════════
 
         /// <summary>
-        /// Monta o contexto financeiro completo do usuário consultando o banco de dados.
-        /// Delega para métodos privados especializados por domínio para manter coesão.
+        /// Monta o contexto financeiro do usuário consultando o banco de dados,
+        /// estritamente limitado ao escopo temporal já detectado. Delega para
+        /// métodos privados especializados por domínio para manter coesão.
         /// </summary>
-        private async Task<ContextoFinanceiroDTO> CarregarContextoFinanceiroAsync(int usuarioId, string nomeUsuario)
+        private async Task<ContextoFinanceiroDTO> CarregarContextoFinanceiroAsync(
+            int usuarioId, string nomeUsuario, EscopoTemporalIA escopo)
         {
-            var mesAtual = DateTime.UtcNow.Month;
-            var anoAtual = DateTime.UtcNow.Year;
+            var mesReferencia = escopo.MesReferencia;
+            var anoReferencia = escopo.AnoReferencia;
 
             var contexto = new ContextoFinanceiroDTO
             {
                 NomeUsuario = nomeUsuario,
-                MesReferencia = mesAtual,
-                AnoReferencia = anoAtual
+                MesReferencia = mesReferencia,
+                AnoReferencia = anoReferencia
             };
 
             // Carregamento sequencial dos dados para evitar erro de concorrência no DbContext
-            contexto.TotalReceitasMes = await CarregarReceitasMesAsync(usuarioId, mesAtual, anoAtual);
-            contexto.TotalDespesasMes = await CarregarDespesasMesAsync(usuarioId, mesAtual, anoAtual);
+            contexto.TotalReceitasMes = await CarregarReceitasMesAsync(usuarioId, mesReferencia, anoReferencia);
+            contexto.TotalDespesasMes = await CarregarDespesasMesAsync(usuarioId, mesReferencia, anoReferencia);
             contexto.SaldoMensal = contexto.TotalReceitasMes - contexto.TotalDespesasMes;
 
             var contas = await CarregarContasAsync(usuarioId);
@@ -155,8 +267,19 @@ namespace Financas.Api.Services
             contexto.MetasEstouradas = metas.Count(m => m.Status == "Estourado");
             contexto.MetasEmAtencao = metas.Count(m => m.Status == "Atenção");
 
-            contexto.UltimosLancamentos = await CarregarUltimosLancamentosAsync(usuarioId);
-            contexto.Indicadores = await CarregarIndicadoresAsync(usuarioId, mesAtual, anoAtual);
+            // CORREÇÃO DE ESCOPO: sempre filtrado por mês/ano do contexto —
+            // nunca mais uma busca "global" pelos lançamentos mais recentes.
+            contexto.UltimosLancamentos = await CarregarUltimosLancamentosAsync(
+                usuarioId, mesReferencia, anoReferencia);
+
+            // Indicadores históricos (médias) só são calculados quando o escopo
+            // detectado é comparativo — caso contrário, o custo dessas consultas
+            // é evitado e a IA não recebe nenhum dado de outros meses.
+            contexto.Indicadores = await CarregarIndicadoresAsync(
+                usuarioId,
+                mesReferencia,
+                anoReferencia,
+                incluirReferenciaHistorica: escopo.Tipo == TipoEscopoTemporal.Comparativo);
 
             return contexto;
         }
@@ -195,6 +318,8 @@ namespace Financas.Api.Services
 
         /// <summary>
         /// Carrega a lista de contas bancárias do usuário com saldo atual.
+        /// Saldo atual é um dado de estado (não histórico de período), por isso
+        /// permanece fora do filtro de mês/ano.
         /// </summary>
         private async Task<List<ContaIADTO>> CarregarContasAsync(int usuarioId)
         {
@@ -213,7 +338,7 @@ namespace Financas.Api.Services
         /// <summary>
         /// Carrega os cartões de crédito do usuário com uso atual e limite disponível.
         /// Calcula o total em aberto somando as faturas com status Aberta ou Fechada
-        /// (não pagas) de cada cartão.
+        /// (não pagas) de cada cartão. Assim como as contas, é um dado de estado atual.
         /// </summary>
         private async Task<List<CartaoIADTO>> CarregarCartoesAsync(int usuarioId)
         {
@@ -254,8 +379,6 @@ namespace Financas.Api.Services
         /// </summary>
         private async Task<List<MetaIADTO>> CarregarMetasAsync(int usuarioId)
         {
-            var hoje = DateTime.UtcNow.Date;
-
             var metas = await _context.MetasGasto
                 .AsNoTracking()
                 .Include(m => m.Categoria)
@@ -275,7 +398,7 @@ namespace Financas.Api.Services
 
                 if (meta.TipoMeta == TipoMeta.Despesa)
                 {
-                    // Calcula gastos no período da meta com filtros opcionais
+                    // Calcula gastos no período da própria meta (datas da meta, não do escopo da pergunta)
                     var query = lancamentos.Where(l =>
                         l.Tipo == TipoLancamento.Despesa &&
                         l.Data.Date >= meta.DataInicio.Date &&
@@ -328,17 +451,25 @@ namespace Financas.Api.Services
         }
 
         /// <summary>
-        /// Carrega os 15 lançamentos mais recentes do usuário para análise de padrões.
-        /// Limitado a 15 registros para controlar o consumo de tokens no prompt da IA.
+        /// Carrega os lançamentos do usuário SEMPRE filtrados pelo mês/ano do
+        /// contexto (escopo de referência da pergunta) — nunca uma busca global
+        /// pelos "mais recentes". Esta é a correção central de vazamento de
+        /// período: antes desta mudança, este método podia retornar lançamentos
+        /// de meses diferentes do período que o usuário perguntou, contaminando
+        /// a análise da IA. Limitado a 15 registros dentro do próprio mês para
+        /// controlar o consumo de tokens.
         /// </summary>
-        private async Task<List<LancamentoIADTO>> CarregarUltimosLancamentosAsync(int usuarioId)
+        private async Task<List<LancamentoIADTO>> CarregarUltimosLancamentosAsync(int usuarioId, int mes, int ano)
         {
             return await _context.Lancamentos
                 .AsNoTracking()
                 .Include(l => l.Categoria)
                 .Include(l => l.ContaBancaria)
                 .Include(l => l.CartaoCredito)
-                .Where(l => l.UsuarioId == usuarioId)
+                .Where(l =>
+                    l.UsuarioId == usuarioId &&
+                    l.Data.Month == mes &&
+                    l.Data.Year == ano)
                 .OrderByDescending(l => l.Data)
                 .Take(15)
                 .Select(l => new LancamentoIADTO
@@ -355,38 +486,63 @@ namespace Financas.Api.Services
         }
 
         /// <summary>
-        /// Carrega indicadores financeiros calculados para enriquecer o contexto da IA.
-        /// Inclui médias dos últimos 3 meses, maior categoria de gasto e status de faturas.
+        /// Carrega os indicadores financeiros enviados à IA. A parte histórica
+        /// (médias de receitas/despesas) só é calculada quando
+        /// <paramref name="incluirReferenciaHistorica"/> é verdadeiro — evitando
+        /// tanto o custo da consulta quanto o vazamento de dados de outros meses
+        /// em perguntas puramente mensais. A janela histórica, quando calculada,
+        /// é sempre ancorada no mês/ano de referência (não em DateTime.Now) e
+        /// estritamente limitada a <see cref="MaxMesesComparativo"/> meses.
+        ///
+        /// A maior categoria de gasto e as faturas atrasadas são dados do
+        /// estado atual/mês de referência, não histórico — por isso continuam
+        /// sendo sempre calculados.
         /// </summary>
         private async Task<IndicadoresFinanceirosIADTO> CarregarIndicadoresAsync(
             int usuarioId,
-            int mesAtual,
-            int anoAtual)
+            int mesReferencia,
+            int anoReferencia,
+            bool incluirReferenciaHistorica)
         {
-            // Define o período dos últimos 3 meses para cálculo de médias
-            var tresAtras = DateTime.UtcNow.AddMonths(-3);
+            var mediaReceitas = 0m;
+            var mediaDespesas = 0m;
+            var percentualGasto = 0m;
 
-            var mediaReceitas = await _context.Lancamentos
-                .AsNoTracking()
-                .Where(l =>
-                    l.UsuarioId == usuarioId &&
-                    l.Tipo == TipoLancamento.Receita &&
-                    l.Data >= tresAtras)
-                .GroupBy(l => new { l.Data.Month, l.Data.Year })
-                .Select(g => g.Sum(l => l.Valor))
-                .AverageAsync(v => (decimal?)v) ?? 0m;
+            if (incluirReferenciaHistorica)
+            {
+                var inicioMesReferencia = new DateTime(anoReferencia, mesReferencia, 1);
+                var inicioJanela = inicioMesReferencia.AddMonths(-(MaxMesesComparativo - 1));
+                var fimJanelaExclusivo = inicioMesReferencia.AddMonths(1);
 
-            var mediaDespesas = await _context.Lancamentos
-                .AsNoTracking()
-                .Where(l =>
-                    l.UsuarioId == usuarioId &&
-                    l.Tipo == TipoLancamento.Despesa &&
-                    l.Data >= tresAtras)
-                .GroupBy(g => new { g.Data.Month, g.Data.Year })
-                .Select(g => g.Sum(l => l.Valor))
-                .AverageAsync(v => (decimal?)v) ?? 0m;
+                mediaReceitas = await _context.Lancamentos
+                    .AsNoTracking()
+                    .Where(l =>
+                        l.UsuarioId == usuarioId &&
+                        l.Tipo == TipoLancamento.Receita &&
+                        l.Data >= inicioJanela &&
+                        l.Data < fimJanelaExclusivo)
+                    .GroupBy(l => new { l.Data.Month, l.Data.Year })
+                    .Select(g => g.Sum(l => l.Valor))
+                    .AverageAsync(v => (decimal?)v) ?? 0m;
 
-            // Maior categoria de gasto no mês atual
+                mediaDespesas = await _context.Lancamentos
+                    .AsNoTracking()
+                    .Where(l =>
+                        l.UsuarioId == usuarioId &&
+                        l.Tipo == TipoLancamento.Despesa &&
+                        l.Data >= inicioJanela &&
+                        l.Data < fimJanelaExclusivo)
+                    .GroupBy(g => new { g.Data.Month, g.Data.Year })
+                    .Select(g => g.Sum(l => l.Valor))
+                    .AverageAsync(v => (decimal?)v) ?? 0m;
+
+                percentualGasto = mediaReceitas > 0
+                    ? Math.Round((mediaDespesas / mediaReceitas) * 100, 2)
+                    : 0m;
+            }
+
+            // Maior categoria de gasto — sempre restrita ao mês/ano de referência,
+            // nunca a outros meses, independentemente do tipo de escopo.
             var maiorCategoria = await _context.Lancamentos
                 .AsNoTracking()
                 .Include(l => l.Categoria)
@@ -394,14 +550,15 @@ namespace Financas.Api.Services
                     l.UsuarioId == usuarioId &&
                     l.Tipo == TipoLancamento.Despesa &&
                     l.CategoriaId != null &&
-                    l.Data.Month == mesAtual &&
-                    l.Data.Year == anoAtual)
+                    l.Data.Month == mesReferencia &&
+                    l.Data.Year == anoReferencia)
                 .GroupBy(l => l.Categoria!.Nome)
                 .Select(g => new { Nome = g.Key, Total = g.Sum(l => l.Valor) })
                 .OrderByDescending(g => g.Total)
                 .FirstOrDefaultAsync();
 
-            // Faturas atrasadas
+            // Faturas atrasadas — reflete o status atual do usuário, não é um
+            // recorte temporal de um período específico.
             var faturasAtrasadas = await _context.Fatura
                 .AsNoTracking()
                 .Include(f => f.CartaoCredito)
@@ -409,10 +566,6 @@ namespace Financas.Api.Services
                     f.CartaoCredito.UsuarioId == usuarioId &&
                     f.Status == FaturaStatus.Atrasada)
                 .ToListAsync();
-
-            var percentualGasto = mediaReceitas > 0
-                ? Math.Round((mediaDespesas / mediaReceitas) * 100, 2)
-                : 0m;
 
             return new IndicadoresFinanceirosIADTO
             {
@@ -433,98 +586,103 @@ namespace Financas.Api.Services
 
         /// <summary>
         /// Monta o prompt completo enviado ao LLM combinando o contexto financeiro
-        /// estruturado com a pergunta original do usuário. O texto é otimizado para
-        /// consumir o mínimo de tokens possível mantendo toda a informação relevante.
+        /// estruturado com a pergunta original do usuário. O texto separa
+        /// explicitamente os "DADOS DO PERÍODO ATUAL" (escopo obrigatório) de uma
+        /// eventual "REFERÊNCIA HISTÓRICA" (opcional, só presente em análises
+        /// comparativas), reduzindo tokens ao omitir por completo o bloco
+        /// histórico quando ele não é necessário.
         /// </summary>
         /// <param name="contexto">Contexto financeiro carregado do banco de dados.</param>
         /// <param name="perguntaUsuario">Pergunta original digitada pelo usuário.</param>
+        /// <param name="escopo">Escopo temporal já resolvido para esta requisição.</param>
         /// <returns>String do prompt completo pronto para envio ao LLM.</returns>
-        private string MontarPromptCompleto(ContextoFinanceiroDTO contexto, string perguntaUsuario)
+        private string MontarPromptCompleto(
+            ContextoFinanceiroDTO contexto, string perguntaUsuario, EscopoTemporalIA escopo)
         {
             var sb = new StringBuilder();
 
-            // Cabeçalho de contexto
-            sb.AppendLine("=== CONTEXTO FINANCEIRO DO USUÁRIO ===");
+            var tipoAnaliseDescricao = escopo.Tipo == TipoEscopoTemporal.Comparativo
+                ? "Comparativa (referência de até 3 meses)"
+                : "Mensal (um único mês)";
+
+            sb.AppendLine("=== CONTEXTO FINANCEIRO ===");
             sb.AppendLine($"Usuário: {contexto.NomeUsuario}");
-            sb.AppendLine($"Período de referência: {contexto.MesReferencia:D2}/{contexto.AnoReferencia}");
+            sb.AppendLine($"Tipo de análise detectado: {tipoAnaliseDescricao}");
+            sb.AppendLine($"Período principal (obrigatório) de análise: {contexto.MesReferencia:D2}/{contexto.AnoReferencia}");
+            sb.AppendLine("Tudo em 'DADOS DO PERÍODO ATUAL' pertence exclusivamente a este período.");
             sb.AppendLine();
 
-            // Resumo mensal
-            sb.AppendLine("--- RESUMO DO MÊS ATUAL ---");
+            // ── DADOS DO PERÍODO ATUAL (escopo principal e obrigatório) ──────
+            sb.AppendLine("=== DADOS DO PERÍODO ATUAL ===");
+
+            sb.AppendLine("--- RESUMO DO PERÍODO ---");
             sb.AppendLine($"Receitas: R$ {contexto.TotalReceitasMes:F2}");
             sb.AppendLine($"Despesas: R$ {contexto.TotalDespesasMes:F2}");
-            sb.AppendLine($"Saldo mensal: R$ {contexto.SaldoMensal:F2} ({(contexto.SaldoMensal >= 0 ? "positivo" : "negativo")})");
+            sb.AppendLine($"Saldo: R$ {contexto.SaldoMensal:F2} ({(contexto.SaldoMensal >= 0 ? "positivo" : "negativo")})");
             sb.AppendLine();
 
-            // Patrimônio total
-            sb.AppendLine("--- PATRIMÔNIO E CONTAS BANCÁRIAS ---");
-            sb.AppendLine($"Patrimônio total (soma de saldos): R$ {contexto.PatrimonioTotal:F2}");
+            sb.AppendLine("--- PATRIMÔNIO E CONTAS (ESTADO ATUAL) ---");
+            sb.AppendLine($"Patrimônio total: R$ {contexto.PatrimonioTotal:F2}");
             sb.AppendLine($"Quantidade de contas: {contexto.QuantidadeContas}");
 
             foreach (var conta in contexto.ContasBancarias)
-                sb.AppendLine($"  - {conta.Nome} ({conta.Tipo}): R$ {conta.Saldo:F2}");
+                sb.AppendLine($"- {conta.Nome} ({conta.Tipo}): R$ {conta.Saldo:F2}");
 
             sb.AppendLine();
 
-            // Cartões de crédito
             if (contexto.CartaoCreditos.Any())
             {
-                sb.AppendLine("--- CARTÕES DE CRÉDITO ---");
-                sb.AppendLine($"Total em faturas abertas/fechadas: R$ {contexto.TotalFaturasAbertas:F2}");
+                sb.AppendLine("--- CARTÕES DE CRÉDITO (ESTADO ATUAL) ---");
+                sb.AppendLine($"Faturas abertas/fechadas: R$ {contexto.TotalFaturasAbertas:F2}");
                 sb.AppendLine($"Limite total disponível: R$ {contexto.LimiteTotalDisponivel:F2}");
 
                 foreach (var cartao in contexto.CartaoCreditos)
                 {
-                    sb.AppendLine($"  - {cartao.Nome} ({cartao.Status}): " +
-                        $"Limite R$ {cartao.Limite:F2} | " +
-                        $"Em aberto R$ {cartao.TotalEmAberto:F2} | " +
-                        $"Disponível R$ {cartao.LimiteDisponivel:F2}");
+                    sb.AppendLine($"- {cartao.Nome} ({cartao.Status}) | Limite: R$ {cartao.Limite:F2} | " +
+                        $"Em aberto: R$ {cartao.TotalEmAberto:F2} | Disponível: R$ {cartao.LimiteDisponivel:F2}");
                 }
 
                 sb.AppendLine();
             }
 
-            // Metas financeiras
             if (contexto.Metas.Any())
             {
                 sb.AppendLine("--- METAS FINANCEIRAS ---");
-                sb.AppendLine($"Total de metas: {contexto.QuantidadeMetas} | " +
-                    $"Estouradas: {contexto.MetasEstouradas} | " +
+                sb.AppendLine($"Total: {contexto.QuantidadeMetas} | Estouradas: {contexto.MetasEstouradas} | " +
                     $"Em atenção: {contexto.MetasEmAtencao}");
 
                 foreach (var meta in contexto.Metas)
                 {
                     var categoriaInfo = meta.CategoriaNome != null ? $" | Categoria: {meta.CategoriaNome}" : "";
-                    sb.AppendLine($"  - {meta.Nome} ({meta.Tipo}{categoriaInfo}): " +
-                        $"Meta R$ {meta.ValorMeta:F2} | " +
-                        $"Atual R$ {meta.ValorAtual:F2} | " +
-                        $"{meta.PercentualUtilizado:F1}% | {meta.Status} | " +
-                        $"Período: {meta.DataInicio:dd/MM/yyyy} a {meta.DataFinal:dd/MM/yyyy}");
+
+                    sb.AppendLine($"- {meta.Nome} ({meta.Tipo}{categoriaInfo}) | Meta: R$ {meta.ValorMeta:F2} | " +
+                        $"Atual: R$ {meta.ValorAtual:F2} | {meta.PercentualUtilizado:F1}% | {meta.Status}");
                 }
 
                 sb.AppendLine();
             }
 
-            // Indicadores financeiros
-            sb.AppendLine("--- INDICADORES FINANCEIROS ---");
-            sb.AppendLine($"Média de receitas (últimos 3 meses): R$ {contexto.Indicadores.MediaReceitasMensal:F2}");
-            sb.AppendLine($"Média de despesas (últimos 3 meses): R$ {contexto.Indicadores.MediaDespesasMensal:F2}");
-            sb.AppendLine($"Percentual de gasto sobre receita: {contexto.Indicadores.PercentualGastoSobreReceita:F1}%");
+            var possuiIndicadorAtual = !string.IsNullOrEmpty(contexto.Indicadores.MaiorCategoriaGasto)
+                || contexto.Indicadores.FaturasAtrasadas > 0;
 
-            if (!string.IsNullOrEmpty(contexto.Indicadores.MaiorCategoriaGasto))
-                sb.AppendLine($"Maior categoria de gasto no mês: {contexto.Indicadores.MaiorCategoriaGasto} " +
-                    $"(R$ {contexto.Indicadores.ValorMaiorCategoriaGasto:F2})");
+            if (possuiIndicadorAtual)
+            {
+                sb.AppendLine("--- INDICADORES DO PERÍODO ATUAL ---");
 
-            if (contexto.Indicadores.FaturasAtrasadas > 0)
-                sb.AppendLine($"⚠️  Faturas atrasadas: {contexto.Indicadores.FaturasAtrasadas} " +
-                    $"(Total: R$ {contexto.Indicadores.ValorTotalFaturasAtrasadas:F2})");
+                if (!string.IsNullOrEmpty(contexto.Indicadores.MaiorCategoriaGasto))
+                    sb.AppendLine($"Maior gasto do período: {contexto.Indicadores.MaiorCategoriaGasto} " +
+                        $"(R$ {contexto.Indicadores.ValorMaiorCategoriaGasto:F2})");
 
-            sb.AppendLine();
+                if (contexto.Indicadores.FaturasAtrasadas > 0)
+                    sb.AppendLine($"Faturas atrasadas (status atual): {contexto.Indicadores.FaturasAtrasadas} " +
+                        $"(R$ {contexto.Indicadores.ValorTotalFaturasAtrasadas:F2})");
 
-            // Lançamentos recentes
+                sb.AppendLine();
+            }
+
             if (contexto.UltimosLancamentos.Any())
             {
-                sb.AppendLine("--- ÚLTIMOS LANÇAMENTOS ---");
+                sb.AppendLine("--- LANÇAMENTOS DO PERÍODO ATUAL (mesmo mês/ano acima) ---");
 
                 foreach (var lanc in contexto.UltimosLancamentos)
                 {
@@ -534,17 +692,30 @@ namespace Financas.Api.Services
                             ? $"Conta: {lanc.ContaBancariaNome}"
                             : "Sem vínculo";
 
-                    var categoriaInfo = lanc.CategoriaNome != null
-                        ? $" | {lanc.CategoriaNome}"
-                        : "";
+                    var categoriaInfo = lanc.CategoriaNome != null ? $" | {lanc.CategoriaNome}" : "";
 
-                    sb.AppendLine($"  [{lanc.Data:dd/MM}] {lanc.Tipo.ToUpper()} R$ {lanc.Valor:F2} — {lanc.Descricao}{categoriaInfo} ({origem})");
+                    sb.AppendLine($"[{lanc.Data:dd/MM}] {lanc.Tipo.ToUpper()} R$ {lanc.Valor:F2} - {lanc.Descricao}{categoriaInfo} ({origem})");
                 }
 
                 sb.AppendLine();
             }
 
-            // Pergunta do usuário
+            // ── REFERÊNCIA HISTÓRICA (opcional, só em análises comparativas) ─
+            // Bloco inteiro omitido do prompt quando o escopo é mensal — isso
+            // reduz tokens e elimina qualquer risco de a IA misturar períodos
+            // em perguntas que não pediram comparação.
+            if (escopo.Tipo == TipoEscopoTemporal.Comparativo)
+            {
+                sb.AppendLine($"=== REFERÊNCIA HISTÓRICA (até {MaxMesesComparativo} meses, incluindo o período atual) ===");
+                sb.AppendLine("Use este bloco SOMENTE porque a pergunta pediu comparação/evolução entre períodos.");
+                sb.AppendLine("São valores agregados (médias) — não invente lançamentos ou meses não listados aqui.");
+                sb.AppendLine($"Média de receitas: R$ {contexto.Indicadores.MediaReceitasMensal:F2}");
+                sb.AppendLine($"Média de despesas: R$ {contexto.Indicadores.MediaDespesasMensal:F2}");
+                sb.AppendLine($"Gasto médio sobre receita: {contexto.Indicadores.PercentualGastoSobreReceita:F1}%");
+                sb.AppendLine();
+            }
+
+            // ── PERGUNTA DO USUÁRIO ───────────────────────────────────────────
             sb.AppendLine("=== PERGUNTA DO USUÁRIO ===");
             sb.AppendLine(perguntaUsuario);
 
@@ -595,6 +766,33 @@ namespace Financas.Api.Services
                 TipoMeta.Receita => "Em andamento",
                 _ => "Indefinido"
             };
+        }
+
+        private static (int Mes, int Ano) ExtrairMesAnoDaPergunta(string pergunta)
+        {
+            var agora = DateTime.Now;
+            var mes = agora.Month;
+            var ano = agora.Year;
+
+            // Dicionário simples para converter texto em mês
+            var mesesMap = new Dictionary<string, int>
+            {
+                {"janeiro", 1}, {"fevereiro", 2}, {"marco", 3}, {"março", 3},
+                {"abril", 4}, {"maio", 5}, {"junho", 6}, {"julho", 7},
+                {"agosto", 8}, {"setembro", 9}, {"outubro", 10}, {"novembro", 11}, {"dezembro", 12}
+            };
+
+            foreach (var item in mesesMap)
+            {
+                if (pergunta.Contains(item.Key))
+                {
+                    mes = item.Value;
+                    // Se o usuário pedir um mês menor que o atual, assume que é o ano atual.
+                    // Em uma implementação robusta, você poderia buscar o ano na string também.
+                    break;
+                }
+            }
+            return (mes, ano);
         }
     }
 }

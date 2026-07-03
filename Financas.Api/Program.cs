@@ -32,7 +32,7 @@ builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<AjudaService>();
 builder.Services.AddScoped<MetaGastoService>();
-builder.Services.AddHttpClient<OpenRouterService>();
+builder.Services.AddHttpClient<GoogleGeminiService>();
 builder.Services.AddScoped<IAService>();
 
 // Configuração de CORS para liberar o frontend (local e produção)
