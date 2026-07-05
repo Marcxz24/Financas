@@ -1,0 +1,429 @@
+/* =========================================
+   1. VARIÁVEIS DO TEMA (ESCOPO LOCAL)
+   ========================================= */
+.transferencia-page {
+  --bg-page: transparent;
+  --bg-card: #1a1f29;
+  --bg-input: #12161f;
+  --text-main: #ffffff;
+  --text-muted: #9ca3af;
+  --border-color: #242833;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --danger-text: #ef4444;
+  --danger-bg: rgba(239, 68, 68, 0.1);
+  --danger-border: rgba(239, 68, 68, 0.2);
+  --success-text: #10b981;
+  --success-bg: rgba(16, 185, 129, 0.1);
+  --success-border: rgba(16, 185, 129, 0.2);
+  --radius-card: 16px;
+  --radius-input: 10px;
+}
+
+/* =========================================
+   2. ESTRUTURA BASE (MOBILE-FIRST)
+   ========================================= */
+.transferencia-page {
+  width: 100%;
+  background-color: var(--bg-page);
+  padding: 20px 15px 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.transferencia-card {
+  width: 100%;
+  max-width: 750px;
+  margin: 0 auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* =========================================
+   3. CABEÇALHO
+   ========================================= */
+.transferencia-header {
+  text-align: center;
+}
+
+.transferencia-header h1 {
+  color: var(--text-main);
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.descricao-header {
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* =========================================
+   4. FORMULÁRIO E INPUTS
+   ========================================= */
+.transferencias-box {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.detalhes-wrapper label {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* Campos de texto, número, select, data e textarea */
+.item-transferencia {
+  width: 100%;
+  height: 50px;
+  padding: 0 16px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-input);
+  color: var(--text-main);
+  font-size: 14px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.item-transferencia:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.item-transferencia option {
+  background-color: var(--bg-card);
+  color: var(--text-main);
+}
+
+/* Input nativo de data: garante que ícone e texto do calendário
+   fiquem legíveis sobre o fundo escuro do tema */
+.item-transferencia[type="date"] {
+  color-scheme: dark;
+}
+
+.item-transferencia[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+  cursor: pointer;
+}
+
+/* Remove as setas nativas do input numérico para um visual mais limpo,
+   mantendo a digitação e o step de 0.01 funcionando normalmente */
+.item-transferencia[type="number"]::-webkit-outer-spin-button,
+.item-transferencia[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.item-transferencia[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+/* Textarea de observação segue o mesmo visual dos demais campos, com altura própria */
+.campo-textarea {
+  height: 90px;
+  padding: 14px 16px;
+  resize: vertical;
+}
+
+/* Grid do Form (Mobile = Empilhado 1 coluna) */
+.grid-form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+/* =========================================
+   5. BOTÕES E AÇÕES
+   ========================================= */
+.acoes-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.btn-salvar, .btn-deletar {
+  width: 100%;
+  height: 50px;
+  border-radius: var(--radius-input);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-salvar {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+}
+
+.btn-salvar:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+}
+
+.btn-deletar {
+  background: transparent;
+  border: 1px solid var(--danger-border);
+  color: var(--danger-text);
+}
+
+.btn-deletar:hover {
+  background: var(--danger-bg);
+  border-color: var(--danger-text);
+  transform: translateY(-2px);
+}
+
+.link-voltar {
+  width: 100%;
+  max-width: 750px;
+  text-align: center;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 14px;
+  padding: 8px;
+  transition: color 0.2s ease;
+}
+
+.link-voltar:hover {
+  color: var(--text-main);
+}
+
+.mensagem-erro {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  padding: 12px;
+  border-radius: var(--radius-input);
+  text-align: center;
+  font-size: 14px;
+}
+
+/* =========================================
+   6. LISTAGEM DE TRANSFERÊNCIAS
+   ========================================= */
+.listagem-transferencias-section h2 {
+  color: var(--text-main);
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.listagem-contador {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  padding: 4px 12px;
+  white-space: nowrap;
+}
+
+.transferencias-grid-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.transferencia-item-card {
+  display: flex;
+  flex-direction: column; /* Mobile: Itens empilhados no card */
+  gap: 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-input);
+  padding: 16px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.transferencia-item-card:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.transferencia-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: var(--text-main);
+  font-size: 15px;
+  font-weight: 500;
+  width: 100%;
+}
+
+.contas-transferencia {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.conta-nome {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 14px;
+}
+
+.seta-transferencia {
+  color: var(--primary);
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.detalhes-transferencia {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.valor-transferencia {
+  color: var(--success-text);
+  background: var(--success-bg);
+  border: 1px solid var(--success-border);
+  border-radius: 8px;
+  padding: 3px 10px;
+  font-weight: 700;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.data-transferencia {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.observacao-transferencia {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-style: italic;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.acoes-lista-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.btn-editar-lista {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 18px;
+  transition: color 0.2s ease;
+}
+
+.btn-editar-lista:hover {
+  color: var(--text-main);
+}
+
+.txt-vazio {
+  color: var(--text-muted);
+  font-size: 14px;
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* =========================================
+   7. RESPONSIVIDADE (TABLET E DESKTOP)
+   ========================================= */
+@media (max-width: 600px) {
+  .transferencia-page {
+    padding: 16px 8px 140px;
+  }
+
+  .transferencia-header h1 {
+    font-size: 22px;
+  }
+
+  .transferencia-item-card {
+    padding: 14px;
+  }
+}
+
+@media (min-width: 600px) {
+
+  .transferencia-page {
+    padding: 32px 20px 80px;
+  }
+
+  .transferencia-card {
+    padding: 35px 40px; /* Expande o card interno */
+  }
+
+  .transferencia-header h1 {
+    font-size: 26px;
+  }
+
+  /* Conta de Origem / Conta de Destino e Valor / Data lado a lado */
+  .grid-form {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Organiza os botões do formulário */
+  .acoes-form-container {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap; /* Evita quebra de layout */
+  }
+
+  .btn-salvar {
+    flex: 1; /* Ocupa o espaço máximo possível */
+  }
+
+  .btn-deletar {
+    width: auto;
+    padding: 0 24px;
+  }
+
+  /* O card da lista fica em linha (Horizontal) */
+  .transferencia-item-card {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .transferencia-item-info {
+    flex-direction: row;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .acoes-lista-wrapper {
+    width: auto;
+    justify-content: flex-end;
+  }
+}

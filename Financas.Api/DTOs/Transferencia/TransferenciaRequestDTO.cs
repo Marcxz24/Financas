@@ -30,6 +30,11 @@ namespace Financas.Api.DTOs.Transferencia
         public decimal Valor { get; set; }
 
         /// <summary>
+        /// Data da transferência. Se não for informada, será utilizada a data atual.
+        /// </summary>
+        public DateTime? DataTransferencia { get; set; } = DateTime.Now;
+
+        /// <summary>
         /// Observação opcional informada pelo usuário.
         /// </summary>
         [StringLength(300, ErrorMessage = "A observação pode conter no máximo 300 caracteres.")]

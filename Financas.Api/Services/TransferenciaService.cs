@@ -95,7 +95,7 @@ namespace Financas.Api.Services
                     ContaDestinoId = contaDestino.Id,
                     Valor = dto.Valor,
                     Observacao = dto.Observacao,
-                    Data = DateTime.Now
+                    Data = dto.DataTransferencia ?? DateTime.Now
                 };
 
                 _financasDbContext.Transferencias.Add(transferencia);
@@ -231,6 +231,7 @@ namespace Financas.Api.Services
                 transferencia.ContaDestinoId = contaDestinoNova.Id;
                 transferencia.Valor = dto.Valor;
                 transferencia.Observacao = dto.Observacao;
+                transferencia.Data = dto.DataTransferencia ?? DateTime.Now;
 
                 // 6.4. Persistência:
                 await _financasDbContext.SaveChangesAsync();

@@ -21,6 +21,7 @@ import ResumoFinanceiro from "./pages/Dashboard/ResumoFinanceiro";
 import Lancamento from "./pages/Lancamentos/Lancamento";
 import Categoria from "./pages/Categoria/Categoria";
 import ContaBancaria from "./pages/ContaBancaria/ContaBancaria";
+import Transferencia from "./pages/Transferencia/Transferencia";
 import CartaoCredito from "./pages/CartaoCredito/CartaoCredito";
 import Fatura from "./pages/Faturas/Fatura";
 import Relatorios from "./pages/Relatorios/Relatorios";
@@ -71,6 +72,8 @@ function App() {
 
           {/* Contas bancárias */}
           <Route path="contas-bancarias" element={<ContaBancaria />} />
+
+          <Route path="transferencia" element={<Transferencia />} />
 
           {/* Cartões de crédito */}
           <Route path="cartao-credito" element={<CartaoCredito />} />
