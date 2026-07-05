@@ -52,6 +52,29 @@ namespace Financas.Api.Controllers
         }
 
         /// <summary>
+        /// Lista todas as transferências cadastradas pelo usuário autenticado.
+        /// </summary>
+        /// <returns>Lista de transferências.</returns>
+        [HttpGet("listar-transferencias")]
+        [Authorize]
+        public async Task<ActionResult<List<TransferenciaResponseDTO>>> ListarTransferencias()
+        {
+            try
+            {
+                // Extrai o ID do usuário diretamente das Claims do Token JWT
+                var usuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+                var transferencias = await _transferenciaService.ListarTransferencias(usuarioId);
+
+                return Ok(transferencias);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
         /// Edita uma transferência existente, estornando os saldos antigos e aplicando os novos valores.
         /// </summary>
         [HttpPut("editar-transferencia/{id}")]

@@ -125,6 +125,32 @@ namespace Financas.Api.Services
         }
 
         /// <summary>
+        /// Lista todas as transferências cadastradas pelo usuário autenticado,
+        /// carregando também os dados das contas de origem e destino para
+        /// apresentação na interface.
+        /// </summary>
+        /// <param name="userId">ID do usuário autenticado.</param>
+        /// <returns>Lista contendo todas as transferências do usuário.</returns>
+        public async Task<List<TransferenciaResponseDTO>> ListarTransferencias(int userId)
+        {
+            var transferencias = await _financasDbContext.Transferencias
+                .Where(t => t.UsuarioId == userId)
+                .Include(t => t.ContaOrigem)
+                .Include(t => t.ContaDestino)
+                .ToListAsync();
+
+            return transferencias.Select(t => new TransferenciaResponseDTO
+            {
+                Id = t.Id,
+                Valor = t.Valor,
+                Data = t.Data,
+                ContaOrigem = t.ContaOrigem.Nome,
+                ContaDestino = t.ContaDestino.Nome,
+                Observacao = t.Observacao
+            }).ToList();
+        }
+
+        /// <summary>
         /// Edita uma transferência existente, estornando os saldos antigos e aplicando os novos
         /// valores informados. Realiza novamente todas as validações de negócio.
         /// </summary>
