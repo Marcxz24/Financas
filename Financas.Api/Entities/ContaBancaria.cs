@@ -42,5 +42,15 @@ namespace Financas.Api.Entities
         /// Coleção de entradas e saídas (transações) vinculadas a esta conta bancária.
         /// </summary>
         public ICollection<Lancamento> Lancamentos { get; set; } = new List<Lancamento>();
+
+        /// <summary>
+        /// Transferências onde esta conta é a conta de origem.
+        /// </summary>
+        public ICollection<Transferencia> TransferenciasOrigem { get; set; } = new List<Transferencia>();
+
+        /// <summary>
+        /// Transferências onde esta conta é a conta de destino.
+        /// </summary>
+        public ICollection<Transferencia> TransferenciasDestino { get; set; } = new List<Transferencia>();
     }
 }

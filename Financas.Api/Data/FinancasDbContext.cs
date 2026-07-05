@@ -36,6 +36,9 @@ namespace Financas.Api.Data
         // Metas financeiras de gasto ou receita
         public DbSet<MetasGasto> MetasGasto { get; set; }
 
+        // Transferências entre contas bancárias do usuário
+        public DbSet<Transferencia> Transferencias { get; set; }
+
         // Aplica automaticamente todas as configurações Fluent API do assembly
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

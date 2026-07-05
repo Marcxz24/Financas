@@ -34,6 +34,7 @@ builder.Services.AddScoped<AjudaService>();
 builder.Services.AddScoped<MetaGastoService>();
 builder.Services.AddHttpClient<GoogleGeminiService>();
 builder.Services.AddScoped<IAService>();
+builder.Services.AddScoped<TransferenciaService>();
 
 // Configuração de CORS para liberar o frontend (local e produção)
 builder.Services.AddCors(options =>
