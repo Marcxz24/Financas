@@ -76,17 +76,40 @@ namespace Financas.Api.Services
                 .Where(c => c.UsuarioId == usuarioId)
                 .ToListAsync();
 
-            // 2. Transformação dos Dados: Após recuperar os cartões de crédito do banco de dados, o método realiza uma transformação dos dados para convertê-los em uma lista de DTOs de resposta (CartaoCreditoResponseDTO). Cada cartão de crédito é mapeado para um DTO que contém as informações relevantes, como ID, ID do usuário, nome, limite, dia de fechamento e status do cartão. O status do cartão é convertido para uma string para facilitar a leitura no front-end
-            return cartoes.Select(c => new CartaoCreditoResponseDTO
+            var response = new List<CartaoCreditoResponseDTO>();
+
+            // 2. Processamento dos Dados: Itera sobre a lista de cartões encontrados para calcular métricas financeiras de cada um, como limite utilizado e disponível
+            foreach (var cartao in cartoes)
             {
-                Id = c.Id,
-                UsuarioId = c.UsuarioId,
-                Nome = c.Nome,
-                Limite = c.Limite,
-                DiaFechamento = c.DiaFechamento,
-                DiaVencimento = c.DiaVencimento,
-                Status = c.Status.ToString()
-            }).ToList();
+                // 3. Cálculo de Saldo em Aberto: Invoca o método auxiliar ObterTotalEmAberto para somar os valores das faturas correntes vinculadas ao cartão
+                var limiteUtilizado = await ObterTotalEmAberto(cartao.Id, usuarioId);
+
+                // 4. Determinação de Limite Disponível: Subtrai o valor já comprometido (faturas em aberto) do limite total definido no cartão
+                var limiteDisponivel = cartao.Limite - limiteUtilizado;
+
+                // 5. Cálculo de Percentual de Utilização: Calcula a proporção do limite utilizada, tratando o caso de divisão por zero caso o limite seja nulo
+                var percentualUtilizado = cartao.Limite == 0
+                    ? 0
+                    : Math.Round((limiteUtilizado / cartao.Limite) * 100, 2);
+
+                // 6. Mapeamento para DTO: Constrói o objeto de resposta (Data Transfer Object) com as informações calculadas para envio ao front-end
+                response.Add(new CartaoCreditoResponseDTO
+                {
+                    Id = cartao.Id,
+                    UsuarioId = cartao.UsuarioId,
+                    Nome = cartao.Nome,
+                    Limite = cartao.Limite,
+                    LimiteUtilizado = limiteUtilizado,
+                    LimiteDisponivel = limiteDisponivel,
+                    PercentualUtilizado = percentualUtilizado,
+                    DiaFechamento = cartao.DiaFechamento,
+                    DiaVencimento = cartao.DiaVencimento,
+                    Status = cartao.Status.ToString()
+                });
+            }
+
+            // 7. Retorno: Entrega a lista completa de DTOs mapeados, contendo o estado atual de todos os cartões do usuário
+            return response;
         }
 
         /// <summary>
@@ -155,26 +178,6 @@ namespace Financas.Api.Services
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
         /// <exception cref="UnauthorizedAccessException"></exception>
-
-        // Método para excluir um cartão de crédito específico, removendo-o do banco de dados e garantindo que ele não possa mais ser acessado ou utilizado
-        public Task DeletarCartaoCredito(int cartaoId, int usuarioId)
-        {
-            var cartao = _FinancasDbContext.CartaoCredito
-                .FirstOrDefault(c => c.Id == cartaoId);
-
-            if (cartao == null)
-                throw new Exception("Cartão não encontrado");
-
-            if (cartao.UsuarioId != usuarioId)
-                throw new UnauthorizedAccessException("Cartão não pertence ao usuário");
-
-            _FinancasDbContext.CartaoCredito.Remove(cartao);
-            return _FinancasDbContext.SaveChangesAsync();
-        }
-
-        /// <summary>
-        /// Método responsável por excluir um cartão de crédito específico, removendo-o do banco de dados e garantindo que ele não possa mais ser acessado ou utilizado.
-        /// </summary>
 
         // Método para excluir um cartão de crédito específico, removendo-o do banco de dados e garantindo que ele não possa mais ser acessado ou utilizado
         public async Task DeletarCartao(int cartaoId, int usuarioId)

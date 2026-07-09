@@ -186,6 +186,16 @@ function CartaoCredito() {
                 cartoes.map((c) => {
                   const id = c.id ?? c.Id;
 
+                  const limite = c.limite ?? c.Limite;
+                  const limiteDisponivel =
+                    c.limiteDisponivel ?? c.LimiteDisponivel;
+
+                  const limiteUtilizado =
+                    c.limiteUtilizado ?? c.LimiteUtilizado;
+
+                  const percentualUtilizado =
+                    c.percentualUtilizado ?? c.PercentualUtilizado;
+
                   return (
                     <div key={id} className="conta-card">
                       <div className="conta-info">
@@ -196,11 +206,51 @@ function CartaoCredito() {
                           Vencimento: {c.diaVencimento ?? c.DiaVencimento}
                         </span>
 
-                        <div className="conta-saldo">
-                          {Number(c.limite ?? c.Limite).toLocaleString(
-                            "pt-BR",
-                            { style: "currency", currency: "BRL" },
-                          )}
+                        <div className="cartao-limites">
+                          <div className="limite-disponivel">
+                            {Number(limiteDisponivel).toLocaleString("pt-BR", {
+                              style: "currency",
+                              currency: "BRL",
+                            })}
+                          </div>
+
+                          <div className="texto-disponivel">Disponível</div>
+
+                          <div className="barra-limite">
+                            <div
+                              className="barra-utilizada"
+                              style={{
+                                width: `${percentualUtilizado}%`,
+                              }}
+                            />
+                          </div>
+
+                          <div className="percentual-utilizado">
+                            {Number(percentualUtilizado).toFixed(2)}% do limite
+                            utilizado
+                          </div>
+
+                          <div className="resumo-item">
+                            <label className="resumo-label">Utilizado</label>
+
+                            <strong className="resumo-valor">
+                              {Number(limiteUtilizado).toLocaleString("pt-BR", {
+                                style: "currency",
+                                currency: "BRL",
+                              })}
+                            </strong>
+                          </div>
+
+                          <div className="resumo-item">
+                            <label className="resumo-label">Limite</label>
+
+                            <strong className="resumo-valor">
+                              {Number(limite).toLocaleString("pt-BR", {
+                                style: "currency",
+                                currency: "BRL",
+                              })}
+                            </strong>
+                          </div>
                         </div>
                       </div>
 
@@ -210,16 +260,6 @@ function CartaoCredito() {
                           title="Editar"
                         >
                           <i className="bi bi-pencil-square"></i>
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            setIdEdicao(id);
-                            handleExcluir();
-                          }}
-                          title="Excluir"
-                        >
-                          <i className="bi bi-trash"></i>
                         </button>
                       </div>
                     </div>

@@ -27,6 +27,21 @@
         public decimal Limite { get; set; }
 
         /// <summary>
+        /// Valor atualmente comprometido em compras/faturas.
+        /// </summary>
+        public decimal LimiteUtilizado { get; set; }
+
+        /// <summary>
+        /// Valor ainda disponível para novas compras.
+        /// </summary>
+        public decimal LimiteDisponivel { get; set; }
+
+        /// <summary>
+        /// Percentual do limite já utilizado.
+        /// </summary>
+        public decimal PercentualUtilizado { get; set; }
+
+        /// <summary>
         /// Dia do mês em que a fatura fecha.
         /// </summary>
         public int DiaFechamento { get; set; }

@@ -144,7 +144,7 @@ namespace Financas.Api.Controllers
                 var usuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
                 // 3. Processamento: Solicita ao serviço para deletar o cartão de crédito.
-                await _cartaoCreditoService.DeletarCartaoCredito(id, usuarioId);
+                await _cartaoCreditoService.DeletarCartao(id, usuarioId);
 
                 // 4. Resposta de Sucesso: Retorna o status 204 (No Content).
                 return NoContent();
