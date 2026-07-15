@@ -56,7 +56,7 @@ namespace Financas.Api.Services
         private void EstornarValor(ContaBancaria conta, decimal valor, TipoLancamento tipo)
         {
             var tipoInvertido = tipo == TipoLancamento.Receita
-                ? TipoLancamento.Despesa 
+                ? TipoLancamento.Despesa
                 : TipoLancamento.Receita;
 
             AplicarValor(conta, valor, tipoInvertido);
@@ -72,7 +72,7 @@ namespace Financas.Api.Services
             if (usuario == null)
                 throw new Exception("Usuário não encontrado");
 
-            // 2. Normalização da data para UTC.
+            // 2. Normalização da data para horário local.
             var dataNormalizada = DateTime.SpecifyKind(dto.Data, DateTimeKind.Local);
 
             // 3. Normaliza IDs opcionais.
@@ -394,7 +394,7 @@ namespace Financas.Api.Services
             var tipoAntigo = lancamento.Tipo; // Armazena o tipo atual para comparação e possível estorno
             var contaAntiga = lancamento.ContaBancaria; // Armazena a conta bancária atual para comparação e possível estorno
 
-            var novoValor = dto.Valor ?? lancamento.Valor; 
+            var novoValor = dto.Valor ?? lancamento.Valor;
             var novoTipo = dto.Tipo.HasValue
                 ? (TipoLancamento)dto.Tipo
                 : lancamento.Tipo;
@@ -458,7 +458,7 @@ namespace Financas.Api.Services
 
                     if (lancamento.ContaBancaria != null)
                         AplicarValor(lancamento.ContaBancaria, lancamento.Valor, lancamento.Tipo); // Aplica o novo valor para atualizar o saldo da conta bancária com a alteração feita
-                     
+
                     if (lancamento.CartaoCreditoId != null && lancamento.Fatura != null)
                     {
                         _faturaService.EstornarValorFatura(lancamento.Fatura, valorAntigo);

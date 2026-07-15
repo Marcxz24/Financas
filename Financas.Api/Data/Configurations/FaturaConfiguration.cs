@@ -23,19 +23,35 @@ namespace Financas.Api.Data.Configurations
                 .HasColumnName("cartao_credito_id")
                 .IsRequired();
 
-            // 2. Data de Início: Define a data de início da fatura.
+            // 1. Competência: Representa o ciclo mensal (ano/mês) da fatura, armazenado como o
+            // primeiro dia do mês de referência. É a chave natural e imutável do ciclo, usada
+            // para localizar/criar a fatura correta independentemente de alterações futuras na
+            // configuração do cartão. Mapeada como "date" pois apenas ano e mês são relevantes.
+            builder.Property(f => f.Competencia)
+                .HasColumnName("competencia")
+                .HasColumnType("date")
+                .IsRequired();
+
+            // 2. Data de Início: Data em que o ciclo de compras desta fatura começou.
+            // Para faturas Abertas, este valor é recalculado dinamicamente pelo FaturaService
+            // a partir da configuração vigente do cartão; para faturas encerradas, representa
+            // o histórico congelado e não deve mais ser alterado pela aplicação.
             builder.Property(f => f.DataInicio)
                 .HasColumnName("data_inicio")
+                .HasColumnType("timestamp without time zone")
                 .IsRequired();
 
-            // 3. Data de Fechamento: Define a data de fechamento da fatura.
+            // 3. Data de Fechamento: Instante exato (23:59:59.999 do dia configurado no cartão)
+            // em que a fatura deixa de aceitar novos lançamentos.
             builder.Property(f => f.DataFechamento)
                 .HasColumnName("data_fechamento")
+                .HasColumnType("timestamp without time zone")
                 .IsRequired();
 
-            // 4. Data de Vencimento: Define a data de vencimento da fatura.
+            // 4. Data de Vencimento: Define o dia de vencimento da fatura.
             builder.Property(f => f.DataVencimento)
                 .HasColumnName("data_vencimento")
+                .HasColumnType("timestamp without time zone")
                 .IsRequired();
 
             // 5. Valor Total: Define o valor total da fatura.
@@ -58,7 +74,14 @@ namespace Financas.Api.Data.Configurations
 
             // 8. Índices para busca por cartão/ciclo.
             builder.HasIndex(f => f.CartaoCreditoId);
-            builder.HasIndex(f => new { f.CartaoCreditoId, f.DataInicio, f.DataFechamento });
+
+            // Índice único por Cartão + Competência: garante, em nível de banco de dados, que
+            // nunca existam duas faturas para o mesmo cartão no mesmo mês de referência,
+            // substituindo o antigo índice baseado em DataInicio/DataFechamento (que era frágil
+            // por depender de datas calculadas e podia gerar duplicidade em recomputações).
+            builder.HasIndex(f => new { f.CartaoCreditoId, f.Competencia })
+                .IsUnique()
+                .HasDatabaseName("ix_faturas_cartao_competencia");
 
             // 9. Relacionamento com Cartão de Crédito: Vincula a fatura ao cartão de crédito.
             // O uso do Restrict garante que você não delete um cartão de crédito que ainda possua 
