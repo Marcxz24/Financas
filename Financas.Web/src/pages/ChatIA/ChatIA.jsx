@@ -21,12 +21,30 @@ const ChatIA = () => {
         );
       }
 
-      // 2. Processa o restante da linha (negrito e texto comum)
-      // Usamos split para separar o que está entre **
-      const partes = linha.split(/(\*\*.*?\*\*)/g);
+      // 2. Verifica se é um item de lista (começa com "* ")
+      let conteudo = linha;
+      let ehItemLista = false;
+
+      if (linha.trim().startsWith("* ")) {
+        ehItemLista = true;
+        conteudo = linha.replace("*", "").trim();
+      }
+
+      // 3. Processa o restante da linha (negrito e texto comum)
+      const partes = conteudo.split(/(\*\*.*?\*\*)/g);
 
       return (
-        <p key={i} style={{ marginBottom: "8px" }}>
+        <p
+          key={i}
+          style={{
+            marginBottom: "8px",
+            paddingLeft: ehItemLista ? "20px" : "0px",
+            position: "relative",
+          }}
+        >
+          {ehItemLista && (
+            <span style={{ position: "absolute", left: "0px" }}>•</span>
+          )}
           {partes.map((parte, j) => {
             if (parte.startsWith("**") && parte.endsWith("**")) {
               return <strong key={j}>{parte.slice(2, -2)}</strong>;
@@ -40,29 +58,29 @@ const ChatIA = () => {
 
   // Função disparada ao clicar no botão para enviar a pergunta ao back-end
   const enviarPergunta = async () => {
-    // Impede envio de perguntas vazias
-    if (!pergunta.trim()) return;
+    const texto = pergunta.trim();
 
-    setLoading(true); // Ativa o estado de carregamento para desabilitar o botão
+    // Impede envio de perguntas vazias
+    if (!texto) return;
+
+    setLoading(true);
+
     try {
       // Realiza a requisição POST para a API com o objeto esperado pelo back-end
-      const response = await api.post("/ia/perguntar", { Pergunta: pergunta });
-      setResposta(response.data.resposta); // Atualiza a resposta com o retorno da API
+      const response = await api.post("/ia/perguntar", {
+        Pergunta: texto,
+      });
+
+      // Atualiza a resposta com o retorno da API
+      setResposta(response.data?.resposta ?? "Nenhuma resposta foi retornada.");
     } catch (error) {
-      // --- Tratamento de erros para depuração no console do navegador ---
-      if (error.response) {
-        console.error(
-          "Dados do erro (o que a API disse):",
-          error.response.data,
-        );
-        console.error("Status do erro:", error.response.status);
-      } else {
-        console.error("Erro na requisição:", error.message);
-      }
-      // ------------------------------------------
-      setResposta("Erro na requisição. Verifique o console.");
+      console.error(error);
+
+      setResposta(
+        "Não foi possível obter uma resposta. Tente novamente em alguns instantes.",
+      );
     } finally {
-      setLoading(false); // Desativa o estado de carregamento após a tentativa
+      setLoading(false);
     }
   };
 
@@ -103,8 +121,8 @@ const ChatIA = () => {
           </li>
           <br />
           <li>
-            <strong>Análise Estruturada:</strong> Para facilitar sua tomada de decisão,
-            entregamos as respostas divididas em 3 pilares:{" "}
+            <strong>Análise Estruturada:</strong> Para facilitar sua tomada de
+            decisão, entregamos as respostas divididas em 3 pilares:{" "}
             <strong>Problemas</strong> (o que exige atenção imediata),{" "}
             <strong>Pontos Positivos</strong> (suas vitórias financeiras) e{" "}
             <strong>Recomendações</strong> (ações práticas para melhorar).
