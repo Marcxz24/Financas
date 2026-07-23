@@ -4,7 +4,8 @@ namespace Financas.Api.Entities
 {
     /// <summary>
     /// Representa a entidade de Cartão de Crédito do sistema.
-    /// Armazena as configurações de limite, datas de ciclo e vínculo com o usuário.
+    /// Armazena as configurações permanentes de limite, vencimento e vínculo com o usuário.
+    /// O ciclo de cobrança é gerenciado exclusivamente pela entidade <see cref="Fatura"/>.
     /// </summary>
     public class CartaoCredito
     {
@@ -29,12 +30,9 @@ namespace Financas.Api.Entities
         public decimal Limite { get; set; }
 
         /// <summary>
-        /// Dia em que a fatura atual será fechada para novas compras.
-        /// </summary>
-        public int DiaFechamento { get; set; }
-
-        /// <summary>
-        /// Dia que a fatura atual irá vencer.
+        /// Dia do mês (1 a 31) em que a fatura vence.
+        /// Utilizado apenas para calcular o vencimento de novas faturas abertas.
+        /// Alterações neste valor não afetam faturas já existentes.
         /// </summary>
         public int DiaVencimento { get; set; }
 

@@ -22,10 +22,10 @@ namespace Financas.Api.DTOs.Fatura
         public decimal ValorPago { get; set; }
 
         /// <summary>
-        /// Data e hora em que o pagamento foi realizado. 
-        /// Por padrão, utiliza o horário atual (UTC) para garantir precisão no registro.
+        /// Data e hora em que o pagamento foi realizado.
+        /// Por padrão, utiliza o horário local atual.
         /// </summary>
-        public DateTime DataPagamento { get; set; } = DateTime.UtcNow;
+        public DateTime DataPagamento { get; set; } = DateTime.Now;
 
         /// <summary>
         /// Identificador da conta bancária de onde sairá o saldo para pagar a fatura.

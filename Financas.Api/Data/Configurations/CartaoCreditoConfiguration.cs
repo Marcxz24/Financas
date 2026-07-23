@@ -39,17 +39,12 @@ namespace Financas.Api.Data.Configurations
                 .IsRequired()
                 .HasColumnType("decimal(18,2)");
 
-            // 6. Dia de Fechamento: Define o dia de fechamento do cartão.
-            builder.Property(c => c.DiaFechamento)
-                .HasColumnName("dia_fechamento")
-                .IsRequired();
-
-            // 7. Dia de Vencimento: Define o dia de vencimento do cartão.
+            // 6. Dia de Vencimento: Define o dia de vencimento do cartão.
             builder.Property(c => c.DiaVencimento)
                 .HasColumnName("dia_vencimento")
                 .IsRequired();
 
-            // 8. Status do Cartão: Converte o Enum StatusCartaoCredito para inteiro ao salvar no banco.
+            // 7. Status do Cartão: Converte o Enum StatusCartaoCredito para inteiro ao salvar no banco.
             builder.Property(c => c.Status)
                 .HasColumnName("status_cartao_credito")
                 .HasConversion<int>()
@@ -58,7 +53,7 @@ namespace Financas.Api.Data.Configurations
             // Índices para consultas frequentes.
             builder.HasIndex(c => c.UsuarioId);
 
-            // 9. Relacionamento com Usuário: Vincula o cartão de crédito ao usuário dono.
+            // 8. Relacionamento com Usuário: Vincula o cartão de crédito ao usuário dono.
             // O uso do Restrict garante que você não delete um usuário que ainda possua 
             // cartões de crédito, preservando a rastreabilidade financeira.
             builder.HasOne(c => c.Usuario)

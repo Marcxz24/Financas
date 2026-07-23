@@ -1,5 +1,8 @@
 ﻿namespace Financas.Api.DTOs.Fatura
 {
+    /// <summary>
+    /// DTO de resposta para faturas encerradas (fechadas ou pagas).
+    /// </summary>
     public class FaturaEncerradaDTO
     {
         public int Id { get; set; }
@@ -8,7 +11,7 @@
 
         public DateTime DataInicio { get; set; }
 
-        public DateTime DataFechamento { get; set; }
+        public DateTime? DataFechamento { get; set; }
 
         public DateTime DataVencimento { get; set; }
 

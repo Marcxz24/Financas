@@ -42,11 +42,6 @@
         public decimal PercentualUtilizado { get; set; }
 
         /// <summary>
-        /// Dia do mês em que a fatura fecha.
-        /// </summary>
-        public int DiaFechamento { get; set; }
-
-        /// <summary>
         /// Dia do mês em que a fatura vence.
         /// </summary>
         public int DiaVencimento { get; set; }

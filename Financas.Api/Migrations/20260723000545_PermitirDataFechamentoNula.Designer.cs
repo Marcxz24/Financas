@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Financas.Api.Migrations
 {
     [DbContext(typeof(FinancasDbContext))]
-    [Migration("20260715004851_AlteraDataFaturaSemTimeZone")]
-    partial class AlteraDataFaturaSemTimeZone
+    [Migration("20260723000545_PermitirDataFechamentoNula")]
+    partial class PermitirDataFechamentoNula
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -149,7 +149,7 @@ namespace Financas.Api.Migrations
                         .HasColumnType("date")
                         .HasColumnName("competencia");
 
-                    b.Property<DateTime>("DataFechamento")
+                    b.Property<DateTime?>("DataFechamento")
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("data_fechamento");
 
@@ -178,7 +178,6 @@ namespace Financas.Api.Migrations
                     b.HasIndex("CartaoCreditoId");
 
                     b.HasIndex("CartaoCreditoId", "Competencia")
-                        .IsUnique()
                         .HasDatabaseName("ix_faturas_cartao_competencia");
 
                     b.ToTable("faturas", (string)null);

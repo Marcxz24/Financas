@@ -42,7 +42,6 @@ namespace Financas.Api.Services
                 UsuarioId = usuarioId,
                 Nome = dto.Nome,
                 Limite = dto.Limite,
-                DiaFechamento = dto.DiaFechamento,
                 DiaVencimento = dto.DiaVencimento,
                 Status = StatusCartaoCredito.Ativo
             };
@@ -58,7 +57,6 @@ namespace Financas.Api.Services
                 UsuarioId = usuarioId,
                 Nome = cartao.Nome,
                 Limite = cartao.Limite,
-                DiaFechamento = cartao.DiaFechamento,
                 DiaVencimento = cartao.DiaVencimento,
                 Status = cartao.Status.ToString()
             };
@@ -102,7 +100,6 @@ namespace Financas.Api.Services
                     LimiteUtilizado = limiteUtilizado,
                     LimiteDisponivel = limiteDisponivel,
                     PercentualUtilizado = percentualUtilizado,
-                    DiaFechamento = cartao.DiaFechamento,
                     DiaVencimento = cartao.DiaVencimento,
                     Status = cartao.Status.ToString()
                 });
@@ -148,9 +145,6 @@ namespace Financas.Api.Services
             if (dto.Status.HasValue)
                 cartao.Status = dto.Status.Value;
 
-            if (dto.DiaFechamento.HasValue)
-                cartao.DiaFechamento = dto.DiaFechamento.Value;
-
             if (dto.DiaVencimento.HasValue)
                 cartao.DiaVencimento = dto.DiaVencimento.Value;
 
@@ -164,7 +158,6 @@ namespace Financas.Api.Services
                 UsuarioId = usuarioId,
                 Nome = cartao.Nome,
                 Limite = cartao.Limite,
-                DiaFechamento = cartao.DiaFechamento,
                 DiaVencimento = cartao.DiaVencimento,
                 Status = cartao.Status.ToString()
             };

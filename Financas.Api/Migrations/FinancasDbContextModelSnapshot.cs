@@ -30,10 +30,6 @@ namespace Financas.Api.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("DiaFechamento")
-                        .HasColumnType("integer")
-                        .HasColumnName("dia_fechamento");
-
                     b.Property<int>("DiaVencimento")
                         .HasColumnType("integer")
                         .HasColumnName("dia_vencimento");
@@ -150,7 +146,7 @@ namespace Financas.Api.Migrations
                         .HasColumnType("date")
                         .HasColumnName("competencia");
 
-                    b.Property<DateTime>("DataFechamento")
+                    b.Property<DateTime?>("DataFechamento")
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("data_fechamento");
 
@@ -179,7 +175,6 @@ namespace Financas.Api.Migrations
                     b.HasIndex("CartaoCreditoId");
 
                     b.HasIndex("CartaoCreditoId", "Competencia")
-                        .IsUnique()
                         .HasDatabaseName("ix_faturas_cartao_competencia");
 
                     b.ToTable("faturas", (string)null);

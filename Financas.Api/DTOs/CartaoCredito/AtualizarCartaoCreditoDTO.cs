@@ -6,6 +6,7 @@ namespace Financas.Api.DTOs.CartaoCredito
     /// <summary>
     /// DTO para atualização de dados de um Cartão de Crédito existente.
     /// Todas as propriedades são opcionais para permitir atualizações parciais.
+    /// Alterações não modificam faturas já existentes.
     /// </summary>
     public class AtualizarCartaoCreditoDTO
     {
@@ -22,13 +23,8 @@ namespace Financas.Api.DTOs.CartaoCredito
         public decimal? Limite { get; set; }
 
         /// <summary>
-        /// Novo dia de fechamento da fatura (1 a 31).
-        /// </summary>
-        [Range(1, 31, ErrorMessage = "O Dia do Fechamento deve ser entre 1 e 31.")]
-        public int? DiaFechamento { get; set; }
-
-        /// <summary>
         /// Novo dia de vencimento da fatura (1 a 31).
+        /// Afeta apenas faturas criadas após a alteração.
         /// </summary>
         [Range(1, 31, ErrorMessage = "O Dia do Vencimento deve ser entre 1 e 31.")]
         public int? DiaVencimento { get; set; }

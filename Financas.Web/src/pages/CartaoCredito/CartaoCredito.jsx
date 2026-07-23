@@ -7,7 +7,6 @@ function CartaoCredito() {
 
   const [nome, setNome] = useState("");
   const [limite, setLimite] = useState("");
-  const [diaFechamento, setDiaFechamento] = useState(1);
   const [diaVencimento, setDiaVencimento] = useState(10);
 
   const [cartoes, setCartoes] = useState([]);
@@ -47,7 +46,6 @@ function CartaoCredito() {
 
     setNome(cartao.nome ?? cartao.Nome ?? "");
     setLimite(cartao.limite ?? cartao.Limite ?? "");
-    setDiaFechamento(cartao.diaFechamento ?? cartao.DiaFechamento ?? 1);
     setDiaVencimento(cartao.diaVencimento ?? cartao.DiaVencimento ?? 10);
   };
 
@@ -58,7 +56,6 @@ function CartaoCredito() {
     const payload = {
       nome: nome.trim(),
       limite: Number(limite),
-      diaFechamento: Number(diaFechamento),
       diaVencimento: Number(diaVencimento),
     };
 
@@ -74,7 +71,6 @@ function CartaoCredito() {
 
       setNome("");
       setLimite("");
-      setDiaFechamento(1);
       setDiaVencimento(10);
       setIdEdicao(null);
 
@@ -93,7 +89,6 @@ function CartaoCredito() {
 
       setNome("");
       setLimite("");
-      setDiaFechamento(1);
       setDiaVencimento(10);
       setIdEdicao(null);
 
@@ -129,15 +124,6 @@ function CartaoCredito() {
                 type="number"
                 value={limite}
                 onChange={(e) => setLimite(e.target.value)}
-              />
-            </div>
-
-            <div className="campo">
-              <label>Dia do Fechamento</label>
-              <input
-                type="number"
-                value={diaFechamento}
-                onChange={(e) => setDiaFechamento(e.target.value)}
               />
             </div>
 
@@ -202,7 +188,6 @@ function CartaoCredito() {
                         <h3>{c.nome ?? c.Nome}</h3>
 
                         <span>
-                          Fechamento: {c.diaFechamento ?? c.DiaFechamento} •
                           Vencimento: {c.diaVencimento ?? c.DiaVencimento}
                         </span>
 
