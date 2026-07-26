@@ -78,5 +78,10 @@ namespace Financas.Api.Entities
         /// Permite que um único perfil gerencie múltiplos ativos financeiros (ex: Corrente, Poupança, Investimentos).
         /// </summary>
         public ICollection<ContaBancaria> ContasBancarias { get; set; } = new List<ContaBancaria>();
+
+        /// <summary>
+        /// Coleção de cofrinhos pertencentes ao usuário.
+        /// </summary>
+        public ICollection<Cofrinho> Cofrinhos { get; set; } = new List<Cofrinho>();
     }
 }

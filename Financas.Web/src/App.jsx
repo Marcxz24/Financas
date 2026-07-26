@@ -33,6 +33,7 @@ import Metas from "./pages/Metas/MetasGasto";
 import ChatIA from "./pages/ChatIA/ChatIA"
 import Perfil from "./pages/Perfil/Perfil";
 import Ajuda from "./pages/Ajuda/Ajuda";
+import Cofrinho from "./pages/Cofrinho/Cofrinho";
 import SessaoExpirada from "./pages/SessaoExpirada/SessaoExpirada";
 
 // Middleware de proteção de rotas (validação de autenticação)
@@ -72,6 +73,8 @@ function App() {
 
           {/* Contas bancárias */}
           <Route path="contas-bancarias" element={<ContaBancaria />} />
+
+          <Route path="cofrinho" element={<Cofrinho />} />
 
           <Route path="transferencia" element={<Transferencia />} />
 

@@ -71,6 +71,12 @@ namespace Financas.Api.Data.Configurations
                 .HasColumnName("conta_bancaria_id")
                 .IsRequired(false);
 
+            // Mapeia a FK do cofrinho. O IsRequired(false) permite que um lançamento exist
+            // sem estar vinculado a um cofrinho.
+            builder.Property(l => l.CofrinhoId)
+                .HasColumnName("cofrinho_id")
+                .IsRequired(false);
+
             // Mapeia a FK do cartão de crédito. O IsRequired(false) permite que um lançamento 
             // exista temporariamente sem estar vinculado a um cartão de crédito (ex: lançamento pendente).
             builder.Property(l => l.CartaoCreditoId)
@@ -121,6 +127,12 @@ namespace Financas.Api.Data.Configurations
             builder.HasOne(l => l.ContaBancaria)
                 .WithMany(c => c.Lancamentos)
                 .HasForeignKey(l => l.ContaBancariaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configuração do Relacionamento com Cofrinho:
+            builder.HasOne(l => l.Cofrinho)
+                .WithMany(c => c.Movimentacoes)
+                .HasForeignKey(l => l.CofrinhoId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Configuração do Relacionamento com Cartão de Crédito:

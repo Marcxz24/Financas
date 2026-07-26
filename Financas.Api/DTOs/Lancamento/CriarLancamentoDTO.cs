@@ -52,6 +52,11 @@ namespace Financas.Api.DTOs.Lancamento
         public int? ContaBancariaId { get; set; }
 
         /// <summary>
+        /// Identificador do cofrinho associado ao lançamento.
+        /// </summary>
+        public int? CofrinhoId { get; set; }
+
+        /// <summary>
         /// Identificador do cartão de crédito utilizado na transação.
         /// Sendo opcional (int?), permite distinguir lançamentos de conta corrente (nulos) de despesas de cartão.
         /// </summary>

@@ -39,6 +39,9 @@ namespace Financas.Api.Data
         // Transferências entre contas bancárias do usuário
         public DbSet<Transferencia> Transferencias { get; set; }
 
+        // Cofrinhos financeiros do usuário
+        public DbSet<Cofrinho> Cofrinhos { get; set; }
+
         // Aplica automaticamente todas as configurações Fluent API do assembly
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -86,13 +86,25 @@ namespace Financas.Api.Services
                 dto.CartaoCreditoId = null;
 
             // 4. Valida a origem financeira do lançamento.
-            if (dto.ContaBancariaId != null && dto.CartaoCreditoId != null)
+            var possuiConta = dto.ContaBancariaId != null;
+            var possuiCofrinho = dto.CofrinhoId != null;
+            var possuiCartao = dto.CartaoCreditoId != null;
+
+            if (possuiConta && possuiCartao)
                 throw new InvalidOperationException(
                     "Não é permitido informar uma Conta Bancária e um Cartão de Crédito ao mesmo tempo.");
 
-            if (dto.ContaBancariaId == null && dto.CartaoCreditoId == null)
+            if (possuiConta && possuiCofrinho)
                 throw new InvalidOperationException(
-                    "É obrigatório informar uma Conta Bancária ou um Cartão de Crédito.");
+                    "Não é permitido informar uma Conta Bancária e um Cofrinho ao mesmo tempo.");
+
+            if (possuiCartao && possuiCofrinho)
+                throw new InvalidOperationException(
+                    "Não é permitido informar um Cartão de Crédito e um Cofrinho ao mesmo tempo.");
+
+            if (!possuiConta && !possuiCofrinho && !possuiCartao)
+                throw new InvalidOperationException(
+                    "É obrigatório informar uma Conta Bancária, um Cofrinho ou um Cartão de Crédito.");
 
             // 5. Valida a categoria informada.
             if (dto.CategoriaId != null)
@@ -108,6 +120,7 @@ namespace Financas.Api.Services
             }
 
             ContaBancaria? contaBancaria = null;
+            Cofrinho? cofrinho = null;
             CartaoCredito? cartaoCredito = null;
             Fatura? fatura = null;
 
@@ -118,6 +131,15 @@ namespace Financas.Api.Services
 
                 if (contaBancaria == null)
                     throw new KeyNotFoundException("Conta bancária não encontrada ou não pertence ao usuário.");
+            }
+
+            if (dto.CofrinhoId != null)
+            {
+                cofrinho = await _financasDbContext.Cofrinhos
+                    .FirstOrDefaultAsync(c => c.Id == dto.CofrinhoId && c.UsuarioId == usuarioId);
+
+                if (cofrinho == null)
+                    throw new KeyNotFoundException("Cofrinho não encontrado ou não pertence ao usuário.");
             }
 
             if (dto.CartaoCreditoId != null)
@@ -235,6 +257,7 @@ namespace Financas.Api.Services
                 UsuarioId = usuarioId,
                 CategoriaId = dto.CategoriaId,
                 ContaBancariaId = dto.ContaBancariaId,
+                CofrinhoId = dto.CofrinhoId,
                 CartaoCreditoId = dto.CartaoCreditoId,
                 FaturaId = fatura?.Id,
                 NumeroParcela = 1,
@@ -243,6 +266,19 @@ namespace Financas.Api.Services
 
             if (contaBancaria != null)
                 AplicarValor(contaBancaria, dto.Valor, dto.Tipo);
+
+            if (cofrinho != null)
+            {
+                if (dto.Tipo == TipoLancamento.Receita)
+                    cofrinho.Saldo += dto.Valor;
+                else
+                {
+                    if (cofrinho.Saldo < dto.Valor)
+                        throw new InvalidOperationException("Saldo insuficiente no cofrinho.");
+
+                    cofrinho.Saldo -= dto.Valor;
+                }
+            }
 
             using var transactionSimples = await _financasDbContext.Database.BeginTransactionAsync();
             try

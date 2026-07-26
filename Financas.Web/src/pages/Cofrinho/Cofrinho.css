@@ -1,0 +1,301 @@
+/* Estrutura principal da tela: empilha os blocos de conteúdo e reserva espaçamento vertical consistente. */
+.cofrinho-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.25rem 0 2rem;
+}
+
+/* Cabeçalho com destaque visual e separação entre título e resumo financeiro. */
+.cofrinho-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: 1.25rem;
+  background: linear-gradient(135deg, rgba(111, 76, 255, 0.14), rgba(0, 150, 136, 0.1));
+  border: 1px solid rgba(111, 76, 255, 0.2);
+}
+
+.cofrinho-header h1 {
+  margin: 0;
+  font-size: 1.65rem;
+  color: var(--text-primary, #1f2937);
+}
+
+.cofrinho-header p {
+  margin: 0.35rem 0 0;
+  color: var(--text-secondary, #6b7280);
+  max-width: 36rem;
+}
+
+.cofrinho-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.7rem 0.95rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
+  color: #4c1d95;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.cofrinho-alerta {
+  padding: 0.95rem 1rem;
+  border-radius: 0.95rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.cofrinho-alerta.erro {
+  color: #b42318;
+  background: #fef3f2;
+  border-color: #fecdca;
+}
+
+.cofrinho-alerta.sucesso {
+  color: #067647;
+  background: #ecfdf3;
+  border-color: #a7f3d0;
+}
+
+/* Layout em duas colunas para formularios e transferências em telas maiores. */
+.cofrinho-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 1.25rem;
+}
+
+/* Cartões de conteúdo com sombra leve para diferenciar blocos de formulário e listagem. */
+.cofrinho-card {
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 1.2rem;
+  padding: 1.25rem;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+}
+
+.cofrinho-card h3,
+.cofrinho-card h4 {
+  margin: 0 0 0.75rem;
+  color: #111827;
+}
+
+.cofrinho-card p {
+  margin: 0.25rem 0;
+  color: #4b5563;
+}
+
+.cofrinho-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Grelha dos campos de formulário, permitindo distribuição ordenada em telas médias e grandes. */
+.cofrinho-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.cofrinho-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.cofrinho-input-group label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.cofrinho-input-group input,
+.cofrinho-input-group select {
+  width: 100%;
+  padding: 0.8rem 0.9rem;
+  border-radius: 0.8rem;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  color: #111827;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cofrinho-input-group input:focus,
+.cofrinho-input-group select:focus {
+  outline: none;
+  border-color: #6d28d9;
+  box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.15);
+}
+
+.cofrinho-help {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.cofrinho-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.cofrinho-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.8rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.cofrinho-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+}
+
+.cofrinho-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.cofrinho-btn-primary {
+  background: linear-gradient(135deg, #6d28d9, #4f46e5);
+  color: white;
+}
+
+.cofrinho-btn-secondary {
+  background: #eef2ff;
+  color: #3730a3;
+}
+
+.cofrinho-btn-danger {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.cofrinho-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.cofrinho-total {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #4c1d95;
+}
+
+.cofrinho-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.cofrinho-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,250,252,0.95));
+  border: 1px solid rgba(15, 23, 42, 0.07);
+}
+
+/* Feedback visual sutil ao passar o cursor sobre cada item da listagem. */
+.cofrinho-item:hover {
+  border-color: rgba(109, 40, 217, 0.25);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.05);
+}
+
+.cofrinho-item-main h4 {
+  margin-bottom: 0.25rem;
+}
+
+.cofrinho-item-saldo {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #047857;
+}
+
+.cofrinho-item-meta {
+  color: #6b7280;
+  font-size: 0.92rem;
+}
+
+.cofrinho-detail {
+  margin-top: 1rem;
+  padding: 0.95rem 1rem;
+  border-radius: 1rem;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+}
+
+.cofrinho-empty {
+  padding: 1.25rem;
+  border-radius: 1rem;
+  background: #f8fafc;
+  color: #6b7280;
+  text-align: center;
+}
+
+.loading-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 12rem;
+}
+
+/* Indicador de carregamento com rotação simples para representar operação assíncrona. */
+.spinner {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 3px solid rgba(109, 40, 217, 0.2);
+  border-top-color: #6d28d9;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Ajustes para tablets e telas menores sem perder a legibilidade. */
+@media (max-width: 960px) {
+  .cofrinho-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Reorganiza os blocos em telas pequenas para evitar overflow e manter a navegação confortável. */
+@media (max-width: 640px) {
+  .cofrinho-header {
+    flex-direction: column;
+  }
+
+  .cofrinho-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cofrinho-item {
+    flex-direction: column;
+  }
+
+  .cofrinho-actions {
+    width: 100%;
+  }
+
+  .cofrinho-btn {
+    flex: 1 1 100%;
+  }
+}

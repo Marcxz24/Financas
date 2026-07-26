@@ -55,6 +55,11 @@ namespace Financas.Api.Entities
         public int? ContaBancariaId { get; set; }
 
         /// <summary>
+        /// Identificador do cofrinho vinculado a este lançamento financeiro.
+        /// </summary>
+        public int? CofrinhoId { get; set; }
+
+        /// <summary>
         /// Identificador do cartão de crédito utilizado. 
         /// Se preenchido, indica que o lançamento é uma despesa de crédito e não um débito em conta.
         /// </summary>
@@ -117,5 +122,10 @@ namespace Financas.Api.Entities
         /// Sendo anulável, permite que o sistema identifique lançamentos feitos via dinheiro ou débito direto.
         /// </summary>
         public CartaoCredito? CartaoCredito { get; set; }
+
+        /// <summary>
+        /// Propriedade de navegação para acessar os detalhes do cofrinho associado.
+        /// </summary>
+        public Cofrinho? Cofrinho { get; set; }
     }
 }

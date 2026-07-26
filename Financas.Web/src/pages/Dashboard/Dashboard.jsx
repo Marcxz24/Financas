@@ -43,6 +43,8 @@ function Dashboard() {
 
           <Link to="/dashboard/contas-bancarias">Contas Bancárias</Link>
 
+          <Link to="/dashboard/cofrinho">Cofrinhos</Link>
+
           <Link to="/dashboard/transferencia">Transferências</Link>
 
           <Link to="/dashboard/cartao-credito">Cartões de Crédito</Link>
