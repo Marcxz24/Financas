@@ -45,3 +45,4 @@ appsettings.Development.json
 Thumbs.db
 desktop.ini
 .DS_Store
+.vercel
